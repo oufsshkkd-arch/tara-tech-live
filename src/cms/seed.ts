@@ -1,0 +1,382 @@
+import type { CmsState } from "./types";
+
+export const seed: CmsState = {
+  brand: {
+    brandName: "Tara Tech",
+    tagline: "تكنولوجيا عملية، مختارة بعناية.",
+    logoText: "Tara Tech",
+    primaryColor: "#111111",
+    ctaColor: "#B42318",
+    ctaHoverColor: "#8E1F1F",
+    textColor: "#111111",
+    bgColor: "#FAF8F5",
+    whatsapp: "+212 660 557 604",
+    email: "contact@taratech.ma",
+    socials: {
+      instagram: "https://instagram.com/taratech",
+      tiktok: "https://tiktok.com/@taratech",
+      facebook: "",
+    },
+    legalLinks: [
+      { label: "الشروط القانونية", href: "#" },
+      { label: "سياسة الخصوصية", href: "#" },
+      { label: "الشروط العامة", href: "#" },
+    ],
+    seo: {
+      title: "Tara Tech — تكنولوجيا مفيدة، مختارة بذوق",
+      description:
+        "منتجات tech موثوقة، أنيقة ومفكر فيها باش تسهل عليك الحياة اليومية. الدفع عند الاستلام فجميع المغرب.",
+    },
+    brandLine: "Tara Tech — تكنولوجيا عملية، مختارة بعناية.",
+  },
+  nav: {
+    labels: {
+      home: "الرئيسية",
+      categories: "الفئات",
+      products: "المنتجات",
+      story: "قصتنا",
+      faq: "الأسئلة",
+      contact: "تواصل",
+    },
+    primaryCta: "كتشف Tara Tech",
+  },
+  hero: {
+    headline: "منتجات ذكية ومختارة بعناية باش تسهّل عليك حياتك",
+    subheadline:
+      "فـ Tara Tech كنقدمو ليك منتجات عملية، موثوقة وراقية، كتعاونك فالحياة اليومية وكتخليك تختار براحة وثقة.",
+    primaryCta: "اكتشف المنتجات",
+    secondaryCta: "تواصل معنا",
+    trustLine: "الدفع عند الاستلام • تأكيد قبل الإرسال • منتجات مختارة بعناية",
+    urgencyBadge: "تكنولوجيا عملية للحياة اليومية",
+    overlayDarkness: 0.15,
+    showFloatingCard: true,
+    floatingCardLines: [
+      "جودة موثوقة",
+      "منتجات مختارة",
+      "خدمة محترفة",
+    ],
+    videoUrl: "",
+  },
+  categorySection: {
+    title: "الفئات",
+    intro:
+      "اختار الفئة اللي كتناسبك، واكتشف منتجات مختارة بعناية باش تعطيك الراحة، العملية، والثقة.",
+  },
+  featuredSection: {
+    title: "منتجات مختارة",
+    intro:
+      "اكتشف بعض من المنتجات اللي كتعكس روح Tara Tech: الجودة، الفائدة، والتقديم الراقي.",
+    enabled: true,
+  },
+  story: {
+    title: "قصتنا",
+    body: "Tara Tech تزادت من رغبة بسيطة: نقدمو للمغاربة منتجات tech عملية، موثوقة ومختارة بعناية، بطريقة راقية وواضحة. الهدف ديالنا هو نوفر تجربة شراء مريحة، واضحة، وعلى مستوى الجودة اللي كيبحث عليها الزبون.",
+    image:
+      "https://images.unsplash.com/photo-1519183071298-a2962be96f83?auto=format&fit=crop&w=1200&q=80",
+  },
+  why: {
+    title: "علاش تختار Tara Tech؟",
+    intro:
+      "فـ Tara Tech كنركزو على الاختيار الذكي، الجودة، والتعامل المحترم باش تكون تجربة الشراء أكثر راحة ووضوح وثقة.",
+    points: [
+      "جودة موثوقة",
+      "منتجات مختارة بعناية",
+      "الدفع عند الاستلام",
+      "تأكيد قبل الإرسال",
+      "خدمة محترفة",
+    ],
+  },
+  faqSection: {
+    title: "الأسئلة الشائعة",
+    intro:
+      "جاوبنا على الأسئلة اللي كيتطرحو بزاف باش تبقى الصورة واضحة عندك قبل الطلب.",
+  },
+  finalCta: {
+    title: "اكتشف عالم Tara Tech",
+    body: "اختار من بين منتجات عملية، راقية، ومختارة بعناية باش تسهّل عليك الحياة اليومية بثقة وراحة.",
+    primaryCta: "اكتشف المنتجات",
+    secondaryCta: "تواصل معنا",
+  },
+  visibility: {
+    hero: true,
+    categories: true,
+    featured: true,
+    trustStrip: true,
+    story: true,
+    why: true,
+    faq: true,
+    finalCta: true,
+  },
+  categories: [
+    {
+      id: "cat-home",
+      slug: "home-tech",
+      title: "الدار",
+      description:
+        "منتجات عملية وذكية كتزيد الراحة والتنظيم فالدار.",
+      image:
+        "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=1400&q=80",
+      icon: "Home",
+      hidden: false,
+      order: 1,
+    },
+    {
+      id: "cat-car",
+      slug: "car-tech",
+      title: "السيارة",
+      description:
+        "حلول عملية للسيارة كتزيد الراحة، التنظيم، والاستعمال اليومي الذكي.",
+      image:
+        "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1400&q=80",
+      icon: "Car",
+      hidden: false,
+      order: 2,
+    },
+    {
+      id: "cat-travel",
+      slug: "travel-tech",
+      title: "السفر",
+      description:
+        "أساسيات مفيدة للسفر والتنقل، خفيفة، عملية، وساهلة فالحمل.",
+      image:
+        "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1400&q=80",
+      icon: "Plane",
+      hidden: false,
+      order: 3,
+    },
+    {
+      id: "cat-desk",
+      slug: "desk-daily-tech",
+      title: "المكتب",
+      description:
+        "منتجات مختارة بعناية للمكتب والاستعمال اليومي براحة وتنظيم أكثر.",
+      image:
+        "https://images.unsplash.com/photo-1593062096033-9a26b09da705?auto=format&fit=crop&w=1400&q=80",
+      icon: "Laptop2",
+      hidden: false,
+      order: 4,
+    },
+  ],
+  products: [
+    {
+      id: "p-js1",
+      slug: "jump-starter-air-pump",
+      title: "ديمارور وبومبة 2 فـ 1",
+      shortDescription: "جهاز كيشعل الطوموبيل إلا ماتت البطارية وكينفخ الروات إلا هبطات. ساهل، عملي، وديما واجد فالكوفير.",
+      longDescription: "جهاز 2 فـ 1 مصمم للاستعمال اليومي فالمغرب. كيشعل الطوموبيل إلا ماتت البطارية، وكينفخ الروات بسرعة إلا هبطات. صغير الحجم، عملي، وكيتهز بسهولة فالكوفير. بلا حاجة لميكانيكي ولا dépannage. الحل ديالك واجد فأي وقت.",
+      price: 699,
+      images: [
+        "https://images.unsplash.com/photo-1609592806596-b02af25e1d0a?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80",
+      ],
+      categoryId: "cat-car",
+      badge: "جديد",
+      featured: true,
+      hidden: false,
+      stock: "low",
+      guarantee: "شوفها قبل ما تخلص",
+      codNote: "الدفع عند الاستلام • شوفها قبل ما تخلص • تأكيد قبل الشحن.",
+      order: 0,
+    },
+    {
+      id: "p-1",
+      slug: "smart-bedside-lamp",
+      title: "ضو السرير الذكي",
+      shortDescription: "إضاءة دافئة قابلة للتحكم، ديزاين راقي ومناسب للغرفة.",
+      longDescription:
+        "لامبا ذكية كتعطيك تحكم كامل فالإضاءة بألوان دافئة وحديثة، تصميم نظيف يلائم أي ديكور. مختارة بعناية باش تكون متينة، عملية وأنيقة فنفس الوقت.",
+      price: 349,
+      compareAtPrice: 449,
+      images: [
+        "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1567016432779-094069958ea5?auto=format&fit=crop&w=1200&q=80",
+      ],
+      categoryId: "cat-home",
+      badge: "جديد",
+      featured: true,
+      hidden: false,
+      stock: "in",
+      guarantee: "ضمان 6 شهور",
+      codNote: "الدفع عند الاستلام متوفر فجميع المدن.",
+      order: 1,
+    },
+    {
+      id: "p-2",
+      slug: "wireless-car-charger",
+      title: "شاحن سيارة لاسلكي",
+      shortDescription: "شاحن سريع للسيارة، تثبيت قوي وتصميم عملي.",
+      longDescription:
+        "شاحن سيارة لاسلكي بشحن سريع، يثبت بإحكام في فتحات التهوية، يدعم مختلف الهواتف الحديثة. مصنوع لتجربة سياقة أنظف وأذكى.",
+      price: 249,
+      compareAtPrice: 329,
+      images: [
+        "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1611174243739-fdd5b66d2a40?auto=format&fit=crop&w=1200&q=80",
+      ],
+      categoryId: "cat-car",
+      badge: "الأكثر مبيعاً",
+      featured: true,
+      hidden: false,
+      stock: "low",
+      guarantee: "ضمان 12 شهر",
+      codNote: "الدفع عند الاستلام، التوصيل لجميع المدن.",
+      order: 2,
+    },
+    {
+      id: "p-3",
+      slug: "travel-power-bank",
+      title: "باور بانك للسفر 20 000 mAh",
+      shortDescription: "بطارية متنقلة كافية لكل أجهزتك خلال السفر.",
+      longDescription:
+        "باور بانك بسعة كبيرة، شحن سريع لمختلف الأجهزة، تصميم خفيف وعملي مناسب للسفر اليومي. حماية ذكية ضد الحرارة والتيار الزائد.",
+      price: 399,
+      images: [
+        "https://images.unsplash.com/photo-1600490722773-35753aea6332?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1609692814857-7e1bf63c6f1b?auto=format&fit=crop&w=1200&q=80",
+      ],
+      categoryId: "cat-travel",
+      featured: true,
+      hidden: false,
+      stock: "in",
+      guarantee: "ضمان 12 شهر",
+      codNote: "الدفع عند الاستلام.",
+      order: 3,
+    },
+    {
+      id: "p-4",
+      slug: "minimal-desk-lamp",
+      title: "ضو المكتب البسيط",
+      shortDescription: "إضاءة مكتبية مريحة للعينين بتصميم بسيط.",
+      longDescription:
+        "ديزاين أنيق وبسيط، إضاءة قابلة للتعديل، مثالية للمكتب أو الدراسة الطويلة. مواد عالية الجودة وتصميم عصري يدوم طويلاً.",
+      price: 299,
+      compareAtPrice: 379,
+      images: [
+        "https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1517705008128-361805f42e86?auto=format&fit=crop&w=1200&q=80",
+      ],
+      categoryId: "cat-desk",
+      badge: "اختيار",
+      featured: true,
+      hidden: false,
+      stock: "in",
+      guarantee: "ضمان 6 شهور",
+      codNote: "الدفع عند الاستلام متوفر.",
+      order: 4,
+    },
+    {
+      id: "p-5",
+      slug: "smart-air-purifier",
+      title: "منقي الهوا الصغير",
+      shortDescription: "هواء نقي وصحي لغرفتك، تشغيل هادئ وعصري.",
+      longDescription:
+        "جهاز نقي للهواء بحجم صغير وتصميم عصري، كيخلصك من الغبار والروائح، تشغيل هادئ، استهلاك منخفض للطاقة. مثالي لغرف النوم والمكاتب.",
+      price: 599,
+      images: [
+        "https://images.unsplash.com/photo-1632935190508-bba2c98f4d12?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=1200&q=80",
+      ],
+      categoryId: "cat-home",
+      featured: false,
+      hidden: false,
+      stock: "in",
+      order: 5,
+    },
+    {
+      id: "p-6",
+      slug: "magnetic-phone-mount",
+      title: "حامل الهاتف بالمغناطيس",
+      shortDescription: "تثبيت قوي بالمغناطيس، استعمال آمن وسهل.",
+      longDescription:
+        "مغناطيس قوي يحمل الهاتف بثبات، تركيب سهل ومناسب لجميع الموديلات. حل عملي وأنيق للسائقين.",
+      price: 149,
+      images: [
+        "https://images.unsplash.com/photo-1601592996763-f05c0c8a7c80?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?auto=format&fit=crop&w=1200&q=80",
+      ],
+      categoryId: "cat-car",
+      featured: false,
+      hidden: false,
+      stock: "in",
+      order: 6,
+    },
+  ],
+  faq: [
+    {
+      id: "f1",
+      order: 1,
+      question: "كيفاش نطلب؟",
+      answer:
+        "تقدر تطلب بسهولة عبر الموقع، ومن بعد كنأكدو الطلب ديالك قبل الإرسال.",
+    },
+    {
+      id: "f2",
+      order: 2,
+      question: "واش الخلاص كيكون عند الاستلام؟",
+      answer: "نعم، كاين الدفع عند الاستلام باش تكون العملية مريحة وواضحة.",
+    },
+    {
+      id: "f3",
+      order: 3,
+      question: "واش كتأكدو الطلب قبل الإرسال؟",
+      answer: "نعم، كنأكدو الطلب قبل الإرسال باش نتفاداو أي خطأ أو سوء تفاهم.",
+    },
+    {
+      id: "f4",
+      order: 4,
+      question: "واش المنتجات كتراجعو قبل الإرسال؟",
+      answer:
+        "نعم، كيتراجعو المنتجات قبل الإرسال باش نوصلو ليك حاجة منظمة ومحترمة.",
+    },
+    {
+      id: "f5",
+      order: 5,
+      question: "واش كتوصلو فجميع المغرب؟",
+      answer: "نعم، التوصيل متوفر لمختلف المدن فالمغرب.",
+    },
+    {
+      id: "f6",
+      order: 6,
+      question: "شحال هي مدة التوصيل؟",
+      answer:
+        "المدة كتختلف حسب المدينة، ولكن كنحاولو يكون التوصيل بأسرع وقت ممكن.",
+    },
+    {
+      id: "f7",
+      order: 7,
+      question: "واش نقدر نتواصل معكم قبل الطلب؟",
+      answer: "أكيد، تقدر تتواصل معنا لأي استفسار قبل ما دير الطلب.",
+    },
+    {
+      id: "f8",
+      order: 8,
+      question: "واش كاين ضمان على بعض المنتجات؟",
+      answer:
+        "بعض المنتجات فيها ضمان، وهاد الشي كيبان بوضوح فصفحة كل منتج.",
+    },
+  ],
+  announcementBar: {
+    enabled: true,
+    speed: 40,
+    messages: [
+      { id: "ab-1", text: "الدفع عند الاستلام", accent: false, order: 1 },
+      { id: "ab-2", text: "تأكيد الطلب قبل الإرسال", accent: false, order: 2 },
+      { id: "ab-3", text: "منتجات مختارة بعناية", accent: true, order: 3 },
+      { id: "ab-4", text: "الكمية محدودة على بعض العروض", accent: true, order: 4 },
+      { id: "ab-5", text: "توصيل داخل المغرب", accent: false, order: 5 },
+      { id: "ab-6", text: "خدمة زبناء متجاوبة", accent: false, order: 6 },
+      { id: "ab-7", text: "Tara Tech — تكنولوجيا عملية ومختارة بعناية", accent: true, order: 7 },
+    ],
+  },
+  footer: {
+    tagline: "Tara Tech — تكنولوجيا مفيدة، ثقة دائمة.",
+    bottomLeft: `© ${new Date().getFullYear()} Tara Tech. جميع الحقوق محفوظة.`,
+    bottomRight: "مختارة بعناية فالمغرب.",
+  },
+  admin: {
+    email: "admin@taratech.ma",
+    password: "TaraTech2026!",
+  },
+};
