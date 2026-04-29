@@ -4,7 +4,7 @@ import { CheckCircle, MessageCircle, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCms } from "../cms/store";
 
-const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyYRWLRxNBgLS1Xl8ayQVGf4ei23-xrn9ZzZtX2DhD3ZiYk-po1DwLtje9D5eUqYu8/exec";
+const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxP8EIQ0M0X939QEn7D8kywI_IV0-0upjYyM_5DoMQ4FKCG4f-eWf_8DOd-xffr0T5n/exec";
 
 interface Order {
   full_name: string;
