@@ -15,6 +15,7 @@ export default {
       },
       fontFamily: {
         sans: [
+          "Cairo",
           "Tajawal",
           "Inter",
           "ui-sans-serif",
@@ -25,6 +26,7 @@ export default {
           "sans-serif",
         ],
         display: [
+          "Cairo",
           "Tajawal",
           "Inter",
           "'Instrument Serif'",
