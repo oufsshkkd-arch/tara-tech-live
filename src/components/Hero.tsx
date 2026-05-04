@@ -2,6 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Truck, Wallet, ShieldCheck } from "lucide-react";
 import { motion, useScroll, useTransform, useMotionTemplate } from "framer-motion";
+
+type AnimVariant = { initial: Record<string, number>; animate: Record<string, number>; transition: Record<string, unknown> };
+const ANIM_VARIANTS: Record<string, AnimVariant> = {
+  none:      { initial: {}, animate: {}, transition: {} },
+  fadeUp:    { initial: { opacity: 0, y: 32 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
+  slideLeft: { initial: { opacity: 0, x: -60 }, animate: { opacity: 1, x: 0 }, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
+  zoom:      { initial: { opacity: 0, scale: 0.92 }, animate: { opacity: 1, scale: 1 }, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+};
 import { useCms } from "../cms/store";
 
 const HERO_IMAGE =
@@ -289,39 +297,62 @@ export default function Hero() {
             <div className="grid lg:grid-cols-12 gap-10 items-center">
               <div className="lg:col-span-7 max-w-3xl text-white">
                 {hero.urgencyBadge && (
-                  <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-md border border-white/25 px-3 py-1 text-xs font-medium">
+                  <div
+                    className="mb-6 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium backdrop-blur-md border"
+                    style={{
+                      backgroundColor: hero.badgeBgColor || "rgba(255,255,255,0.15)",
+                      color: hero.badgeColor || "white",
+                      borderColor: hero.badgeBgColor ? `${hero.badgeBgColor}60` : "rgba(255,255,255,0.25)",
+                    }}
+                  >
                     <Sparkles className="h-3 w-3" />
                     {hero.urgencyBadge}
                   </div>
                 )}
 
-                <h1
-                  data-hero="title"
-                  className="font-sans font-extrabold text-[44px] sm:text-[72px] lg:text-[96px] leading-[1.05] tracking-[-0.03em]"
-                  dir="auto"
-                  style={{
-                    ...(hero.titleFontSize ? { fontSize: `${hero.titleFontSize}px` } : {}),
-                    ...(hero.titleLineHeight ? { lineHeight: hero.titleLineHeight } : {}),
-                    ...(hero.titleLetterSpacing != null ? { letterSpacing: `${hero.titleLetterSpacing}em` } : {}),
-                    ...(hero.titleColor ? { color: hero.titleColor } : {}),
-                  }}
-                >
-                  {hero.headline}
-                </h1>
+                {(() => {
+                  const tv = ANIM_VARIANTS[hero.titleAnimation ?? "none"];
+                  return (
+                    <motion.h1
+                      data-hero="title"
+                      className="font-sans font-extrabold text-[44px] sm:text-[72px] lg:text-[96px] leading-[1.05] tracking-[-0.03em]"
+                      dir="auto"
+                      initial={tv.initial}
+                      animate={tv.animate}
+                      transition={tv.transition}
+                      style={{
+                        ...(hero.titleFontSize ? { fontSize: `${hero.titleFontSize}px` } : {}),
+                        ...(hero.titleLineHeight ? { lineHeight: hero.titleLineHeight } : {}),
+                        ...(hero.titleLetterSpacing != null ? { letterSpacing: `${hero.titleLetterSpacing}em` } : {}),
+                        ...(hero.titleColor ? { color: hero.titleColor } : {}),
+                      }}
+                    >
+                      {hero.headline}
+                    </motion.h1>
+                  );
+                })()}
 
-                <p
-                  data-hero="subtitle"
-                  className="mt-6 max-w-md text-base sm:text-lg text-white/90 leading-relaxed"
-                  dir="auto"
-                  style={{
-                    ...(hero.subtitleFontSize ? { fontSize: `${hero.subtitleFontSize}px` } : {}),
-                    ...(hero.subtitleLineHeight ? { lineHeight: hero.subtitleLineHeight } : {}),
-                    ...(hero.subtitleLetterSpacing != null ? { letterSpacing: `${hero.subtitleLetterSpacing}em` } : {}),
-                    ...(hero.subtitleColor ? { color: hero.subtitleColor } : {}),
-                  }}
-                >
-                  {hero.subheadline}
-                </p>
+                {(() => {
+                  const sv = ANIM_VARIANTS[hero.subtitleAnimation ?? "none"];
+                  return (
+                    <motion.p
+                      data-hero="subtitle"
+                      className="mt-6 max-w-md text-base sm:text-lg text-white/90 leading-relaxed"
+                      dir="auto"
+                      initial={sv.initial}
+                      animate={sv.animate}
+                      transition={{ ...sv.transition, delay: 0.1 }}
+                      style={{
+                        ...(hero.subtitleFontSize ? { fontSize: `${hero.subtitleFontSize}px` } : {}),
+                        ...(hero.subtitleLineHeight ? { lineHeight: hero.subtitleLineHeight } : {}),
+                        ...(hero.subtitleLetterSpacing != null ? { letterSpacing: `${hero.subtitleLetterSpacing}em` } : {}),
+                        ...(hero.subtitleColor ? { color: hero.subtitleColor } : {}),
+                      }}
+                    >
+                      {hero.subheadline}
+                    </motion.p>
+                  );
+                })()}
 
                 <div className="mt-8 flex flex-wrap items-center gap-3">
                   <Link

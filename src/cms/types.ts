@@ -149,6 +149,12 @@ export type HeroContent = {
   subtitleColor?: string;       // hex, default white/90
   // Video poster (shown while video loads)
   videoPoster?: string;
+  // Entrance animations for title and subtitle
+  titleAnimation?: "none" | "fadeUp" | "slideLeft" | "zoom";
+  subtitleAnimation?: "none" | "fadeUp" | "slideLeft" | "zoom";
+  // Urgency badge custom colors
+  badgeColor?: string;
+  badgeBgColor?: string;
 };
 
 export type StoryContent = {

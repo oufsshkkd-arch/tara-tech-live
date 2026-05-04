@@ -180,117 +180,173 @@ function Slider({
 
 /* ── Hero Module (inline in Theme Editor) ───────────────────────── */
 
-function HeroModule() {
+const ANIM_OPTIONS = [
+  { value: "none",      label: "Aucune" },
+  { value: "fadeUp",    label: "Fade Up" },
+  { value: "slideLeft", label: "Slide Gauche" },
+  { value: "zoom",      label: "Zoom In" },
+];
+
+function HeroModule({ activeField }: { activeField?: string | null }) {
   const { hero, setHero } = useCms();
   const patch = (p: Partial<typeof hero>) => setHero(p);
+  const titleRef = useRef<HTMLDivElement>(null);
+  const subtitleRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (activeField === "title") titleRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (activeField === "subtitle") subtitleRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [activeField]);
+
+  const fieldRing = (field: string) =>
+    activeField === field ? "ring-2 ring-blue-400 rounded-xl p-2 -mx-2" : "";
 
   return (
     <div className="space-y-3 pt-2">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-body/40">Hero Media</p>
 
-      {/* Media type toggle */}
-      <div className="flex rounded-lg overflow-hidden border border-line">
-        <button
-          type="button"
-          className={`flex-1 py-1.5 text-xs font-medium transition-colors ${(hero.mediaType ?? "image") === "image" ? "bg-ink text-white" : "text-body hover:bg-gray-50"}`}
-          onClick={() => patch({ mediaType: "image" })}
-        >
-          🖼 Image
-        </button>
-        <button
-          type="button"
-          className={`flex-1 py-1.5 text-xs font-medium transition-colors ${hero.mediaType === "video" ? "bg-ink text-white" : "text-body hover:bg-gray-50"}`}
-          onClick={() => patch({ mediaType: "video" })}
-        >
-          🎬 Vidéo
-        </button>
+      {/* ── Contenu texte ── */}
+      <p className="text-[10px] font-bold uppercase tracking-widest text-body/40">Contenu</p>
+
+      <div ref={titleRef} className={`space-y-1 transition-all ${fieldRing("title")}`}>
+        <label className="text-[11px] text-body">Titre principal</label>
+        <textarea value={hero.headline} onChange={(e) => patch({ headline: e.target.value })}
+          rows={2} dir="auto"
+          className="w-full text-sm border border-line rounded-lg px-2.5 py-2 resize-none focus:outline-none focus:border-ink/60 bg-white" />
       </div>
 
-      <ImageUpload
-        value={hero.videoUrl}
-        onChange={(v) => patch({ videoUrl: v })}
-        placeholder={hero.mediaType === "video" ? "https://example.com/video.mp4" : "https://..."}
-        aspectRatio="aspect-video"
-      />
+      <div ref={subtitleRef} className={`space-y-1 transition-all ${fieldRing("subtitle")}`}>
+        <label className="text-[11px] text-body">Sous-titre</label>
+        <textarea value={hero.subheadline} onChange={(e) => patch({ subheadline: e.target.value })}
+          rows={2} dir="auto"
+          className="w-full text-sm border border-line rounded-lg px-2.5 py-2 resize-none focus:outline-none focus:border-ink/60 bg-white" />
+      </div>
 
+      <div className="space-y-1">
+        <label className="text-[11px] text-body">Badge d'urgence</label>
+        <input value={hero.urgencyBadge || ""} onChange={(e) => patch({ urgencyBadge: e.target.value })}
+          dir="auto" placeholder="حياة ذكية"
+          className="w-full text-sm border border-line rounded-lg px-2.5 py-2 focus:outline-none focus:border-ink/60 bg-white" />
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        {([
+          { label: "CTA principal",  key: "primaryCta" as const },
+          { label: "CTA secondaire", key: "secondaryCta" as const },
+        ]).map(({ label, key }) => (
+          <div key={key} className="space-y-1">
+            <label className="text-[11px] text-body">{label}</label>
+            <input value={hero[key]} onChange={(e) => patch({ [key]: e.target.value })}
+              dir="auto"
+              className="w-full text-sm border border-line rounded-lg px-2.5 py-2 focus:outline-none focus:border-ink/60 bg-white" />
+          </div>
+        ))}
+      </div>
+
+      {/* ── Badge colors ── */}
+      <p className="text-[10px] font-bold uppercase tracking-widest text-body/40 pt-1">Couleurs Badge</p>
+      <div className="grid grid-cols-2 gap-3">
+        {([
+          { label: "Texte badge", key: "badgeColor" as const },
+          { label: "Fond badge",  key: "badgeBgColor" as const },
+        ]).map(({ label, key }) => (
+          <div key={key} className="flex flex-col items-center gap-1">
+            <span className="text-[10px] text-body/60">{label}</span>
+            <input type="color" value={hero[key] || "#ffffff"}
+              onChange={(e) => patch({ [key]: e.target.value })}
+              className="h-8 w-8 rounded-lg border border-line cursor-pointer p-0.5 bg-white" />
+            {hero[key] && <button onClick={() => patch({ [key]: "" })} className="text-[9px] text-body/40 hover:text-red transition-colors">reset</button>}
+          </div>
+        ))}
+      </div>
+
+      {/* ── Animations ── */}
+      <p className="text-[10px] font-bold uppercase tracking-widest text-body/40 pt-1">Animations</p>
+      <div className="grid grid-cols-2 gap-2">
+        {([
+          { label: "Titre",      key: "titleAnimation" as const },
+          { label: "Sous-titre", key: "subtitleAnimation" as const },
+        ]).map(({ label, key }) => (
+          <div key={key} className="space-y-1">
+            <label className="text-[11px] text-body">{label}</label>
+            <select value={hero[key] || "none"}
+              onChange={(e) => patch({ [key]: e.target.value as "none" | "fadeUp" | "slideLeft" | "zoom" })}
+              className="w-full text-xs border border-line rounded-lg px-2 py-1.5 bg-white focus:outline-none">
+              {ANIM_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Média ── */}
+      <p className="text-[10px] font-bold uppercase tracking-widest text-body/40 pt-1">Média</p>
+      <div className="flex rounded-lg overflow-hidden border border-line">
+        <button type="button"
+          className={`flex-1 py-1.5 text-xs font-medium transition-colors ${(hero.mediaType ?? "image") === "image" ? "bg-ink text-white" : "text-body hover:bg-gray-50"}`}
+          onClick={() => patch({ mediaType: "image" })}>🖼 Image</button>
+        <button type="button"
+          className={`flex-1 py-1.5 text-xs font-medium transition-colors ${hero.mediaType === "video" ? "bg-ink text-white" : "text-body hover:bg-gray-50"}`}
+          onClick={() => patch({ mediaType: "video" })}>🎬 Vidéo</button>
+      </div>
+      <ImageUpload value={hero.videoUrl} onChange={(v) => patch({ videoUrl: v })}
+        placeholder={hero.mediaType === "video" ? "https://example.com/video.mp4" : "https://..."} aspectRatio="aspect-video" />
       {hero.mediaType === "video" && (
-        <ImageUpload
-          value={hero.videoPoster ?? ""}
-          onChange={(v) => patch({ videoPoster: v })}
-          placeholder="Poster image URL…"
-          aspectRatio="aspect-video"
-        />
+        <ImageUpload value={hero.videoPoster ?? ""} onChange={(v) => patch({ videoPoster: v })}
+          placeholder="Poster image URL…" aspectRatio="aspect-video" />
       )}
 
-      {/* Overlay */}
+      {/* ── Overlay ── */}
       <p className="text-[10px] font-bold uppercase tracking-widest text-body/40 pt-1">Overlay</p>
       <div>
         <div className="flex justify-between text-[11px] text-body mb-1">
           <span>Voile sombre</span>
           <span className="font-mono text-ink">{Math.round((hero.overlayDarkness ?? 0.15) * 100)}%</span>
         </div>
-        <input
-          type="range" min={0} max={1} step={0.05}
-          value={hero.overlayDarkness ?? 0.15}
-          onChange={(e) => patch({ overlayDarkness: Number(e.target.value) })}
-          className="w-full accent-ink h-1"
-        />
+        <input type="range" min={0} max={1} step={0.05} value={hero.overlayDarkness ?? 0.15}
+          onChange={(e) => patch({ overlayDarkness: Number(e.target.value) })} className="w-full accent-ink h-1" />
       </div>
 
-      {/* Typography */}
-      <p className="text-[10px] font-bold uppercase tracking-widest text-body/40 pt-1">Titre</p>
+      {/* ── Typography ── */}
+      <p className="text-[10px] font-bold uppercase tracking-widest text-body/40 pt-1">Titre — Typographie</p>
       {[
-        { label: "Font Size", key: "titleFontSize" as const, min: 32, max: 140, step: 2, def: 96, fmt: (v: number) => `${v}px` },
-        { label: "Line Height", key: "titleLineHeight" as const, min: 0.9, max: 1.8, step: 0.05, def: 1.05, fmt: (v: number) => v.toFixed(2) },
+        { label: "Font Size",      key: "titleFontSize" as const,      min: 32,   max: 140, step: 2,    def: 96,   fmt: (v: number) => `${v}px` },
+        { label: "Line Height",    key: "titleLineHeight" as const,    min: 0.9,  max: 1.8, step: 0.05, def: 1.05, fmt: (v: number) => v.toFixed(2) },
         { label: "Letter Spacing", key: "titleLetterSpacing" as const, min: -0.1, max: 0.2, step: 0.01, def: -0.03, fmt: (v: number) => `${v.toFixed(2)}em` },
       ].map(({ label, key, min, max, step, def, fmt }) => (
         <div key={key}>
           <div className="flex justify-between text-[11px] text-body mb-1">
-            <span>{label}</span>
-            <span className="font-mono text-ink">{fmt(hero[key] ?? def)}</span>
+            <span>{label}</span><span className="font-mono text-ink">{fmt(hero[key] ?? def)}</span>
           </div>
-          <input type="range" min={min} max={max} step={step}
-            value={hero[key] ?? def}
-            onChange={(e) => patch({ [key]: Number(e.target.value) })}
-            className="w-full accent-ink h-1"
-          />
+          <input type="range" min={min} max={max} step={step} value={hero[key] ?? def}
+            onChange={(e) => patch({ [key]: Number(e.target.value) })} className="w-full accent-ink h-1" />
         </div>
       ))}
 
-      <p className="text-[10px] font-bold uppercase tracking-widest text-body/40 pt-1">Sous-titre</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-body/40 pt-1">Sous-titre — Typographie</p>
       {[
-        { label: "Font Size", key: "subtitleFontSize" as const, min: 12, max: 32, step: 1, def: 18, fmt: (v: number) => `${v}px` },
-        { label: "Line Height", key: "subtitleLineHeight" as const, min: 1.2, max: 2.2, step: 0.1, def: 1.6, fmt: (v: number) => v.toFixed(1) },
+        { label: "Font Size",      key: "subtitleFontSize" as const,      min: 12,    max: 32,  step: 1,    def: 18, fmt: (v: number) => `${v}px` },
+        { label: "Line Height",    key: "subtitleLineHeight" as const,    min: 1.2,   max: 2.2, step: 0.1,  def: 1.6, fmt: (v: number) => v.toFixed(1) },
         { label: "Letter Spacing", key: "subtitleLetterSpacing" as const, min: -0.05, max: 0.2, step: 0.01, def: 0, fmt: (v: number) => `${v.toFixed(2)}em` },
       ].map(({ label, key, min, max, step, def, fmt }) => (
         <div key={key}>
           <div className="flex justify-between text-[11px] text-body mb-1">
-            <span>{label}</span>
-            <span className="font-mono text-ink">{fmt(hero[key] ?? def)}</span>
+            <span>{label}</span><span className="font-mono text-ink">{fmt(hero[key] ?? def)}</span>
           </div>
-          <input type="range" min={min} max={max} step={step}
-            value={hero[key] ?? def}
-            onChange={(e) => patch({ [key]: Number(e.target.value) })}
-            className="w-full accent-ink h-1"
-          />
+          <input type="range" min={min} max={max} step={step} value={hero[key] ?? def}
+            onChange={(e) => patch({ [key]: Number(e.target.value) })} className="w-full accent-ink h-1" />
         </div>
       ))}
 
       <div className="grid grid-cols-2 gap-3 pt-1">
-        {[
-          { label: "Couleur titre", key: "titleColor" as const },
+        {([
+          { label: "Couleur titre",      key: "titleColor" as const },
           { label: "Couleur sous-titre", key: "subtitleColor" as const },
-        ].map(({ label, key }) => (
+        ]).map(({ label, key }) => (
           <div key={key} className="flex flex-col items-center gap-1">
             <span className="text-[10px] text-body/60">{label}</span>
-            <input type="color"
-              value={hero[key] || "#ffffff"}
+            <input type="color" value={hero[key] || "#ffffff"}
               onChange={(e) => patch({ [key]: e.target.value })}
-              className="h-8 w-8 rounded-lg border border-line cursor-pointer p-0.5"
-            />
-            {hero[key] && (
-              <button onClick={() => patch({ [key]: "" })} className="text-[9px] text-body/40 hover:text-red">reset</button>
-            )}
+              className="h-8 w-8 rounded-lg border border-line cursor-pointer p-0.5 bg-white" />
+            {hero[key] && <button onClick={() => patch({ [key]: "" })} className="text-[9px] text-body/40 hover:text-red transition-colors">reset</button>}
           </div>
         ))}
       </div>
@@ -536,7 +592,9 @@ export default function AdminTheme() {
   const [globalOpen, setGlobalOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const [aiQuery, setAiQuery] = useState("");
+  const [activeHeroField, setActiveHeroField] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   const hasChanges =
     JSON.stringify(sectionOrder) !== JSON.stringify(themeSchema?.sectionOrder) ||
@@ -622,6 +680,29 @@ export default function AdminTheme() {
       // ignore
     }
   }, []);
+
+  /* ── Click-to-edit: clicking [data-hero] in iframe opens that field ── */
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    const attach = () => {
+      try {
+        const doc = iframe.contentDocument;
+        if (!doc) return;
+        const handler = (e: Event) => {
+          const el = (e.target as Element).closest("[data-hero]");
+          if (!el) return;
+          const field = el.getAttribute("data-hero");
+          setExpandedSection("__hero__");
+          setActiveHeroField(field);
+          sidebarRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+        };
+        doc.addEventListener("click", handler);
+      } catch { /* cross-origin guard */ }
+    };
+    iframe.addEventListener("load", attach);
+    return () => iframe.removeEventListener("load", attach);
+  }, [mode]);
 
   /* ── DnD ── */
   const sensors = useSensors(
@@ -715,7 +796,7 @@ export default function AdminTheme() {
 
         {/* ── Sidebar ── */}
         <div className="w-80 shrink-0 bg-white border-r border-line flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto">
+          <div ref={sidebarRef} className="flex-1 overflow-y-auto">
 
             {/* ═══ BLOCKS ═══ */}
             <div className="px-4 pt-4 pb-1">
@@ -734,7 +815,7 @@ export default function AdminTheme() {
               </button>
               {expandedSection === "__hero__" && (
                 <div className="border-t border-line px-3 pt-3 pb-4 bg-gray-50/60">
-                  <HeroModule />
+                  <HeroModule activeField={activeHeroField} />
                 </div>
               )}
             </div>
@@ -791,7 +872,7 @@ export default function AdminTheme() {
                           [id]: { ...(prev[id] ?? {}), ...partial },
                         }))
                       }
-                      moduleContent={id === "hero" ? <HeroModule /> : undefined}
+                      moduleContent={id === "hero" ? <HeroModule activeField={activeHeroField} /> : undefined}
                     />
                   ))}
                 </SortableContext>
