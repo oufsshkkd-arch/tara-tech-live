@@ -296,6 +296,7 @@ export default function Hero() {
                 )}
 
                 <h1
+                  data-hero="title"
                   className="font-sans font-extrabold text-[44px] sm:text-[72px] lg:text-[96px] leading-[1.05] tracking-[-0.03em]"
                   dir="auto"
                   style={{
@@ -309,6 +310,7 @@ export default function Hero() {
                 </h1>
 
                 <p
+                  data-hero="subtitle"
                   className="mt-6 max-w-md text-base sm:text-lg text-white/90 leading-relaxed"
                   dir="auto"
                   style={{

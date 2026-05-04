@@ -497,8 +497,33 @@ function SortableSection({
 
 /* ── Main component ─────────────────────────────────────────────── */
 
+/* ── Announcement block ─────────────────────────────────────────── */
+function AnnouncementBlock() {
+  const { announcementBar, setAnnouncementBar } = useCms();
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-body">Activer le bandeau</span>
+        <button
+          type="button"
+          onClick={() => setAnnouncementBar({ enabled: !announcementBar.enabled })}
+          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${announcementBar.enabled ? "bg-ink" : "bg-line"}`}
+        >
+          <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform ${announcementBar.enabled ? "translate-x-4" : "translate-x-0.5"}`} />
+        </button>
+      </div>
+      <p className="text-[11px] text-body/40">
+        {announcementBar.messages.length} message(s) •{" "}
+        <a href="/tara-admin/announcement" className="text-ink hover:underline">Modifier ↗</a>
+      </p>
+    </div>
+  );
+}
+
+/* ── Main component ─────────────────────────────────────────────── */
+
 export default function AdminTheme() {
-  const { themeSchema, setThemeSchema, visibility, setVisibility, brand, setBrand } = useCms();
+  const { themeSchema, setThemeSchema, visibility, setVisibility, brand, setBrand, hero } = useCms();
 
   const [mode, setMode] = useState<ViewMode>("desktop");
   const [sectionOrder, setSectionOrder] = useState<string[]>(
@@ -561,11 +586,29 @@ export default function AdminTheme() {
         }
       });
 
+      // Hero live-sync CSS
+      if (hero.titleFontSize || hero.titleLineHeight || hero.titleLetterSpacing != null || hero.titleColor) {
+        const r: string[] = [];
+        if (hero.titleFontSize) r.push(`font-size: ${hero.titleFontSize}px !important`);
+        if (hero.titleLineHeight) r.push(`line-height: ${hero.titleLineHeight} !important`);
+        if (hero.titleLetterSpacing != null) r.push(`letter-spacing: ${hero.titleLetterSpacing}em !important`);
+        if (hero.titleColor) r.push(`color: ${hero.titleColor} !important`);
+        css += `[data-hero="title"] { ${r.join("; ")}; }\n`;
+      }
+      if (hero.subtitleFontSize || hero.subtitleLineHeight || hero.subtitleLetterSpacing != null || hero.subtitleColor) {
+        const r: string[] = [];
+        if (hero.subtitleFontSize) r.push(`font-size: ${hero.subtitleFontSize}px !important`);
+        if (hero.subtitleLineHeight) r.push(`line-height: ${hero.subtitleLineHeight} !important`);
+        if (hero.subtitleLetterSpacing != null) r.push(`letter-spacing: ${hero.subtitleLetterSpacing}em !important`);
+        if (hero.subtitleColor) r.push(`color: ${hero.subtitleColor} !important`);
+        css += `[data-hero="subtitle"] { ${r.join("; ")}; }\n`;
+      }
+
       styleEl.textContent = css;
     } catch {
       // Cross-origin or not yet loaded
     }
-  }, [sectionThemes]);
+  }, [sectionThemes, hero]);
 
   useEffect(() => {
     const t = setTimeout(injectThemeStyles, 80);
@@ -691,6 +734,23 @@ export default function AdminTheme() {
               {expandedSection === "__hero__" && (
                 <div className="border-t border-line px-3 pt-3 pb-4 bg-gray-50/60">
                   <HeroModule />
+                </div>
+              )}
+            </div>
+
+            {/* Announcement Block */}
+            <div className="mx-3 mb-3 rounded-xl border border-line bg-white overflow-hidden">
+              <button
+                className="w-full flex items-center gap-2 px-3 py-2.5 hover:bg-gray-50 transition-colors"
+                onClick={() => setExpandedSection((p) => p === "__announce__" ? null : "__announce__")}
+              >
+                <span className="h-5 w-5 rounded bg-yellow-400 text-white text-[10px] font-bold grid place-items-center shrink-0">A</span>
+                <span className="flex-1 text-sm font-semibold text-ink text-left">Announcement Bar</span>
+                <ChevronDown className={`h-4 w-4 text-body/40 transition-transform duration-150 ${expandedSection === "__announce__" ? "rotate-180" : ""}`} />
+              </button>
+              {expandedSection === "__announce__" && (
+                <div className="border-t border-line px-3 pt-3 pb-4 bg-gray-50/60">
+                  <AnnouncementBlock />
                 </div>
               )}
             </div>
