@@ -1,8 +1,6 @@
 import { NavLink, Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
-  Sparkles,
-  LayoutTemplate,
   Boxes,
   Package,
   HelpCircle,
@@ -32,9 +30,7 @@ const links = [
   { to: "/tara-admin/categories", label: "الفئات", icon: Boxes },
   { to: "/tara-admin/landing-pages", label: "صفحات المنتجات", icon: FileText },
   { group: "الموقع" },
-  { to: "/tara-admin/hero", label: "Hero Section", icon: Sparkles },
   { to: "/tara-admin/announcement", label: "شريط الإعلان", icon: Megaphone },
-  { to: "/tara-admin/sections", label: "الأقسام", icon: LayoutTemplate },
   { to: "/tara-admin/story", label: "قصتنا & CTA", icon: BookOpen },
   { to: "/tara-admin/faq", label: "FAQ", icon: HelpCircle },
   { to: "/tara-admin/footer", label: "Footer", icon: PanelBottom },

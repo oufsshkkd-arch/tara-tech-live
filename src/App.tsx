@@ -15,12 +15,10 @@ import AdminLogin from "./admin/AdminLogin";
 import AdminLayout from "./admin/AdminLayout";
 import AdminDashboard from "./admin/AdminDashboard";
 import AdminBrand from "./admin/sections/AdminBrand";
-import AdminHero from "./admin/sections/AdminHero";
 import AdminCategories from "./admin/sections/AdminCategories";
 import AdminProducts from "./admin/sections/AdminProducts";
 import AdminFaq from "./admin/sections/AdminFaq";
 import AdminStory from "./admin/sections/AdminStory";
-import AdminSections from "./admin/sections/AdminSections";
 import AdminAccount from "./admin/sections/AdminAccount";
 import AdminAnnouncementBar from "./admin/sections/AdminAnnouncementBar";
 import AdminFooter from "./admin/sections/AdminFooter";
@@ -78,8 +76,8 @@ export default function App() {
         >
           <Route index element={<AdminDashboard />} />
           <Route path="brand" element={<AdminBrand />} />
-          <Route path="hero" element={<AdminHero />} />
-          <Route path="sections" element={<AdminSections />} />
+          <Route path="hero" element={<Navigate to="/tara-admin/theme" replace />} />
+          <Route path="sections" element={<Navigate to="/tara-admin/theme" replace />} />
           <Route path="categories" element={<AdminCategories />} />
           <Route path="products" element={<AdminProducts />} />
           <Route path="faq" element={<AdminFaq />} />

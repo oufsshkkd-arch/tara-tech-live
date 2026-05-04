@@ -670,73 +670,35 @@ export default function AdminTheme() {
       <div className="flex-1 flex overflow-hidden">
 
         {/* ── Sidebar ── */}
-        <div className="w-72 shrink-0 bg-white border-r border-line flex flex-col overflow-hidden">
+        <div className="w-80 shrink-0 bg-white border-r border-line flex flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto">
 
-            {/* Color scheme presets */}
-            <div className="px-4 pt-4 pb-3 border-b border-line">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-body/40 mb-2.5">Color Presets</p>
-              <div className="flex items-center gap-2 flex-wrap">
-                {COLOR_PRESETS.map((preset) => (
-                  <button
-                    key={preset.name}
-                    onClick={() => {
-                      setBrand(preset.brand);
-                      setTimeout(reloadIframe, 200);
-                    }}
-                    className="group flex flex-col items-center gap-1"
-                    title={preset.name}
-                  >
-                    <span
-                      className="h-8 w-8 rounded-full border-2 border-line group-hover:border-ink/40 transition-colors shadow-sm"
-                      style={{ background: preset.swatch }}
-                    />
-                    <span className="text-[9px] text-body/50 group-hover:text-body transition-colors">{preset.name}</span>
-                  </button>
-                ))}
-              </div>
+            {/* ═══ BLOCKS ═══ */}
+            <div className="px-4 pt-4 pb-1">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-body/40">Blocks</p>
             </div>
 
-            {/* Global brand colors */}
-            <div className="border-b border-line">
+            {/* Hero Block — always first, dedicated */}
+            <div className="mx-3 mb-3 rounded-xl border border-line bg-white overflow-hidden">
               <button
-                onClick={() => setGlobalOpen((v) => !v)}
-                className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2.5 hover:bg-gray-50 transition-colors"
+                onClick={() => setExpandedSection((p) => p === "__hero__" ? null : "__hero__")}
               >
-                <p className="text-[10px] font-bold uppercase tracking-widest text-body/40">Global Colors</p>
-                <ChevronDown className={`h-4 w-4 text-body/40 transition-transform duration-150 ${globalOpen ? "rotate-180" : ""}`} />
+                <span className="h-5 w-5 rounded bg-ink text-white text-[10px] font-bold grid place-items-center shrink-0">H</span>
+                <span className="flex-1 text-sm font-semibold text-ink text-left">Hero Section</span>
+                <ChevronDown className={`h-4 w-4 text-body/40 transition-transform duration-150 ${expandedSection === "__hero__" ? "rotate-180" : ""}`} />
               </button>
-              {globalOpen && (
-                <div className="px-4 pb-4 grid grid-cols-4 gap-3">
-                  {(
-                    [
-                      { key: "primaryColor" as const, label: "Primary" },
-                      { key: "ctaColor" as const, label: "CTA" },
-                      { key: "textColor" as const, label: "Text" },
-                      { key: "bgColor" as const, label: "BG" },
-                    ] as const
-                  ).map(({ key, label }) => (
-                    <div key={key} className="flex flex-col items-center gap-1.5">
-                      <span className="text-[10px] text-body/60 leading-none">{label}</span>
-                      <input
-                        type="color"
-                        value={brand[key] || "#ffffff"}
-                        onChange={(e) => setBrand({ [key]: e.target.value })}
-                        className="h-8 w-8 rounded-lg border border-line cursor-pointer p-0.5 bg-white"
-                      />
-                    </div>
-                  ))}
-                  <p className="col-span-4 text-[10px] text-body/40 mt-1">
-                    Color changes apply after Refresh ↻
-                  </p>
+              {expandedSection === "__hero__" && (
+                <div className="border-t border-line px-3 pt-3 pb-4 bg-gray-50/60">
+                  <HeroModule />
                 </div>
               )}
             </div>
 
-            {/* Sections header */}
-            <div className="px-4 pt-3 pb-1">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-body/40">Sections</p>
-              <p className="text-[11px] text-body/40 mt-0.5">Drag to reorder · eye to toggle</p>
+            {/* ═══ SECTION LAYOUT ═══ */}
+            <div className="px-4 pt-2 pb-1 border-t border-line">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-body/40">Section Layout</p>
+              <p className="text-[11px] text-body/40 mt-0.5">Drag to reorder · 👁 to toggle visibility</p>
             </div>
 
             {/* Draggable list */}
@@ -776,13 +738,68 @@ export default function AdminTheme() {
             </div>
           </div>
 
+          {/* ═══ STYLING ═══ */}
+          <div className="border-t border-line px-4 pt-3 pb-1">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-body/40">Styling</p>
+          </div>
+
+          {/* Color scheme presets */}
+          <div className="px-4 pb-3">
+            <p className="text-[11px] text-body/50 mb-2">Color Presets</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              {COLOR_PRESETS.map((preset) => (
+                <button
+                  key={preset.name}
+                  onClick={() => { setBrand(preset.brand); setTimeout(reloadIframe, 200); }}
+                  className="group flex flex-col items-center gap-1"
+                  title={preset.name}
+                >
+                  <span
+                    className="h-8 w-8 rounded-full border-2 border-line group-hover:border-ink/40 transition-colors shadow-sm"
+                    style={{ background: preset.swatch }}
+                  />
+                  <span className="text-[9px] text-body/50 group-hover:text-body transition-colors">{preset.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Global brand colors */}
+          <div className="border-t border-line">
+            <button
+              onClick={() => setGlobalOpen((v) => !v)}
+              className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
+            >
+              <p className="text-[10px] font-bold uppercase tracking-widest text-body/40">Global Colors</p>
+              <ChevronDown className={`h-4 w-4 text-body/40 transition-transform duration-150 ${globalOpen ? "rotate-180" : ""}`} />
+            </button>
+            {globalOpen && (
+              <div className="px-4 pb-4 grid grid-cols-4 gap-3">
+                {([
+                  { key: "primaryColor" as const, label: "Primary" },
+                  { key: "ctaColor" as const, label: "CTA" },
+                  { key: "textColor" as const, label: "Text" },
+                  { key: "bgColor" as const, label: "BG" },
+                ] as const).map(({ key, label }) => (
+                  <div key={key} className="flex flex-col items-center gap-1.5">
+                    <span className="text-[10px] text-body/60 leading-none">{label}</span>
+                    <input
+                      type="color"
+                      value={brand[key] || "#ffffff"}
+                      onChange={(e) => setBrand({ [key]: e.target.value })}
+                      className="h-8 w-8 rounded-lg border border-line cursor-pointer p-0.5 bg-white"
+                    />
+                  </div>
+                ))}
+                <p className="col-span-4 text-[10px] text-body/40 mt-1">Color changes apply after Refresh ↻</p>
+              </div>
+            )}
+          </div>
+
           {/* Reset */}
           <div className="p-3 border-t border-line shrink-0">
             <button
-              onClick={() => {
-                setSectionOrder(DEFAULT_ORDER);
-                setSectionThemes({});
-              }}
+              onClick={() => { setSectionOrder(DEFAULT_ORDER); setSectionThemes({}); }}
               className="w-full flex items-center justify-center gap-1.5 py-2 text-[11px] text-body/50 hover:text-body rounded-lg hover:bg-gray-50 transition-colors"
             >
               <RotateCcw className="h-3 w-3" />
