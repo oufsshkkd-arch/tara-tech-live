@@ -1,5 +1,6 @@
 import { ReactNode, useState, useCallback, useEffect } from "react";
 import { Monitor, Smartphone, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { useCms } from "../cms/store";
 
 type ViewMode = "desktop" | "mobile";
 type ToastState = { type: "success" | "error"; message: string } | null;
@@ -27,6 +28,7 @@ export default function SplitEditor({ title, hasChanges, onSave, renderPreview, 
     setSaving(true);
     try {
       await onSave();
+      await useCms.getState().syncToDb();
       setToast({ type: "success", message: "Settings Saved Successfully!" });
     } catch {
       setToast({ type: "error", message: "Save failed — check your connection." });

@@ -4,6 +4,7 @@ import { CheckCircle, MessageCircle, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCms } from "../cms/store";
 import { useAnalytics } from "../hooks/useAnalytics";
+import { saveOrder } from "../lib/db";
 
 const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbytXQjDr40xi-zH-qkksarUW75xptpK_bp8-KBgbnl4U5IYV3gV64kAEU90s1AEQICX0g/exec";
 
@@ -56,24 +57,20 @@ export default function ThankYouPage() {
         new Image().src = `${WEBHOOK_URL}?${params.toString()}`;
         trackOrderSuccess(data.product_name || "unknown");
 
-        // Save to local orders log for admin dashboard
-        try {
-          const log = JSON.parse(localStorage.getItem("tara_orders_log") || "[]");
-          log.unshift({
-            id: Date.now().toString(),
-            date: data.date || "",
-            time: data.time || "",
-            full_name: data.full_name || "",
-            phone: data.phone || "",
-            city: data.city || "",
-            product_name: data.product_name || "",
-            price: parseInt(data.price || "699"),
-            quantity: parseInt(data.quantity || "1"),
-            status: "جديد",
-            source: data.source || "direct",
-          });
-          localStorage.setItem("tara_orders_log", JSON.stringify(log.slice(0, 200)));
-        } catch { /* ignore */ }
+        // Save to Supabase orders table for admin dashboard
+        saveOrder({
+          id: Date.now().toString(),
+          date: data.date || "",
+          time: data.time || "",
+          full_name: data.full_name || "",
+          phone: data.phone || "",
+          city: data.city || "",
+          product_name: data.product_name || "",
+          price: parseInt(data.price || "699"),
+          quantity: parseInt(data.quantity || "1"),
+          status: "جديد",
+          source: data.source || "direct",
+        }).catch(() => { /* ignore */ });
       }
     } catch { /* ignore */ }
   }, []);
