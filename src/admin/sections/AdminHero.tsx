@@ -6,6 +6,13 @@ import SplitEditor from "../SplitEditor";
 import HeroPreview from "../previews/HeroPreview";
 import ImageUpload from "../ImageUpload";
 
+const ANIM_OPTIONS = [
+  { value: "none",      label: "Aucune" },
+  { value: "fadeUp",    label: "Fade Up" },
+  { value: "slideLeft", label: "Slide Gauche" },
+  { value: "zoom",      label: "Zoom In" },
+];
+
 function SectionLabel({ children }: { children: string }) {
   return (
     <p className="text-[10px] font-bold uppercase tracking-widest text-body/40 pb-1 border-b border-line">
@@ -231,6 +238,43 @@ export default function AdminHero() {
         </div>
       </div>
 
+      {/* Animations & Badge */}
+      <div className="space-y-4">
+        <SectionLabel>Animations & Badge</SectionLabel>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Anim. titre">
+            <select
+              className="input"
+              value={draft.titleAnimation ?? "none"}
+              onChange={(e) => patch({ titleAnimation: e.target.value as "none" | "fadeUp" | "slideLeft" | "zoom" })}
+            >
+              {ANIM_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </Field>
+          <Field label="Anim. sous-titre">
+            <select
+              className="input"
+              value={draft.subtitleAnimation ?? "none"}
+              onChange={(e) => patch({ subtitleAnimation: e.target.value as "none" | "fadeUp" | "slideLeft" | "zoom" })}
+            >
+              {ANIM_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </Field>
+        </div>
+        <div className="grid grid-cols-2 gap-4 pt-1">
+          <ColorPill
+            label="Texte badge"
+            value={draft.badgeColor ?? ""}
+            onChange={(v) => patch({ badgeColor: v })}
+          />
+          <ColorPill
+            label="Fond badge"
+            value={draft.badgeBgColor ?? ""}
+            onChange={(v) => patch({ badgeBgColor: v })}
+          />
+        </div>
+      </div>
+
       {/* Background */}
       <div className="space-y-4">
         <SectionLabel>Arrière-plan</SectionLabel>
@@ -273,6 +317,17 @@ export default function AdminHero() {
                 value={draft.videoUrl}
                 onChange={(v) => patch({ videoUrl: v })}
                 placeholder="https://example.com/video.mp4"
+                aspectRatio="aspect-video"
+              />
+            </Field>
+            <Field
+              label="Vidéo mobile (optionnel)"
+              hint="Version compressée pour mobile (< 768px). Si vide, la vidéo desktop est utilisée."
+            >
+              <ImageUpload
+                value={draft.mobileVideoUrl ?? ""}
+                onChange={(v) => patch({ mobileVideoUrl: v })}
+                placeholder="https://example.com/video-mobile.mp4"
                 aspectRatio="aspect-video"
               />
             </Field>

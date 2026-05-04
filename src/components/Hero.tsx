@@ -81,6 +81,9 @@ export default function Hero() {
   const midStatOpacity = useTransform(scrollYProgress, [0.55, 0.8], [0, 1]);
   const midBadgesOpacity = useTransform(scrollYProgress, [0.6, 0.85], [0, 1]);
 
+  const isMobile = dims.vw < 768;
+  const activeVideoSrc = (isMobile && hero.mobileVideoUrl) ? hero.mobileVideoUrl : hero.videoUrl;
+
   const overlayMax = hero.overlayDarkness ?? 0.75;
   const overlayMin = Math.max(0, overlayMax - 0.5);
   const overlayOpacity = useTransform(
@@ -118,7 +121,7 @@ export default function Hero() {
         >
           {hero.mediaType === "video" && hero.videoUrl ? (
             <video
-              src={hero.videoUrl}
+              src={activeVideoSrc}
               poster={hero.videoPoster || HERO_IMAGE}
               autoPlay
               muted

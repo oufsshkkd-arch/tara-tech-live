@@ -290,8 +290,12 @@ function HeroModule({ activeField }: { activeField?: string | null }) {
       <ImageUpload value={hero.videoUrl} onChange={(v) => patch({ videoUrl: v })}
         placeholder={hero.mediaType === "video" ? "https://example.com/video.mp4" : "https://..."} aspectRatio="aspect-video" />
       {hero.mediaType === "video" && (
-        <ImageUpload value={hero.videoPoster ?? ""} onChange={(v) => patch({ videoPoster: v })}
-          placeholder="Poster image URL…" aspectRatio="aspect-video" />
+        <>
+          <ImageUpload value={hero.mobileVideoUrl ?? ""} onChange={(v) => patch({ mobileVideoUrl: v })}
+            placeholder="Vidéo mobile (compressée)…" aspectRatio="aspect-video" />
+          <ImageUpload value={hero.videoPoster ?? ""} onChange={(v) => patch({ videoPoster: v })}
+            placeholder="Poster image URL…" aspectRatio="aspect-video" />
+        </>
       )}
 
       {/* ── Overlay ── */}

@@ -149,6 +149,8 @@ export type HeroContent = {
   subtitleColor?: string;       // hex, default white/90
   // Video poster (shown while video loads)
   videoPoster?: string;
+  // Mobile-optimized video (lower bitrate, served on screens < 768px)
+  mobileVideoUrl?: string;
   // Entrance animations for title and subtitle
   titleAnimation?: "none" | "fadeUp" | "slideLeft" | "zoom";
   subtitleAnimation?: "none" | "fadeUp" | "slideLeft" | "zoom";
