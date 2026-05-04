@@ -42,5 +42,14 @@ jobs:
             set net:max-retries 5
             open -u $FTP_USER,$FTP_PASS $FTP_SERVER
             mirror --reverse --delete --verbose --no-perms --transfer-all ./dist/ ./
+            put -O . ./dist/index.html
+            put -O . ./dist/.htaccess
             quit
           "
+
+      - name: Purge LiteSpeed cache
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" \
+            -H "X-LiteSpeed-Purge: *" \
+            "https://taratech.pro/" || true
+          curl -s -o /dev/null "https://taratech.pro/?LSCWP_CTRL=before_htaccess&action=purge&type=all" || true
