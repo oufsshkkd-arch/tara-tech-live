@@ -22,6 +22,7 @@ import {
   GripVertical,
   Monitor,
   Smartphone,
+  Maximize2,
   Check,
   ChevronDown,
   Eye,
@@ -30,6 +31,8 @@ import {
   RotateCcw,
   RefreshCw,
 } from "lucide-react";
+
+type ViewMode = "desktop" | "mobile" | "full";
 
 /* ── Constants ─────────────────────────────────────────────────── */
 
@@ -55,6 +58,9 @@ const THEME_DEFAULTS: SectionTheme = {
   fontFamily: "",
   paddingTop: 0,
   paddingBottom: 0,
+  borderRadius: 0,
+  borderWidth: 0,
+  borderColor: "",
 };
 
 const FONT_FAMILIES = [
@@ -295,8 +301,33 @@ function SortableSection({
             />
           </div>
 
+          {/* Card styling */}
+          <div className="pt-1">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-body/40 mb-2">Card Styling</p>
+            <div className="space-y-3">
+              <Slider
+                label="Border Radius"
+                value={t.borderRadius ?? 0}
+                min={0}
+                max={32}
+                step={2}
+                format={(v) => `${v}px`}
+                onChange={(v) => onThemeChange({ borderRadius: v })}
+              />
+              <Slider
+                label="Border Width"
+                value={t.borderWidth ?? 0}
+                min={0}
+                max={8}
+                step={1}
+                format={(v) => `${v}px`}
+                onChange={(v) => onThemeChange({ borderWidth: v })}
+              />
+            </div>
+          </div>
+
           {/* Color pickers */}
-          <div className="grid grid-cols-3 gap-2 pt-1">
+          <div className="grid grid-cols-4 gap-2 pt-1">
             <ColorPill
               label="خلفية"
               value={t.bgColor}
@@ -312,6 +343,11 @@ function SortableSection({
               value={t.accentColor}
               onChange={(v) => onThemeChange({ accentColor: v })}
             />
+            <ColorPill
+              label="Border"
+              value={t.borderColor ?? ""}
+              onChange={(v) => onThemeChange({ borderColor: v })}
+            />
           </div>
         </div>
       )}
@@ -324,7 +360,7 @@ function SortableSection({
 export default function AdminTheme() {
   const { themeSchema, setThemeSchema, visibility, setVisibility, brand, setBrand } = useCms();
 
-  const [mode, setMode] = useState<"desktop" | "mobile">("desktop");
+  const [mode, setMode] = useState<ViewMode>("desktop");
   const [sectionOrder, setSectionOrder] = useState<string[]>(
     () => themeSchema?.sectionOrder ?? DEFAULT_ORDER
   );
@@ -370,6 +406,17 @@ export default function AdminTheme() {
         if (rules.length) css += `${sel} { ${rules.join("; ")}; }\n`;
         if (theme.accentColor) {
           css += `${sel} a { color: ${theme.accentColor}; }\n`;
+        }
+        // Card styling — target direct card children
+        const cardRules: string[] = [];
+        if ((theme.borderRadius ?? 0) > 0) cardRules.push(`border-radius: ${theme.borderRadius}px`);
+        if ((theme.borderWidth ?? 0) > 0) {
+          cardRules.push(`border-width: ${theme.borderWidth}px`);
+          cardRules.push(`border-style: solid`);
+          cardRules.push(`border-color: ${theme.borderColor || "currentColor"}`);
+        }
+        if (cardRules.length) {
+          css += `${sel} [class*="rounded"] { ${cardRules.join("; ")}; }\n`;
         }
       });
 
@@ -442,15 +489,24 @@ export default function AdminTheme() {
         <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
           <button
             onClick={() => setMode("desktop")}
+            title="Desktop"
             className={`p-1.5 rounded-md transition-colors ${mode === "desktop" ? "bg-white shadow-sm text-ink" : "text-body/50 hover:text-body"}`}
           >
             <Monitor className="h-4 w-4" />
           </button>
           <button
             onClick={() => setMode("mobile")}
+            title="Mobile"
             className={`p-1.5 rounded-md transition-colors ${mode === "mobile" ? "bg-white shadow-sm text-ink" : "text-body/50 hover:text-body"}`}
           >
             <Smartphone className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => setMode("full")}
+            title="Full width"
+            className={`p-1.5 rounded-md transition-colors ${mode === "full" ? "bg-white shadow-sm text-ink" : "text-body/50 hover:text-body"}`}
+          >
+            <Maximize2 className="h-4 w-4" />
           </button>
         </div>
         <button
@@ -594,8 +650,19 @@ export default function AdminTheme() {
         </div>
 
         {/* ── Iframe preview ── */}
-        <div className="flex-1 flex flex-col items-center justify-start bg-gray-100 overflow-auto p-6">
-          {mode === "desktop" ? (
+        <div className={`flex-1 flex flex-col items-center justify-start overflow-auto ${mode === "full" ? "bg-white" : "bg-gray-100 p-6"}`}>
+          {mode === "full" && (
+            <iframe
+              ref={iframeRef}
+              src="/"
+              onLoad={injectThemeStyles}
+              className="w-full border-0 block flex-1"
+              style={{ height: "calc(100vh - 48px)" }}
+              title="Site Preview Full"
+            />
+          )}
+
+          {mode === "desktop" && (
             <div className="w-full max-w-5xl bg-white rounded-xl overflow-hidden shadow-xl border border-line/50">
               <div className="h-9 bg-gray-50 border-b border-line flex items-center px-3 gap-1.5 shrink-0">
                 <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
@@ -603,7 +670,7 @@ export default function AdminTheme() {
                 <span className="h-2.5 w-2.5 rounded-full bg-green-400/80" />
                 <div className="flex-1 mx-4">
                   <div className="bg-white border border-line rounded-md text-[11px] text-body/40 px-3 py-0.5 text-center max-w-xs mx-auto">
-                    taratech.ma
+                    taratech.pro
                   </div>
                 </div>
               </div>
@@ -613,10 +680,12 @@ export default function AdminTheme() {
                 onLoad={injectThemeStyles}
                 className="w-full border-0 block"
                 style={{ height: "calc(100vh - 185px)" }}
-                title="Site Preview"
+                title="Site Preview Desktop"
               />
             </div>
-          ) : (
+          )}
+
+          {mode === "mobile" && (
             <div className="w-[390px] rounded-[44px] overflow-hidden shadow-2xl border-[8px] border-gray-800 bg-gray-800">
               <div className="h-7 bg-gray-800 flex items-center justify-center shrink-0">
                 <div className="w-24 h-4 rounded-full bg-gray-900" />
@@ -628,7 +697,7 @@ export default function AdminTheme() {
                   onLoad={injectThemeStyles}
                   className="w-full border-0 block"
                   style={{ height: "calc(100vh - 195px)", width: "390px" }}
-                  title="Site Preview"
+                  title="Site Preview Mobile"
                 />
               </div>
             </div>

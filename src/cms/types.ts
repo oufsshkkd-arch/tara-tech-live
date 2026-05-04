@@ -99,6 +99,9 @@ export type SectionTheme = {
   fontFamily?: string;    // "" = inherit
   paddingTop?: number;    // 0–120 px
   paddingBottom?: number; // 0–120 px
+  borderRadius?: number;  // 0–32 px, applied to cards inside section
+  borderWidth?: number;   // 0–8 px
+  borderColor?: string;   // hex or ""
 };
 
 export type ThemeSchema = {
