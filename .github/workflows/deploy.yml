@@ -41,6 +41,6 @@ jobs:
             set net:timeout 60
             set net:max-retries 5
             open -u $FTP_USER,$FTP_PASS $FTP_SERVER
-            mirror --reverse --delete --verbose --no-perms ./dist/ public_html/
+            mirror --reverse --delete --verbose --no-perms --transfer-all ./dist/ public_html/
             quit
           "
