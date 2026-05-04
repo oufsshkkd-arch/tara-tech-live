@@ -91,17 +91,18 @@ export type BrandSettings = {
 };
 
 export type SectionTheme = {
-  fontSize: number;       // 12–24 px
-  lineHeight: number;     // 1.2–2.0
-  bgColor: string;        // hex or ""
-  textColor: string;      // hex or ""
-  accentColor: string;    // hex or ""
-  fontFamily?: string;    // "" = inherit
-  paddingTop?: number;    // 0–120 px
-  paddingBottom?: number; // 0–120 px
-  borderRadius?: number;  // 0–32 px, applied to cards inside section
-  borderWidth?: number;   // 0–8 px
-  borderColor?: string;   // hex or ""
+  fontSize: number;         // 12–24 px
+  lineHeight: number;       // 1.2–2.0
+  letterSpacing?: number;   // -0.05 to 0.2 em
+  bgColor: string;          // hex or ""
+  textColor: string;        // hex or ""
+  accentColor: string;      // hex or ""
+  fontFamily?: string;      // "" = inherit
+  paddingTop?: number;      // 0–120 px
+  paddingBottom?: number;   // 0–120 px
+  borderRadius?: number;    // 0–32 px
+  borderWidth?: number;     // 0–8 px
+  borderColor?: string;     // hex or ""
 };
 
 export type ThemeSchema = {
@@ -138,12 +139,16 @@ export type HeroContent = {
   // Label shown on each product card in the hero ("اختيار" etc.)
   cardLabel?: string;
   // Hero typography overrides
-  titleFontSize?: number;    // px, default ~96
-  titleLineHeight?: number;  // default 1.05
-  titleColor?: string;       // hex, default white
-  subtitleFontSize?: number; // px, default 18
-  subtitleLineHeight?: number; // default 1.6
-  subtitleColor?: string;    // hex, default white/90
+  titleFontSize?: number;       // px, default ~96
+  titleLineHeight?: number;     // default 1.05
+  titleLetterSpacing?: number;  // em, default -0.03
+  titleColor?: string;          // hex, default white
+  subtitleFontSize?: number;    // px, default 18
+  subtitleLineHeight?: number;  // default 1.6
+  subtitleLetterSpacing?: number; // em, default 0
+  subtitleColor?: string;       // hex, default white/90
+  // Video poster (shown while video loads)
+  videoPoster?: string;
 };
 
 export type StoryContent = {

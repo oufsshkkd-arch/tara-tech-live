@@ -111,6 +111,7 @@ export default function Hero() {
           {hero.mediaType === "video" && hero.videoUrl ? (
             <video
               src={hero.videoUrl}
+              poster={hero.videoPoster || undefined}
               autoPlay
               muted
               loop
@@ -300,6 +301,7 @@ export default function Hero() {
                   style={{
                     ...(hero.titleFontSize ? { fontSize: `${hero.titleFontSize}px` } : {}),
                     ...(hero.titleLineHeight ? { lineHeight: hero.titleLineHeight } : {}),
+                    ...(hero.titleLetterSpacing != null ? { letterSpacing: `${hero.titleLetterSpacing}em` } : {}),
                     ...(hero.titleColor ? { color: hero.titleColor } : {}),
                   }}
                 >
@@ -312,6 +314,7 @@ export default function Hero() {
                   style={{
                     ...(hero.subtitleFontSize ? { fontSize: `${hero.subtitleFontSize}px` } : {}),
                     ...(hero.subtitleLineHeight ? { lineHeight: hero.subtitleLineHeight } : {}),
+                    ...(hero.subtitleLetterSpacing != null ? { letterSpacing: `${hero.subtitleLetterSpacing}em` } : {}),
                     ...(hero.subtitleColor ? { color: hero.subtitleColor } : {}),
                   }}
                 >

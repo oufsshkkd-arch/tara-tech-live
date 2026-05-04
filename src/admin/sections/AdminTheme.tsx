@@ -52,6 +52,7 @@ const DEFAULT_ORDER = ["hero", "categories", "featured", "trustStrip", "story", 
 const THEME_DEFAULTS: SectionTheme = {
   fontSize: 16,
   lineHeight: 1.6,
+  letterSpacing: 0,
   bgColor: "",
   textColor: "",
   accentColor: "",
@@ -278,6 +279,15 @@ function SortableSection({
             format={(v) => v.toFixed(1)}
             onChange={(v) => onThemeChange({ lineHeight: v })}
           />
+          <Slider
+            label="Letter Spacing"
+            value={t.letterSpacing ?? 0}
+            min={-0.05}
+            max={0.2}
+            step={0.01}
+            format={(v) => `${v.toFixed(2)}em`}
+            onChange={(v) => onThemeChange({ letterSpacing: v })}
+          />
 
           {/* Spacing sliders */}
           <div className="grid grid-cols-2 gap-3">
@@ -400,6 +410,7 @@ export default function AdminTheme() {
         if (theme.textColor) rules.push(`color: ${theme.textColor}`);
         if (theme.fontSize) rules.push(`font-size: ${theme.fontSize}px`);
         if (theme.lineHeight) rules.push(`line-height: ${theme.lineHeight}`);
+        if (theme.letterSpacing) rules.push(`letter-spacing: ${theme.letterSpacing}em`);
         if (theme.fontFamily) rules.push(`font-family: ${theme.fontFamily}`);
         if ((theme.paddingTop ?? 0) > 0) rules.push(`padding-top: ${theme.paddingTop}px`);
         if ((theme.paddingBottom ?? 0) > 0) rules.push(`padding-bottom: ${theme.paddingBottom}px`);

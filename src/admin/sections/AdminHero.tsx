@@ -177,6 +177,16 @@ export default function AdminHero() {
           onChange={(v) => patch({ titleLineHeight: v })}
         />
 
+        <Slider
+          label="Letter Spacing"
+          value={draft.titleLetterSpacing ?? -0.03}
+          min={-0.1}
+          max={0.2}
+          step={0.01}
+          format={(v) => `${v.toFixed(2)}em`}
+          onChange={(v) => patch({ titleLetterSpacing: v })}
+        />
+
         <p className="text-[11px] text-body/50 pt-1">Sous-titre</p>
         <Slider
           label="Font Size"
@@ -195,6 +205,15 @@ export default function AdminHero() {
           step={0.1}
           format={(v) => v.toFixed(1)}
           onChange={(v) => patch({ subtitleLineHeight: v })}
+        />
+        <Slider
+          label="Letter Spacing"
+          value={draft.subtitleLetterSpacing ?? 0}
+          min={-0.05}
+          max={0.2}
+          step={0.01}
+          format={(v) => `${v.toFixed(2)}em`}
+          onChange={(v) => patch({ subtitleLetterSpacing: v })}
         />
 
         <div className="grid grid-cols-2 gap-4 pt-1">
@@ -244,17 +263,30 @@ export default function AdminHero() {
         </Field>
 
         {draft.mediaType === "video" ? (
-          <Field
-            label="URL vidéo (MP4)"
-            hint="Lien direct vers un fichier .mp4 — YouTube/Vimeo ne fonctionnent pas en arrière-plan."
-          >
-            <input
-              className="input"
-              placeholder="https://example.com/video.mp4"
-              value={draft.videoUrl}
-              onChange={(e) => patch({ videoUrl: e.target.value })}
-            />
-          </Field>
+          <>
+            <Field
+              label="URL vidéo (MP4)"
+              hint="Lien direct vers un fichier .mp4 — YouTube/Vimeo ne fonctionnent pas en arrière-plan."
+            >
+              <input
+                className="input"
+                placeholder="https://example.com/video.mp4"
+                value={draft.videoUrl}
+                onChange={(e) => patch({ videoUrl: e.target.value })}
+              />
+            </Field>
+            <Field
+              label="Poster image (aperçu avant chargement)"
+              hint="URL image affichée pendant le chargement de la vidéo — évite l'écran noir."
+            >
+              <input
+                className="input"
+                placeholder="https://example.com/poster.jpg"
+                value={draft.videoPoster ?? ""}
+                onChange={(e) => patch({ videoPoster: e.target.value })}
+              />
+            </Field>
+          </>
         ) : (
           <Field
             label="URL image"
