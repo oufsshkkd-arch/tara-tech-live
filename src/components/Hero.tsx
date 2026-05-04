@@ -12,8 +12,8 @@ const ANIM_VARIANTS: Record<string, AnimVariant> = {
 };
 import { useCms } from "../cms/store";
 
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1488161628813-04466f872be2?auto=format&fit=crop&w=2400&q=80";
+const HERO_IMAGE = "/images/jump-starter/product-hero.jpg";
+const FALLBACK_IMAGE = "/images/jump-starter/family-road.jpg";
 
 const CARD_W = 320;
 const CARD_H = 460;
@@ -119,17 +119,22 @@ export default function Hero() {
           {hero.mediaType === "video" && hero.videoUrl ? (
             <video
               src={hero.videoUrl}
-              poster={hero.videoPoster || undefined}
+              poster={hero.videoPoster || HERO_IMAGE}
               autoPlay
               muted
               loop
               playsInline
+              preload="metadata"
               className="absolute inset-0 h-full w-full object-cover"
             />
           ) : (
             <img
               src={hero.videoUrl || HERO_IMAGE}
               alt=""
+              fetchPriority="high"
+              loading="eager"
+              decoding="async"
+              onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMAGE; }}
               className="absolute inset-0 h-full w-full object-cover"
             />
           )}
@@ -195,6 +200,8 @@ export default function Hero() {
               <img
                 src={leftProduct.images[0]}
                 alt={leftProduct.title}
+                loading="lazy"
+                onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMAGE; }}
                 className="absolute inset-0 h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/45" />
@@ -251,6 +258,8 @@ export default function Hero() {
               <img
                 src={rightProduct.images[0]}
                 alt={rightProduct.title}
+                loading="lazy"
+                onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMAGE; }}
                 className="absolute inset-0 h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/55" />
