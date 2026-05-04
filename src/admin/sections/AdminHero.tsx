@@ -4,6 +4,7 @@ import { Field, Toggle } from "../ui";
 import type { HeroContent } from "../../cms/types";
 import SplitEditor from "../SplitEditor";
 import HeroPreview from "../previews/HeroPreview";
+import ImageUpload from "../ImageUpload";
 
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -265,38 +266,38 @@ export default function AdminHero() {
         {draft.mediaType === "video" ? (
           <>
             <Field
-              label="URL vidéo (MP4)"
-              hint="Lien direct vers un fichier .mp4 — YouTube/Vimeo ne fonctionnent pas en arrière-plan."
+              label="Vidéo (MP4 / WebM)"
+              hint="Upload un fichier ou colle un lien direct — YouTube/Vimeo ne fonctionnent pas en arrière-plan."
             >
-              <input
-                className="input"
-                placeholder="https://example.com/video.mp4"
+              <ImageUpload
                 value={draft.videoUrl}
-                onChange={(e) => patch({ videoUrl: e.target.value })}
+                onChange={(v) => patch({ videoUrl: v })}
+                placeholder="https://example.com/video.mp4"
+                aspectRatio="aspect-video"
               />
             </Field>
             <Field
-              label="Poster image (aperçu avant chargement)"
-              hint="URL image affichée pendant le chargement de la vidéo — évite l'écran noir."
+              label="Poster image"
+              hint="Image affichée pendant le chargement de la vidéo — évite l'écran noir."
             >
-              <input
-                className="input"
-                placeholder="https://example.com/poster.jpg"
+              <ImageUpload
                 value={draft.videoPoster ?? ""}
-                onChange={(e) => patch({ videoPoster: e.target.value })}
+                onChange={(v) => patch({ videoPoster: v })}
+                placeholder="https://example.com/poster.jpg"
+                aspectRatio="aspect-video"
               />
             </Field>
           </>
         ) : (
           <Field
-            label="URL image"
-            hint="Laisser vide pour utiliser le mesh par défaut."
+            label="Image d'arrière-plan"
+            hint="Upload ou colle un lien. Laisser vide = image par défaut."
           >
-            <input
-              className="input"
-              placeholder="https://..."
+            <ImageUpload
               value={draft.videoUrl}
-              onChange={(e) => patch({ videoUrl: e.target.value })}
+              onChange={(v) => patch({ videoUrl: v })}
+              placeholder="https://..."
+              aspectRatio="aspect-video"
             />
           </Field>
         )}

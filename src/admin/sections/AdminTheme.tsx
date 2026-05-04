@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, type ReactNode } from "react";
 import {
   DndContext,
   closestCenter,
@@ -18,6 +18,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { useCms } from "../../cms/store";
 import type { SectionTheme } from "../../cms/types";
+import ImageUpload from "../ImageUpload";
 import {
   GripVertical,
   Monitor,
@@ -177,6 +178,126 @@ function Slider({
   );
 }
 
+/* ── Hero Module (inline in Theme Editor) ───────────────────────── */
+
+function HeroModule() {
+  const { hero, setHero } = useCms();
+  const patch = (p: Partial<typeof hero>) => setHero(p);
+
+  return (
+    <div className="space-y-3 pt-2">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-body/40">Hero Media</p>
+
+      {/* Media type toggle */}
+      <div className="flex rounded-lg overflow-hidden border border-line">
+        <button
+          type="button"
+          className={`flex-1 py-1.5 text-xs font-medium transition-colors ${(hero.mediaType ?? "image") === "image" ? "bg-ink text-white" : "text-body hover:bg-gray-50"}`}
+          onClick={() => patch({ mediaType: "image" })}
+        >
+          🖼 Image
+        </button>
+        <button
+          type="button"
+          className={`flex-1 py-1.5 text-xs font-medium transition-colors ${hero.mediaType === "video" ? "bg-ink text-white" : "text-body hover:bg-gray-50"}`}
+          onClick={() => patch({ mediaType: "video" })}
+        >
+          🎬 Vidéo
+        </button>
+      </div>
+
+      <ImageUpload
+        value={hero.videoUrl}
+        onChange={(v) => patch({ videoUrl: v })}
+        placeholder={hero.mediaType === "video" ? "https://example.com/video.mp4" : "https://..."}
+        aspectRatio="aspect-video"
+      />
+
+      {hero.mediaType === "video" && (
+        <ImageUpload
+          value={hero.videoPoster ?? ""}
+          onChange={(v) => patch({ videoPoster: v })}
+          placeholder="Poster image URL…"
+          aspectRatio="aspect-video"
+        />
+      )}
+
+      {/* Overlay */}
+      <p className="text-[10px] font-bold uppercase tracking-widest text-body/40 pt-1">Overlay</p>
+      <div>
+        <div className="flex justify-between text-[11px] text-body mb-1">
+          <span>Voile sombre</span>
+          <span className="font-mono text-ink">{Math.round((hero.overlayDarkness ?? 0.15) * 100)}%</span>
+        </div>
+        <input
+          type="range" min={0} max={1} step={0.05}
+          value={hero.overlayDarkness ?? 0.15}
+          onChange={(e) => patch({ overlayDarkness: Number(e.target.value) })}
+          className="w-full accent-ink h-1"
+        />
+      </div>
+
+      {/* Typography */}
+      <p className="text-[10px] font-bold uppercase tracking-widest text-body/40 pt-1">Titre</p>
+      {[
+        { label: "Font Size", key: "titleFontSize" as const, min: 32, max: 140, step: 2, def: 96, fmt: (v: number) => `${v}px` },
+        { label: "Line Height", key: "titleLineHeight" as const, min: 0.9, max: 1.8, step: 0.05, def: 1.05, fmt: (v: number) => v.toFixed(2) },
+        { label: "Letter Spacing", key: "titleLetterSpacing" as const, min: -0.1, max: 0.2, step: 0.01, def: -0.03, fmt: (v: number) => `${v.toFixed(2)}em` },
+      ].map(({ label, key, min, max, step, def, fmt }) => (
+        <div key={key}>
+          <div className="flex justify-between text-[11px] text-body mb-1">
+            <span>{label}</span>
+            <span className="font-mono text-ink">{fmt(hero[key] ?? def)}</span>
+          </div>
+          <input type="range" min={min} max={max} step={step}
+            value={hero[key] ?? def}
+            onChange={(e) => patch({ [key]: Number(e.target.value) })}
+            className="w-full accent-ink h-1"
+          />
+        </div>
+      ))}
+
+      <p className="text-[10px] font-bold uppercase tracking-widest text-body/40 pt-1">Sous-titre</p>
+      {[
+        { label: "Font Size", key: "subtitleFontSize" as const, min: 12, max: 32, step: 1, def: 18, fmt: (v: number) => `${v}px` },
+        { label: "Line Height", key: "subtitleLineHeight" as const, min: 1.2, max: 2.2, step: 0.1, def: 1.6, fmt: (v: number) => v.toFixed(1) },
+        { label: "Letter Spacing", key: "subtitleLetterSpacing" as const, min: -0.05, max: 0.2, step: 0.01, def: 0, fmt: (v: number) => `${v.toFixed(2)}em` },
+      ].map(({ label, key, min, max, step, def, fmt }) => (
+        <div key={key}>
+          <div className="flex justify-between text-[11px] text-body mb-1">
+            <span>{label}</span>
+            <span className="font-mono text-ink">{fmt(hero[key] ?? def)}</span>
+          </div>
+          <input type="range" min={min} max={max} step={step}
+            value={hero[key] ?? def}
+            onChange={(e) => patch({ [key]: Number(e.target.value) })}
+            className="w-full accent-ink h-1"
+          />
+        </div>
+      ))}
+
+      <div className="grid grid-cols-2 gap-3 pt-1">
+        {[
+          { label: "Couleur titre", key: "titleColor" as const },
+          { label: "Couleur sous-titre", key: "subtitleColor" as const },
+        ].map(({ label, key }) => (
+          <div key={key} className="flex flex-col items-center gap-1">
+            <span className="text-[10px] text-body/60">{label}</span>
+            <input type="color"
+              value={hero[key] || "#ffffff"}
+              onChange={(e) => patch({ [key]: e.target.value })}
+              className="h-8 w-8 rounded-lg border border-line cursor-pointer p-0.5"
+            />
+            {hero[key] && (
+              <button onClick={() => patch({ [key]: "" })} className="text-[9px] text-body/40 hover:text-red">reset</button>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ── Sortable section row ───────────────────────────────────────── */
 
 function SortableSection({
@@ -187,6 +308,7 @@ function SortableSection({
   onToggleExpand,
   onToggleVisibility,
   onThemeChange,
+  moduleContent,
 }: {
   id: string;
   isExpanded: boolean;
@@ -195,6 +317,7 @@ function SortableSection({
   onToggleExpand: () => void;
   onToggleVisibility: () => void;
   onThemeChange: (partial: Partial<SectionTheme>) => void;
+  moduleContent?: ReactNode;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id });
@@ -359,6 +482,13 @@ function SortableSection({
               onChange={(v) => onThemeChange({ borderColor: v })}
             />
           </div>
+
+          {/* Section-specific module controls */}
+          {moduleContent && (
+            <div className="border-t border-line pt-3">
+              {moduleContent}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -638,6 +768,7 @@ export default function AdminTheme() {
                           [id]: { ...(prev[id] ?? {}), ...partial },
                         }))
                       }
+                      moduleContent={id === "hero" ? <HeroModule /> : undefined}
                     />
                   ))}
                 </SortableContext>
