@@ -523,7 +523,7 @@ function AnnouncementBlock() {
 /* ── Main component ─────────────────────────────────────────────── */
 
 export default function AdminTheme() {
-  const { themeSchema, setThemeSchema, visibility, setVisibility, brand, setBrand, hero } = useCms();
+  const { themeSchema, setThemeSchema, visibility, setVisibility, brand, setBrand, hero, syncToDb } = useCms();
 
   const [mode, setMode] = useState<ViewMode>("desktop");
   const [sectionOrder, setSectionOrder] = useState<string[]>(
@@ -641,14 +641,15 @@ export default function AdminTheme() {
   }
 
   /* ── Save ── */
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     setThemeSchema({ sectionOrder, sections: sectionThemes });
+    await syncToDb();
     setSaved(true);
     setTimeout(() => {
       reloadIframe();
       setSaved(false);
     }, 900);
-  }, [sectionOrder, sectionThemes, setThemeSchema, reloadIframe]);
+  }, [sectionOrder, sectionThemes, setThemeSchema, syncToDb, reloadIframe]);
 
   /* ── Render ─────────────────────────────────────────────────── */
   return (

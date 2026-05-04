@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { loadCmsState, saveCmsState } from "../lib/db";
 import type {
   CmsState,
   TrackingStats,
@@ -66,6 +67,9 @@ type Actions = {
   setThemeSchema: (t: ThemeSchema) => void;
   updateSectionTheme: (sectionId: string, theme: Partial<SectionTheme>) => void;
   reorderSections: (sectionOrder: string[]) => void;
+
+  syncToDb: () => Promise<void>;
+  loadFromDb: () => Promise<void>;
 };
 
 export type CmsStore = CmsState & Actions;
@@ -220,6 +224,19 @@ export const useCms = create<CmsStore>()(
         })),
       reorderSections: (sectionOrder) =>
         set((s) => ({ themeSchema: { ...s.themeSchema, sectionOrder } })),
+
+      syncToDb: async () => {
+        const state = useCms.getState();
+        const { syncToDb: _s, loadFromDb: _l, ...data } = state;
+        await saveCmsState(data);
+      },
+
+      loadFromDb: async () => {
+        const remote = await loadCmsState();
+        if (remote && typeof remote === "object") {
+          set((local) => ({ ...local, ...(remote as object) }));
+        }
+      },
     }),
     {
       name: "taratech-cms-v2",
