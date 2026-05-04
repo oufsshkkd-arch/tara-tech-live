@@ -41,10 +41,11 @@ jobs:
             set net:timeout 60
             set net:max-retries 3
             open -u $FTP_USER,$FTP_PASS $FTP_SERVER
-            glob --no-symlinks -a rm -rf assets/ images/
-            glob --no-symlinks -a rm -f index.html .htaccess favicon.svg story-editorial.png
+            rm -rf assets
+            rm -rf images
+            glob rm index.html .htaccess favicon.svg story-editorial.png
             quit
-          "
+          " || true
 
       - name: Upload fresh build
         env:
