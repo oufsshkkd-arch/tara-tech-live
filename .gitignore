@@ -5,3 +5,5 @@ dist
 .vite
 .npm-cache
 .claude
+.env
+.env.*

@@ -85,34 +85,79 @@ export default function AdminHero() {
       {/* Background */}
       <div className="space-y-4">
         <SectionLabel>Arrière-plan</SectionLabel>
-        <Field
-          label="URL image"
-          hint="Laisser vide pour utiliser le mesh par défaut."
-        >
-          <input
-            className="input"
-            placeholder="https://..."
-            value={draft.videoUrl}
-            onChange={(e) => patch({ videoUrl: e.target.value })}
-          />
+
+        {/* Media type toggle */}
+        <Field label="Type de média">
+          <div className="flex rounded-lg overflow-hidden border border-line">
+            <button
+              type="button"
+              className={`flex-1 py-2 text-xs font-medium transition-colors ${
+                (draft.mediaType ?? "image") === "image"
+                  ? "bg-ink text-white"
+                  : "text-body hover:bg-line"
+              }`}
+              onClick={() => patch({ mediaType: "image" })}
+            >
+              🖼 Image
+            </button>
+            <button
+              type="button"
+              className={`flex-1 py-2 text-xs font-medium transition-colors ${
+                draft.mediaType === "video"
+                  ? "bg-ink text-white"
+                  : "text-body hover:bg-line"
+              }`}
+              onClick={() => patch({ mediaType: "video" })}
+            >
+              🎬 Vidéo
+            </button>
+          </div>
         </Field>
+
+        {draft.mediaType === "video" ? (
+          <Field
+            label="URL vidéo (MP4)"
+            hint="Lien direct vers un fichier .mp4 — YouTube/Vimeo ne fonctionnent pas en arrière-plan."
+          >
+            <input
+              className="input"
+              placeholder="https://example.com/video.mp4"
+              value={draft.videoUrl}
+              onChange={(e) => patch({ videoUrl: e.target.value })}
+            />
+          </Field>
+        ) : (
+          <Field
+            label="URL image"
+            hint="Laisser vide pour utiliser le mesh par défaut."
+          >
+            <input
+              className="input"
+              placeholder="https://..."
+              value={draft.videoUrl}
+              onChange={(e) => patch({ videoUrl: e.target.value })}
+            />
+          </Field>
+        )}
+
         <Field
-          label={`Intensité du voile — ${(draft.overlayDarkness * 100).toFixed(0)}%`}
+          label={`Voile sombre — ${Math.round((draft.overlayDarkness ?? 0.15) * 100)}%`}
+          hint="Assombrit la photo/vidéo pour rendre le texte blanc plus lisible."
         >
           <input
             type="range"
             min={0}
             max={1}
             step={0.05}
-            value={draft.overlayDarkness}
+            value={draft.overlayDarkness ?? 0.15}
             onChange={(e) =>
               patch({ overlayDarkness: Number(e.target.value) })
             }
             className="w-full accent-ink"
           />
           <div className="flex justify-between text-[10px] text-body mt-0.5">
-            <span>0%</span>
-            <span>100%</span>
+            <span>Transparent</span>
+            <span>Très sombre</span>
           </div>
         </Field>
       </div>

@@ -123,6 +123,7 @@ export type HeroContent = {
   overlayDarkness: number;
   showFloatingCard: boolean;
   floatingCardLines: string[];
+  mediaType?: "image" | "video";
   videoUrl: string;
   // End-state section (appears after scroll animation completes)
   endTitle?: string;

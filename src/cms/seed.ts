@@ -66,6 +66,7 @@ export const seed: CmsState = {
       "منتجات مختارة",
       "خدمة محترفة",
     ],
+    mediaType: "image" as const,
     videoUrl: "",
     endTitle: "اختيار محرر",
     endSub: "منتجات مختارة بعناية، أنيقة ومفيدة، باش تسهل عليك الحياة اليومية.",

@@ -73,10 +73,12 @@ export default function Hero() {
   const midStatOpacity = useTransform(scrollYProgress, [0.55, 0.8], [0, 1]);
   const midBadgesOpacity = useTransform(scrollYProgress, [0.6, 0.85], [0, 1]);
 
+  const overlayMax = hero.overlayDarkness ?? 0.75;
+  const overlayMin = Math.max(0, overlayMax - 0.5);
   const overlayOpacity = useTransform(
     scrollYProgress,
     [0, 0.55],
-    [0.75, 0.25]
+    [overlayMax, overlayMin]
   );
   const overlayBg = useMotionTemplate`rgba(0,0,0,${overlayOpacity})`;
 
@@ -106,11 +108,22 @@ export default function Hero() {
             borderRadius: midRadius,
           }}
         >
-          <img
-            src={hero.videoUrl || HERO_IMAGE}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-          />
+          {hero.mediaType === "video" && hero.videoUrl ? (
+            <video
+              src={hero.videoUrl}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          ) : (
+            <img
+              src={hero.videoUrl || HERO_IMAGE}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          )}
           <motion.div
             className="absolute inset-0"
             style={{ background: overlayBg }}
