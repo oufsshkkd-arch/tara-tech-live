@@ -137,6 +137,13 @@ export type HeroContent = {
   scarcityLine?: string;
   // Label shown on each product card in the hero ("اختيار" etc.)
   cardLabel?: string;
+  // Hero typography overrides
+  titleFontSize?: number;    // px, default ~96
+  titleLineHeight?: number;  // default 1.05
+  titleColor?: string;       // hex, default white
+  subtitleFontSize?: number; // px, default 18
+  subtitleLineHeight?: number; // default 1.6
+  subtitleColor?: string;    // hex, default white/90
 };
 
 export type StoryContent = {

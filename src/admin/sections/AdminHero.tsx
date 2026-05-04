@@ -13,6 +13,77 @@ function SectionLabel({ children }: { children: string }) {
   );
 }
 
+function Slider({
+  label,
+  value,
+  min,
+  max,
+  step,
+  format,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  format?: (v: number) => string;
+  onChange: (v: number) => void;
+}) {
+  const display = format ? format(value) : String(value);
+  return (
+    <div>
+      <div className="flex justify-between text-[11px] text-body mb-1.5">
+        <span>{label}</span>
+        <span className="font-mono text-ink">{display}</span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full accent-ink h-1"
+      />
+    </div>
+  );
+}
+
+function ColorPill({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <span className="text-[10px] text-body/60 leading-none">{label}</span>
+      <div className="relative h-8 w-8">
+        <input
+          type="color"
+          value={value || "#ffffff"}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-8 w-8 rounded-lg border border-line cursor-pointer p-0.5 bg-white"
+        />
+        {!value && (
+          <div className="absolute inset-0 rounded-lg bg-white border border-dashed border-line/60 pointer-events-none flex items-center justify-center">
+            <span className="text-[8px] text-body/30">auto</span>
+          </div>
+        )}
+      </div>
+      {value && (
+        <button onClick={() => onChange("")} className="text-[9px] text-body/40 hover:text-red transition-colors leading-none">
+          reset
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function AdminHero() {
   const { hero, setHero } = useCms();
   const [draft, setDraft] = useState<HeroContent>(() => ({ ...hero }));
@@ -80,6 +151,64 @@ export default function AdminHero() {
             onChange={(e) => patch({ urgencyBadge: e.target.value })}
           />
         </Field>
+      </div>
+
+      {/* Typography */}
+      <div className="space-y-4">
+        <SectionLabel>Typography</SectionLabel>
+
+        <p className="text-[11px] text-body/50">Titre principal</p>
+        <Slider
+          label="Font Size"
+          value={draft.titleFontSize ?? 96}
+          min={32}
+          max={140}
+          step={2}
+          format={(v) => `${v}px`}
+          onChange={(v) => patch({ titleFontSize: v })}
+        />
+        <Slider
+          label="Line Height"
+          value={draft.titleLineHeight ?? 1.05}
+          min={0.9}
+          max={1.8}
+          step={0.05}
+          format={(v) => v.toFixed(2)}
+          onChange={(v) => patch({ titleLineHeight: v })}
+        />
+
+        <p className="text-[11px] text-body/50 pt-1">Sous-titre</p>
+        <Slider
+          label="Font Size"
+          value={draft.subtitleFontSize ?? 18}
+          min={12}
+          max={32}
+          step={1}
+          format={(v) => `${v}px`}
+          onChange={(v) => patch({ subtitleFontSize: v })}
+        />
+        <Slider
+          label="Line Height"
+          value={draft.subtitleLineHeight ?? 1.6}
+          min={1.2}
+          max={2.2}
+          step={0.1}
+          format={(v) => v.toFixed(1)}
+          onChange={(v) => patch({ subtitleLineHeight: v })}
+        />
+
+        <div className="grid grid-cols-2 gap-4 pt-1">
+          <ColorPill
+            label="Couleur titre"
+            value={draft.titleColor ?? ""}
+            onChange={(v) => patch({ titleColor: v })}
+          />
+          <ColorPill
+            label="Couleur sous-titre"
+            value={draft.subtitleColor ?? ""}
+            onChange={(v) => patch({ subtitleColor: v })}
+          />
+        </div>
       </div>
 
       {/* Background */}

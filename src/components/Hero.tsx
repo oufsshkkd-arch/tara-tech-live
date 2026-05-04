@@ -297,6 +297,11 @@ export default function Hero() {
                 <h1
                   className="font-sans font-extrabold text-[44px] sm:text-[72px] lg:text-[96px] leading-[1.05] tracking-[-0.03em]"
                   dir="auto"
+                  style={{
+                    ...(hero.titleFontSize ? { fontSize: `${hero.titleFontSize}px` } : {}),
+                    ...(hero.titleLineHeight ? { lineHeight: hero.titleLineHeight } : {}),
+                    ...(hero.titleColor ? { color: hero.titleColor } : {}),
+                  }}
                 >
                   {hero.headline}
                 </h1>
@@ -304,6 +309,11 @@ export default function Hero() {
                 <p
                   className="mt-6 max-w-md text-base sm:text-lg text-white/90 leading-relaxed"
                   dir="auto"
+                  style={{
+                    ...(hero.subtitleFontSize ? { fontSize: `${hero.subtitleFontSize}px` } : {}),
+                    ...(hero.subtitleLineHeight ? { lineHeight: hero.subtitleLineHeight } : {}),
+                    ...(hero.subtitleColor ? { color: hero.subtitleColor } : {}),
+                  }}
                 >
                   {hero.subheadline}
                 </p>
