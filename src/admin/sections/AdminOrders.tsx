@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { ShoppingBag, TrendingUp, Users, DollarSign, Trash2, Download } from "lucide-react";
+import { loadOrders, saveOrder } from "../../lib/db";
+import { supabase } from "../../lib/supabase";
 import type { StoredOrder } from "../../cms/types";
 
 const STATUSES: StoredOrder["status"][] = ["جديد", "مؤكد", "مشحون", "مسلم", "ملغي"];
@@ -11,42 +13,34 @@ const STATUS_COLOR: Record<string, string> = {
   "ملغي": "bg-red-100 text-red-600",
 };
 
-function loadOrders(): StoredOrder[] {
-  try {
-    return JSON.parse(localStorage.getItem("tara_orders_log") || "[]");
-  } catch { return []; }
-}
-
-function saveOrders(orders: StoredOrder[]) {
-  localStorage.setItem("tara_orders_log", JSON.stringify(orders));
-}
-
 export default function AdminOrders() {
   const [orders, setOrders] = useState<StoredOrder[]>([]);
 
-  useEffect(() => { setOrders(loadOrders()); }, []);
+  useEffect(() => {
+    loadOrders().then((rows) => setOrders(rows as StoredOrder[]));
+  }, []);
 
   const revenue = orders.filter(o => o.status !== "ملغي").reduce((s, o) => s + o.price, 0);
   const confirmed = orders.filter(o => o.status === "مؤكد" || o.status === "مشحون" || o.status === "مسلم").length;
   const cities = new Set(orders.map(o => o.city)).size;
 
-  function updateStatus(id: string, status: StoredOrder["status"]) {
+  async function updateStatus(id: string, status: StoredOrder["status"]) {
     const updated = orders.map(o => o.id === id ? { ...o, status } : o);
     setOrders(updated);
-    saveOrders(updated);
+    const order = updated.find(o => o.id === id);
+    if (order) await saveOrder(order as Record<string, unknown>);
   }
 
-  function deleteOrder(id: string) {
+  async function deleteOrder(id: string) {
     if (!confirm("حذف هذا الطلب؟")) return;
-    const updated = orders.filter(o => o.id !== id);
-    setOrders(updated);
-    saveOrders(updated);
+    setOrders(prev => prev.filter(o => o.id !== id));
+    await supabase.from("orders").delete().eq("id", id);
   }
 
-  function clearAll() {
+  async function clearAll() {
     if (!confirm("حذف جميع الطلبات؟")) return;
     setOrders([]);
-    saveOrders([]);
+    await supabase.from("orders").delete().neq("id", "");
   }
 
   function exportCsv() {

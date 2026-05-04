@@ -5,6 +5,7 @@ import {
   ArrowUpRight, Circle, Boxes, FileText,
 } from "lucide-react";
 import { useCms } from "../cms/store";
+import { loadOrders } from "../lib/db";
 import type { StoredOrder } from "../cms/types";
 
 const STATUS_COLOR: Record<string, string> = {
@@ -15,16 +16,13 @@ const STATUS_COLOR: Record<string, string> = {
   "ملغي": "text-red-500",
 };
 
-function loadOrders(): StoredOrder[] {
-  try { return JSON.parse(localStorage.getItem("tara_orders_log") || "[]"); }
-  catch { return []; }
-}
-
 export default function AdminDashboard() {
   const { categories, products, brand } = useCms();
   const [orders, setOrders] = useState<StoredOrder[]>([]);
 
-  useEffect(() => { setOrders(loadOrders()); }, []);
+  useEffect(() => {
+    loadOrders().then((rows) => setOrders(rows as StoredOrder[]));
+  }, []);
 
   const revenue = orders.filter(o => o.status !== "ملغي").reduce((s, o) => s + o.price, 0);
   const todayStr = new Date().toLocaleDateString("fr-MA");
