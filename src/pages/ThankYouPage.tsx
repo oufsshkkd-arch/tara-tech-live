@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import { CheckCircle, MessageCircle, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCms } from "../cms/store";
+import { useAnalytics } from "../hooks/useAnalytics";
 
-const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxP8EIQ0M0X939QEn7D8kywI_IV0-0upjYyM_5DoMQ4FKCG4f-eWf_8DOd-xffr0T5n/exec";
+const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbytXQjDr40xi-zH-qkksarUW75xptpK_bp8-KBgbnl4U5IYV3gV64kAEU90s1AEQICX0g/exec";
 
 interface Order {
   full_name: string;
@@ -23,6 +24,7 @@ interface Order {
 
 export default function ThankYouPage() {
   const { brand } = useCms();
+  const { trackOrderSuccess } = useAnalytics();
   const [order, setOrder] = useState<Order | null>(null);
 
   useEffect(() => {
@@ -51,8 +53,27 @@ export default function ThankYouPage() {
           date:         data.date         || "",
           time:         data.time         || "",
         });
-        fetch(`${WEBHOOK_URL}?${params.toString()}`, { mode: "no-cors" })
-          .catch(() => {});
+        new Image().src = `${WEBHOOK_URL}?${params.toString()}`;
+        trackOrderSuccess(data.product_name || "unknown");
+
+        // Save to local orders log for admin dashboard
+        try {
+          const log = JSON.parse(localStorage.getItem("tara_orders_log") || "[]");
+          log.unshift({
+            id: Date.now().toString(),
+            date: data.date || "",
+            time: data.time || "",
+            full_name: data.full_name || "",
+            phone: data.phone || "",
+            city: data.city || "",
+            product_name: data.product_name || "",
+            price: parseInt(data.price || "699"),
+            quantity: parseInt(data.quantity || "1"),
+            status: "جديد",
+            source: data.source || "direct",
+          });
+          localStorage.setItem("tara_orders_log", JSON.stringify(log.slice(0, 200)));
+        } catch { /* ignore */ }
       }
     } catch { /* ignore */ }
   }, []);

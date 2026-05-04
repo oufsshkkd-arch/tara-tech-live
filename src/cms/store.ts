@@ -2,6 +2,9 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type {
   CmsState,
+  TrackingStats,
+  ThemeSchema,
+  SectionTheme,
   Category,
   Product,
   FaqItem,
@@ -19,11 +22,14 @@ import type {
   SectionVisibility,
   Nav,
   AdminUser,
+  LandingPage,
 } from "./types";
 import { seed } from "./seed";
 
 type Actions = {
   reset: () => void;
+  incrementStat: (key: keyof TrackingStats) => void;
+  resetStats: () => void;
 
   setBrand: (b: Partial<BrandSettings>) => void;
   setNav: (n: Partial<Nav>) => void;
@@ -55,6 +61,11 @@ type Actions = {
   reorderAnnouncementMessages: (orderedIds: string[]) => void;
 
   setFooter: (f: Partial<FooterContent>) => void;
+  upsertLandingPage: (lp: LandingPage) => void;
+
+  setThemeSchema: (t: ThemeSchema) => void;
+  updateSectionTheme: (sectionId: string, theme: Partial<SectionTheme>) => void;
+  reorderSections: (sectionOrder: string[]) => void;
 };
 
 export type CmsStore = CmsState & Actions;
@@ -64,7 +75,13 @@ export const useCms = create<CmsStore>()(
     (set, _get) => ({
       ...seed,
 
-      reset: () => set({ ...seed }),
+      reset: () => set((s) => ({ ...seed, trackingStats: s.trackingStats })),
+      incrementStat: (key) =>
+        set((s) => ({
+          trackingStats: { ...s.trackingStats, [key]: (s.trackingStats[key] ?? 0) + 1 },
+        })),
+      resetStats: () =>
+        set({ trackingStats: { whatsappClicks: 0, formStarts: 0, formSubmissions: 0, pageViews: 0 } }),
 
       setBrand: (b) =>
         set((s) => ({ brand: { ...s.brand, ...b } })),
@@ -180,6 +197,29 @@ export const useCms = create<CmsStore>()(
 
       setFooter: (f) =>
         set((st) => ({ footer: { ...st.footer, ...f } })),
+
+      upsertLandingPage: (lp) =>
+        set((s) => {
+          const idx = s.landingPages.findIndex((x) => x.slug === lp.slug);
+          const next = [...s.landingPages];
+          if (idx === -1) next.push(lp);
+          else next[idx] = lp;
+          return { landingPages: next };
+        }),
+
+      setThemeSchema: (t) => set({ themeSchema: t }),
+      updateSectionTheme: (sectionId, theme) =>
+        set((s) => ({
+          themeSchema: {
+            ...s.themeSchema,
+            sections: {
+              ...s.themeSchema.sections,
+              [sectionId]: { ...(s.themeSchema.sections[sectionId] ?? {}), ...theme },
+            },
+          },
+        })),
+      reorderSections: (sectionOrder) =>
+        set((s) => ({ themeSchema: { ...s.themeSchema, sectionOrder } })),
     }),
     {
       name: "taratech-cms-v2",

@@ -1,8 +1,23 @@
 import { Link } from "react-router-dom";
-import { ArrowUpRight } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import type { Product } from "../cms/types";
+import { useCart } from "../store/cart";
 
 export default function ProductCard({ product }: { product: Product }) {
+  const { addItem } = useCart();
+
+  function handleAddToCart(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem({
+      id: product.id,
+      slug: product.slug,
+      title: product.title,
+      price: product.price,
+      image: product.images[0],
+    });
+  }
+
   return (
     <Link
       to={`/products/${product.slug}`}
@@ -25,9 +40,6 @@ export default function ProductCard({ product }: { product: Product }) {
             كمية محدودة
           </span>
         )}
-        <span className="absolute bottom-3 right-3 h-9 w-9 grid place-items-center rounded-full bg-white text-ink opacity-0 group-hover:opacity-100 transition-opacity">
-          <ArrowUpRight className="h-4 w-4" />
-        </span>
       </div>
       <div className="p-5 flex-1 flex flex-col">
         <h3 className="text-base font-medium text-ink leading-snug" dir="auto">
@@ -36,7 +48,7 @@ export default function ProductCard({ product }: { product: Product }) {
         <p className="mt-1.5 text-sm text-body line-clamp-2" dir="auto">
           {product.shortDescription}
         </p>
-        <div className="mt-4 flex items-end justify-between">
+        <div className="mt-4 flex items-center justify-between gap-2">
           <div className="flex items-baseline gap-2">
             <span className="text-lg font-semibold text-ink">
               {product.price} <span className="text-xs font-normal">درهم</span>
@@ -47,6 +59,14 @@ export default function ProductCard({ product }: { product: Product }) {
               </span>
             )}
           </div>
+          <button
+            onClick={handleAddToCart}
+            className="flex items-center gap-1.5 rounded-full bg-ink text-white text-xs font-semibold px-3 py-2 hover:bg-black/80 transition-colors shrink-0"
+            dir="rtl"
+          >
+            <ShoppingCart className="h-3.5 w-3.5" />
+            أضف للسلة
+          </button>
         </div>
       </div>
     </Link>

@@ -5,7 +5,7 @@
 
 function doGet(e) {
   try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = SpreadsheetApp.openById("16zNfzPRVsXdHkuTmvq7ThVINLryAxn10c9JS4OWvDz8");
     let sheet = ss.getSheetByName("Commandes") || ss.getActiveSheet();
 
     // Add headers on first row if sheet is empty

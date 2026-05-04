@@ -11,12 +11,21 @@ const CARD_W = 320;
 const CARD_H = 460;
 const GAP = 24;
 
+const DEFAULT_CHIPS = ["الدفع عند الاستلام", "تأكيد قبل الإرسال", "مراجعة المنتج قبل الشحن"];
+
 export default function Hero() {
   const { hero, products, brand } = useCms();
   const featured = products.filter((p) => p.featured && !p.hidden);
   const middleProduct = featured[0];
   const leftProduct = featured[1] ?? products[1];
   const rightProduct = featured[2] ?? products[2];
+
+  const endTitle = hero.endTitle || "اختيار محرر";
+  const endSub = hero.endSub || "منتجات مختارة بعناية، أنيقة ومفيدة، باش تسهل عليك الحياة اليومية.";
+  const endCta = hero.endCta || "كتشف الاختيار";
+  const trustChips = hero.trustChips?.length ? hero.trustChips : DEFAULT_CHIPS;
+  const scarcityLine = hero.scarcityLine || "عروض مختارة متوفرة بكمية محدودة";
+  const cardLabel = hero.cardLabel || "اختيار";
 
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
@@ -308,11 +317,7 @@ export default function Hero() {
                 <div className="mt-7 flex flex-col gap-3">
                   {/* Trust chips */}
                   <div className="flex flex-wrap items-center gap-2" dir="rtl">
-                    {[
-                      "الدفع عند الاستلام",
-                      "تأكيد قبل الإرسال",
-                      "مراجعة المنتج قبل الشحن",
-                    ].map((item) => (
+                    {trustChips.map((item) => (
                       <span
                         key={item}
                         className="inline-flex items-center gap-1.5 rounded-full bg-white/12 backdrop-blur-sm border border-white/20 px-3 py-1.5 text-[11px] font-medium text-white/90 leading-none"
@@ -323,9 +328,11 @@ export default function Hero() {
                     ))}
                   </div>
                   {/* Scarcity micro-copy */}
-                  <p className="text-[11px] text-white/45 tracking-wide" dir="rtl">
-                    عروض مختارة متوفرة بكمية محدودة
-                  </p>
+                  {scarcityLine && (
+                    <p className="text-[11px] text-white/45 tracking-wide" dir="rtl">
+                      {scarcityLine}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -351,7 +358,7 @@ export default function Hero() {
                   />
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-8">
                     <div className="text-sm font-medium text-white/90 mb-2">
-                      اختيار
+                      {cardLabel}
                     </div>
                     <div className="font-sans font-bold text-[64px] sm:text-[80px] leading-none tracking-tight">
                       {middleProduct?.price ?? "349"}
@@ -379,20 +386,20 @@ export default function Hero() {
               className="font-sans font-extrabold text-4xl sm:text-5xl lg:text-6xl text-ink leading-[1.05] tracking-[-0.03em]"
               dir="auto"
             >
-              اختيار محرر
+              {endTitle}
             </h2>
             <p
               className="mt-4 max-w-xl mx-auto text-body text-base sm:text-lg"
               dir="auto"
             >
-              منتجات مختارة بعناية، أنيقة ومفيدة، باش تسهل عليك الحياة اليومية.
+              {endSub}
             </p>
             <div className="mt-6 flex justify-center">
               <Link
                 to="/products"
                 className="inline-flex items-center gap-2 rounded-full bg-ink text-white px-7 py-3.5 text-sm font-medium hover:bg-black transition-colors"
               >
-                كتشف الاختيار
+                {endCta}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>

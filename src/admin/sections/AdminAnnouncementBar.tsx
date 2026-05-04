@@ -41,6 +41,39 @@ export default function AdminAnnouncementBar() {
         description="Gérez le bandeau défilant qui apparaît en haut du site."
       />
 
+      {/* Live preview */}
+      {announcementBar.enabled && sorted.length > 0 && (
+        <div className="rounded-xl border border-line overflow-hidden">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-body/40 px-4 pt-3 pb-2">
+            Live Preview
+          </p>
+          <div className="relative overflow-hidden bg-ink py-2.5">
+            <div
+              className="flex gap-8 whitespace-nowrap animate-marquee"
+              style={{ animationDuration: `${announcementBar.speed}s` }}
+            >
+              {[...sorted, ...sorted].map((msg, i) => (
+                <span
+                  key={i}
+                  className={`text-xs font-medium inline-flex items-center gap-2 ${
+                    msg.accent ? "text-yellow-300" : "text-white/80"
+                  }`}
+                >
+                  {msg.accent && <span className="h-1.5 w-1.5 rounded-full bg-yellow-300 shrink-0" />}
+                  {msg.text}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!announcementBar.enabled && (
+        <div className="rounded-xl border border-dashed border-line bg-gray-50 px-4 py-3 text-sm text-body/50 text-center">
+          Le bandeau est désactivé — activez-le pour voir l'aperçu.
+        </div>
+      )}
+
       <Section title="Paramètres">
         <div className="flex items-center justify-between">
           <span className="text-sm text-ink">Afficher le bandeau</span>
@@ -49,16 +82,17 @@ export default function AdminAnnouncementBar() {
             onChange={(v) => setAnnouncementBar({ enabled: v })}
           />
         </div>
-        <Field label="Vitesse d'animation (secondes)" hint="Plus le nombre est grand, plus le défilement est lent.">
+        <Field
+          label="Vitesse d'animation (secondes)"
+          hint="Plus le nombre est grand, plus le défilement est lent."
+        >
           <input
             type="number"
             className="input w-32"
             min={10}
             max={120}
             value={announcementBar.speed}
-            onChange={(e) =>
-              setAnnouncementBar({ speed: Number(e.target.value) || 40 })
-            }
+            onChange={(e) => setAnnouncementBar({ speed: Number(e.target.value) || 40 })}
           />
         </Field>
       </Section>
@@ -66,11 +100,8 @@ export default function AdminAnnouncementBar() {
       <Section
         title="Messages"
         description="Les messages apparaissent en boucle infinie dans le bandeau."
-        actions={
-          <span className="text-xs text-body">{sorted.length} message(s)</span>
-        }
+        actions={<span className="text-xs text-body">{sorted.length} message(s)</span>}
       >
-        {/* Add new */}
         <div className="flex gap-2">
           <input
             className="input flex-1"
@@ -85,7 +116,6 @@ export default function AdminAnnouncementBar() {
           </button>
         </div>
 
-        {/* List */}
         <div className="space-y-2 mt-2">
           {sorted.map((msg, i) => (
             <div
@@ -112,23 +142,18 @@ export default function AdminAnnouncementBar() {
               <input
                 className="input flex-1"
                 value={msg.text}
-                onChange={(e) =>
-                  upsertAnnouncementMessage({ ...msg, text: e.target.value })
-                }
+                onChange={(e) => upsertAnnouncementMessage({ ...msg, text: e.target.value })}
               />
 
               <Toggle
                 checked={msg.accent}
-                onChange={(v) =>
-                  upsertAnnouncementMessage({ ...msg, accent: v })
-                }
+                onChange={(v) => upsertAnnouncementMessage({ ...msg, accent: v })}
                 label="Accent"
               />
 
               <button
                 onClick={() => {
-                  if (confirm("Supprimer ce message ?"))
-                    removeAnnouncementMessage(msg.id);
+                  if (confirm("Supprimer ce message ?")) removeAnnouncementMessage(msg.id);
                 }}
                 className="text-red hover:text-red-dark shrink-0"
               >

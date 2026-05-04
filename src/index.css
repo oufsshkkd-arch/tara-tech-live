@@ -54,6 +54,9 @@ body {
   .input {
     @apply w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-body/60 focus:outline-none focus:ring-2 focus:ring-ink/10 focus:border-ink/30;
   }
+  .input-base {
+    @apply rounded-xl border border-line bg-bg px-4 py-3 text-sm text-ink placeholder:text-ink/25 outline-none transition-all focus:border-ink focus:bg-white focus:ring-2 focus:ring-ink/10;
+  }
   .label {
     @apply mb-1 block text-xs font-medium uppercase tracking-wider text-body;
   }

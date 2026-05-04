@@ -1,3 +1,8 @@
+export type LandingPageFeature = {
+  icon: string;
+  text: string;
+};
+
 export type Category = {
   id: string;
   slug: string;
@@ -25,7 +30,9 @@ export type Product = {
   stock: "in" | "low" | "out";
   guarantee?: string;
   codNote?: string;
+  features?: LandingPageFeature[];
   order: number;
+  copy?: ProductPageCopy;
 };
 
 export type FaqItem = {
@@ -80,6 +87,30 @@ export type BrandSettings = {
   legalLinks: { label: string; href: string }[];
   seo: { title: string; description: string };
   brandLine: string;
+  clarityId?: string;
+};
+
+export type SectionTheme = {
+  fontSize: number;       // 12–24 px
+  lineHeight: number;     // 1.2–2.0
+  bgColor: string;        // hex or ""
+  textColor: string;      // hex or ""
+  accentColor: string;    // hex or ""
+  fontFamily?: string;    // "" = inherit
+  paddingTop?: number;    // 0–120 px
+  paddingBottom?: number; // 0–120 px
+};
+
+export type ThemeSchema = {
+  sectionOrder: string[];
+  sections: Record<string, Partial<SectionTheme>>;
+};
+
+export type TrackingStats = {
+  whatsappClicks: number;
+  formStarts: number;
+  formSubmissions: number;
+  pageViews: number;
 };
 
 export type HeroContent = {
@@ -89,10 +120,19 @@ export type HeroContent = {
   secondaryCta: string;
   trustLine: string;
   urgencyBadge: string;
-  overlayDarkness: number; // 0..1
+  overlayDarkness: number;
   showFloatingCard: boolean;
   floatingCardLines: string[];
   videoUrl: string;
+  // End-state section (appears after scroll animation completes)
+  endTitle?: string;
+  endSub?: string;
+  endCta?: string;
+  // Trust chips + scarcity below the CTA buttons
+  trustChips?: string[];
+  scarcityLine?: string;
+  // Label shown on each product card in the hero ("اختيار" etc.)
+  cardLabel?: string;
 };
 
 export type StoryContent = {
@@ -130,6 +170,79 @@ export type FaqSectionContent = {
   intro: string;
 };
 
+export type ProductPageReview = {
+  name: string;
+  city: string;
+  rating: number;
+  text: string;
+  date: string;
+};
+
+export type ProductPageCopy = {
+  sectionToggles?: {
+    marquee?: boolean;
+    problem?: boolean;
+    solution?: boolean;
+    howItWorks?: boolean;
+    benefits?: boolean;
+    whoFor?: boolean;
+    value?: boolean;
+    reviews?: boolean;
+    finalCta?: boolean;
+  };
+  promoTicker: string[];
+  heroHeadline: string[];
+  heroSub: string;
+  problemTitle: string;
+  problemSub: string;
+  problemQuote: string;
+  problems: { emoji: string; text: string }[];
+  solutionTitle: string;
+  solutionSub: string;
+  solutionBullets: { emoji: string; text: string }[];
+  solutionQuote: string;
+  howItWorksTitle: string;
+  howSteps: { label: string; steps: string[] }[];
+  benefits: { emoji: string; title: string; body: string }[];
+  whoFor: { emoji: string; title: string; body: string }[];
+  valueTitle: string;
+  valueSub: string;
+  valueCosts: { emoji: string; text: string }[];
+  valueConclusion: string;
+  reviews: ProductPageReview[];
+  finalHeadline: string;
+  finalSub: string;
+  scarcityText: string;
+};
+
+export type LandingPage = {
+  productId: string;
+  slug: string;
+  badge: string;
+  headline: string;
+  subheadline: string;
+  description: string;
+  features: LandingPageFeature[];
+  primaryCta: string;
+  secondaryCta: string;
+  guarantee: string;
+  urgencyText: string;
+};
+
+export type StoredOrder = {
+  id: string;
+  date: string;
+  time: string;
+  full_name: string;
+  phone: string;
+  city: string;
+  product_name: string;
+  price: number;
+  quantity: number;
+  status: "جديد" | "مؤكد" | "مشحون" | "مسلم" | "ملغي";
+  source: string;
+};
+
 export type AdminUser = {
   email: string;
   password: string;
@@ -148,6 +261,9 @@ export type Nav = {
 };
 
 export type CmsState = {
+  trackingStats: TrackingStats;
+  themeSchema: ThemeSchema;
+  landingPages: LandingPage[];
   brand: BrandSettings;
   nav: Nav;
   hero: HeroContent;

@@ -4,9 +4,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Zap, Wind, CheckCircle, MessageCircle, Wallet, Truck,
   ShieldCheck, ChevronDown, ArrowLeft, Users, Clock,
-  AlertTriangle, Heart, Star, Sparkles,
+  AlertTriangle, Heart, Star, Sparkles, ShoppingCart,
 } from "lucide-react";
 import OrderFormModal from "../components/OrderFormModal";
+import { useCart } from "../store/cart";
+import { useCms } from "../cms/store";
 
 // ─── Product images ───
 const IMG_TRUNK        = "/images/jump-starter/trunk.jpg";
@@ -65,6 +67,20 @@ export default function JumpStarterPage() {
   const [activeImg, setActiveImg] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const { addItem, openCart } = useCart();
+  const { brand } = useCms();
+  const waPhone = brand.whatsapp.replace(/[^0-9]/g, "");
+
+  function addToCart() {
+    addItem({
+      id: "p-js1",
+      slug: "jump-starter-air-pump",
+      title: "ديمارور وبومبة 2 فـ 1",
+      price: 699,
+      image: IMG_PRODUCT,
+    });
+    openCart();
+  }
 
   return (
     <div className="pb-24 md:pb-0">
@@ -176,17 +192,23 @@ export default function JumpStarterPage() {
                 <span className="pill-red text-xs">كمية محدودة</span>
               </motion.div>
 
-              <motion.div variants={fadeUp} className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <button
-                  onClick={() => setShowForm(true)}
-                  className="btn-primary group flex-1 justify-center py-4 text-base"
-                >
-                  <MessageCircle className="h-5 w-5 transition-transform group-hover:scale-110" />
-                  طلب دابا
-                </button>
-                <Link to="/contact" className="btn-ghost justify-center px-6 py-4">
-                  تواصل معنا
-                </Link>
+              <motion.div variants={fadeUp} className="mt-6 flex flex-col gap-2" dir="rtl">
+                <div className="flex gap-3">
+                  <button
+                    onClick={addToCart}
+                    className="btn-primary group flex-1 justify-center py-4 text-base"
+                  >
+                    <ShoppingCart className="h-5 w-5 transition-transform group-hover:scale-110" />
+                    أضف للسلة
+                  </button>
+                  <button
+                    onClick={() => setShowForm(true)}
+                    className="btn-ghost px-5 py-4 shrink-0"
+                    title="اطلب مباشرة"
+                  >
+                    اطلب دابا
+                  </button>
+                </div>
               </motion.div>
 
               <motion.p variants={fadeUp} className="mt-3 text-center text-xs text-body/50" dir="rtl">
@@ -765,14 +787,42 @@ export default function JumpStarterPage() {
       {/* ══════════════════════════════════════════
           STICKY MOBILE CTA
       ══════════════════════════════════════════ */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center gap-3 border-t border-line bg-white px-4 py-3 shadow-lift md:hidden">
-        <div className="min-w-0 flex-1" dir="rtl">
-          <div className="truncate text-xs text-body">ديمارور وبومبة 2 فـ 1</div>
-          <div className="text-lg font-bold leading-none text-ink">699 درهم</div>
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-line bg-white/95 backdrop-blur-md shadow-lift md:hidden">
+        <div className="flex items-center gap-3 px-4 py-3" dir="rtl">
+          <img
+            src={IMG_PRODUCT}
+            alt=""
+            className="h-11 w-11 shrink-0 rounded-xl border border-line object-cover"
+          />
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-xs text-body leading-none">ديمارور وبومبة 2 فـ 1</div>
+            <div className="text-base font-bold text-ink leading-tight mt-0.5">699 درهم</div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => setShowForm(true)}
+              className="btn-ghost px-3 py-2.5 text-sm"
+            >
+              اطلب
+            </button>
+            <a
+              href={`https://wa.me/${waPhone}`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white shadow-sm"
+              aria-label="WhatsApp"
+            >
+              <MessageCircle className="h-5 w-5" fill="white" strokeWidth={0} />
+            </a>
+            <button
+              onClick={addToCart}
+              className="btn-primary px-4 py-2.5 text-sm"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              السلة
+            </button>
+          </div>
         </div>
-        <button onClick={() => setShowForm(true)} className="btn-primary shrink-0 px-6 py-3">
-          طلب دابا
-        </button>
       </div>
 
       <OrderFormModal open={showForm} onClose={() => setShowForm(false)} />

@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Menu, X, ArrowUpRight } from "lucide-react";
+import { Menu, X, ArrowUpRight, ShoppingBag } from "lucide-react";
 import { useCms } from "../cms/store";
 import { motion, AnimatePresence } from "framer-motion";
+import { useCart } from "../store/cart";
 
 import AnnouncementBar from "./AnnouncementBar";
 
 export default function Header() {
   const { brand, nav } = useCms();
+  const { count, openCart } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
@@ -97,8 +99,24 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* ── Desktop CTA ── */}
+          {/* ── Desktop CTA + Cart ── */}
           <div className="hidden lg:flex items-center gap-3 shrink-0">
+            <button
+              onClick={openCart}
+              aria-label="السلة"
+              className={`relative grid place-items-center h-10 w-10 rounded-full border transition-colors ${
+                overPhoto
+                  ? "border-white/30 text-white hover:bg-white/10"
+                  : "border-line bg-white/70 text-ink hover:bg-ink/5"
+              }`}
+            >
+              <ShoppingBag className="h-4.5 w-4.5 h-[18px] w-[18px]" />
+              {count > 0 && (
+                <span className="absolute -top-1 -right-1 h-4 w-4 grid place-items-center rounded-full bg-red text-white text-[10px] font-bold">
+                  {count}
+                </span>
+              )}
+            </button>
             <Link
               to="/products"
               className={
@@ -112,18 +130,36 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* ── Mobile Hamburger ── */}
-          <button
-            aria-label="Open menu"
-            className={`lg:hidden grid place-items-center h-9 w-9 rounded-full border transition-colors ${
-              overPhoto
-                ? "border-white/30 bg-white/10 backdrop-blur text-white"
-                : "border-line bg-white/70 backdrop-blur text-ink"
-            }`}
-            onClick={() => setOpen((v) => !v)}
-          >
-            {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-          </button>
+          {/* ── Mobile: Cart + Hamburger ── */}
+          <div className="lg:hidden flex items-center gap-2">
+            <button
+              onClick={openCart}
+              aria-label="السلة"
+              className={`relative grid place-items-center h-9 w-9 rounded-full border transition-colors ${
+                overPhoto
+                  ? "border-white/30 bg-white/10 backdrop-blur text-white"
+                  : "border-line bg-white/70 backdrop-blur text-ink"
+              }`}
+            >
+              <ShoppingBag className="h-4 w-4" />
+              {count > 0 && (
+                <span className="absolute -top-1 -right-1 h-4 w-4 grid place-items-center rounded-full bg-red text-white text-[10px] font-bold">
+                  {count}
+                </span>
+              )}
+            </button>
+            <button
+              aria-label="Open menu"
+              className={`grid place-items-center h-9 w-9 rounded-full border transition-colors ${
+                overPhoto
+                  ? "border-white/30 bg-white/10 backdrop-blur text-white"
+                  : "border-line bg-white/70 backdrop-blur text-ink"
+              }`}
+              onClick={() => setOpen((v) => !v)}
+            >
+              {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
 
         <AnimatePresence>

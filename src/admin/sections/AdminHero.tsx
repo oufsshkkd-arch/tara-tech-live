@@ -1,141 +1,196 @@
+import { useState, useCallback } from "react";
 import { useCms } from "../../cms/store";
-import { Field, PageHeader, Section, Toggle } from "../ui";
+import { Field, Toggle } from "../ui";
+import type { HeroContent } from "../../cms/types";
+import SplitEditor from "../SplitEditor";
+import HeroPreview from "../previews/HeroPreview";
+
+function SectionLabel({ children }: { children: string }) {
+  return (
+    <p className="text-[10px] font-bold uppercase tracking-widest text-body/40 pb-1 border-b border-line">
+      {children}
+    </p>
+  );
+}
 
 export default function AdminHero() {
   const { hero, setHero } = useCms();
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Section Hero"
-        description="Le bloc d'ouverture du site — première impression."
-      />
+  const [draft, setDraft] = useState<HeroContent>(() => ({ ...hero }));
 
-      <Section title="Texte">
-        <div className="grid gap-4">
-          <Field label="Titre principal">
+  const hasChanges = JSON.stringify(draft) !== JSON.stringify(hero);
+
+  const patch = (p: Partial<HeroContent>) =>
+    setDraft((prev) => ({ ...prev, ...p }));
+
+  const handleSave = useCallback(() => {
+    setHero(draft);
+  }, [draft, setHero]);
+
+  return (
+    <SplitEditor
+      title="Hero Section"
+      hasChanges={hasChanges}
+      onSave={handleSave}
+      renderPreview={(mode) => <HeroPreview data={draft} mode={mode} />}
+    >
+      {/* Text */}
+      <div className="space-y-4">
+        <SectionLabel>Text</SectionLabel>
+        <Field label="Titre principal">
+          <input
+            className="input"
+            value={draft.headline}
+            onChange={(e) => patch({ headline: e.target.value })}
+          />
+        </Field>
+        <Field label="Sous-titre" hint="Darija recommandée.">
+          <textarea
+            className="input min-h-[90px]"
+            value={draft.subheadline}
+            onChange={(e) => patch({ subheadline: e.target.value })}
+          />
+        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="CTA principal">
             <input
               className="input"
-              value={hero.headline}
-              onChange={(e) => setHero({ headline: e.target.value })}
+              value={draft.primaryCta}
+              onChange={(e) => patch({ primaryCta: e.target.value })}
             />
           </Field>
-          <Field label="Sous-titre" hint="Darija recommandée.">
-            <textarea
-              className="input min-h-[100px]"
-              value={hero.subheadline}
-              onChange={(e) => setHero({ subheadline: e.target.value })}
-            />
-          </Field>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Field label="CTA principal">
-              <input
-                className="input"
-                value={hero.primaryCta}
-                onChange={(e) => setHero({ primaryCta: e.target.value })}
-              />
-            </Field>
-            <Field label="CTA secondaire">
-              <input
-                className="input"
-                value={hero.secondaryCta}
-                onChange={(e) => setHero({ secondaryCta: e.target.value })}
-              />
-            </Field>
-          </div>
-          <Field label="Ligne de réassurance" hint="Sous le bouton.">
+          <Field label="CTA secondaire">
             <input
               className="input"
-              value={hero.trustLine}
-              onChange={(e) => setHero({ trustLine: e.target.value })}
-            />
-          </Field>
-          <Field label="Badge d'urgence (rouge)">
-            <input
-              className="input"
-              value={hero.urgencyBadge}
-              onChange={(e) => setHero({ urgencyBadge: e.target.value })}
+              value={draft.secondaryCta}
+              onChange={(e) => patch({ secondaryCta: e.target.value })}
             />
           </Field>
         </div>
-      </Section>
+        <Field label="Ligne de réassurance">
+          <input
+            className="input"
+            value={draft.trustLine}
+            onChange={(e) => patch({ trustLine: e.target.value })}
+          />
+        </Field>
+        <Field label="Badge d'urgence">
+          <input
+            className="input"
+            value={draft.urgencyBadge}
+            onChange={(e) => patch({ urgencyBadge: e.target.value })}
+          />
+        </Field>
+      </div>
 
-      <Section title="Arrière-plan">
+      {/* Background */}
+      <div className="space-y-4">
+        <SectionLabel>Arrière-plan</SectionLabel>
         <Field
-          label="URL vidéo (optionnelle)"
-          hint="Laissez vide pour utiliser l'animation mesh par défaut."
+          label="URL image"
+          hint="Laisser vide pour utiliser le mesh par défaut."
         >
           <input
             className="input"
             placeholder="https://..."
-            value={hero.videoUrl}
-            onChange={(e) => setHero({ videoUrl: e.target.value })}
+            value={draft.videoUrl}
+            onChange={(e) => patch({ videoUrl: e.target.value })}
           />
         </Field>
         <Field
-          label={`Intensité du voile (${(hero.overlayDarkness * 100).toFixed(0)}%)`}
+          label={`Intensité du voile — ${(draft.overlayDarkness * 100).toFixed(0)}%`}
         >
           <input
             type="range"
             min={0}
             max={1}
             step={0.05}
-            value={hero.overlayDarkness}
+            value={draft.overlayDarkness}
             onChange={(e) =>
-              setHero({ overlayDarkness: Number(e.target.value) })
+              patch({ overlayDarkness: Number(e.target.value) })
             }
-            className="w-full"
+            className="w-full accent-ink"
           />
+          <div className="flex justify-between text-[10px] text-body mt-0.5">
+            <span>0%</span>
+            <span>100%</span>
+          </div>
         </Field>
-      </Section>
+      </div>
 
-      <Section title="Carte flottante (glass)">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-ink">Afficher la carte</span>
-          <Toggle
-            checked={hero.showFloatingCard}
-            onChange={(v) => setHero({ showFloatingCard: v })}
-          />
-        </div>
-        {hero.showFloatingCard && (
-          <div className="grid gap-3">
-            {hero.floatingCardLines.map((line, i) => (
+      {/* Trust chips */}
+      <div className="space-y-3">
+        <SectionLabel>Trust Chips (الأقراص تحت الأزرار)</SectionLabel>
+        <div className="space-y-2">
+          {(draft.trustChips ?? ["الدفع عند الاستلام", "تأكيد قبل الإرسال", "مراجعة المنتج قبل الشحن"]).map((chip, i) => {
+            const chips = draft.trustChips ?? ["الدفع عند الاستلام", "تأكيد قبل الإرسال", "مراجعة المنتج قبل الشحن"];
+            return (
               <div key={i} className="flex gap-2">
                 <input
                   className="input flex-1"
-                  value={line}
+                  value={chip}
                   onChange={(e) => {
-                    const next = [...hero.floatingCardLines];
+                    const next = [...chips];
                     next[i] = e.target.value;
-                    setHero({ floatingCardLines: next });
+                    patch({ trustChips: next });
                   }}
                 />
                 <button
-                  className="btn-ghost"
-                  onClick={() =>
-                    setHero({
-                      floatingCardLines: hero.floatingCardLines.filter(
-                        (_, j) => j !== i
-                      ),
-                    })
-                  }
+                  className="shrink-0 h-9 w-9 grid place-items-center rounded-lg text-body hover:bg-red/5 hover:text-red transition-colors"
+                  onClick={() => patch({ trustChips: chips.filter((_, j) => j !== i) })}
                 >
-                  Supprimer
+                  ✕
                 </button>
               </div>
-            ))}
-            <button
-              className="btn-dark"
-              onClick={() =>
-                setHero({
-                  floatingCardLines: [...hero.floatingCardLines, "Nouveau"],
-                })
-              }
-            >
-              Ajouter une ligne
-            </button>
-          </div>
-        )}
-      </Section>
-    </div>
+            );
+          })}
+          <button
+            className="btn-dark w-full"
+            onClick={() => patch({ trustChips: [...(draft.trustChips ?? []), ""] })}
+          >
+            + أضف chip
+          </button>
+        </div>
+        <Field label="نص الشح (scarcity)" hint="يظهر تحت الأقراص بخط رمادي.">
+          <input
+            className="input"
+            value={draft.scarcityLine ?? ""}
+            onChange={(e) => patch({ scarcityLine: e.target.value })}
+          />
+        </Field>
+      </div>
+
+      {/* End state */}
+      <div className="space-y-4">
+        <SectionLabel>End State (بعد الأنيميشن)</SectionLabel>
+        <Field label="العنوان الكبير">
+          <input
+            className="input"
+            value={draft.endTitle ?? ""}
+            onChange={(e) => patch({ endTitle: e.target.value })}
+          />
+        </Field>
+        <Field label="النص التحتي">
+          <textarea
+            className="input min-h-[80px]"
+            value={draft.endSub ?? ""}
+            onChange={(e) => patch({ endSub: e.target.value })}
+          />
+        </Field>
+        <Field label="نص زر CTA">
+          <input
+            className="input"
+            value={draft.endCta ?? ""}
+            onChange={(e) => patch({ endCta: e.target.value })}
+          />
+        </Field>
+        <Field label="تسمية كروت المنتجات" hint='الكلمة اللي كتظهر فوق السعر فكل كارد ("اختيار", "جديد"...)'>
+          <input
+            className="input"
+            value={draft.cardLabel ?? ""}
+            onChange={(e) => patch({ cardLabel: e.target.value })}
+          />
+        </Field>
+      </div>
+    </SplitEditor>
   );
 }

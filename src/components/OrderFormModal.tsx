@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAnalytics } from "../hooks/useAnalytics";
 import { X, Minus, Plus, ShieldCheck, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -14,6 +15,9 @@ const CITIES = [
 interface Props {
   open: boolean;
   onClose: () => void;
+  productName?: string;
+  productPrice?: number;
+  productImage?: string;
 }
 
 interface FormState {
@@ -35,8 +39,10 @@ function isValidPhone(phone: string) {
   return /^(\+212|00212|0)(6|7)\d{8}$/.test(cleaned);
 }
 
-export default function OrderFormModal({ open, onClose }: Props) {
+export default function OrderFormModal({ open, onClose, productName = "Jump Starter + Air Pump", productPrice = 699, productImage = "/images/jump-starter/product-hero.jpg" }: Props) {
   const navigate = useNavigate();
+  const { trackFormStart, trackFormAbandon } = useAnalytics();
+  const hasStarted = useRef(false);
   const [form, setForm] = useState<FormState>({
     full_name: "", phone: "", city: "", quantity: 1, note: "",
   });
@@ -45,17 +51,26 @@ export default function OrderFormModal({ open, onClose }: Props) {
   const [submitError, setSubmitError] = useState("");
   const firstInputRef = useRef<HTMLInputElement>(null);
 
+  function onFirstFocus() {
+    if (hasStarted.current) return;
+    hasStarted.current = true;
+    trackFormStart();
+  }
+
   useEffect(() => {
     if (open) {
+      hasStarted.current = false;
       document.body.style.overflow = "hidden";
       setTimeout(() => firstInputRef.current?.focus(), 350);
     } else {
+      if (hasStarted.current) trackFormAbandon();
+      hasStarted.current = false;
       document.body.style.overflow = "";
       setErrors({});
       setSubmitError("");
     }
     return () => { document.body.style.overflow = ""; };
-  }, [open]);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function setField(field: keyof FormState, value: string | number) {
     setForm(f => ({ ...f, [field]: value }));
@@ -83,8 +98,8 @@ export default function OrderFormModal({ open, onClose }: Props) {
     const payload = {
       date: now.toLocaleDateString("fr-MA"),
       time: now.toLocaleTimeString("fr-MA"),
-      product_name: "Jump Starter + Air Pump",
-      price: "699",
+      product_name: productName,
+      price: String(productPrice),
       full_name: form.full_name.trim(),
       phone: form.phone.trim(),
       city: form.city.trim(),
@@ -107,7 +122,7 @@ export default function OrderFormModal({ open, onClose }: Props) {
     }
   }
 
-  const total = form.quantity * 699;
+  const total = form.quantity * productPrice;
 
   return (
     <AnimatePresence>
@@ -150,14 +165,13 @@ export default function OrderFormModal({ open, onClose }: Props) {
               {/* Product summary */}
               <div className="mb-5 flex items-center gap-3 rounded-2xl border border-line bg-bg p-3.5" dir="rtl">
                 <img
-                  src="/images/jump-starter/product-hero.jpg"
-                  alt="ديمارور وبومبة"
+                  src={productImage}
+                  alt={productName}
                   className="h-14 w-14 shrink-0 rounded-xl border border-line object-cover"
-                  onError={e => { (e.target as HTMLImageElement).src = "/images/jump-starter/trunk.jpg"; }}
                 />
                 <div className="min-w-0">
-                  <p className="text-xs text-body truncate">ديمارور وبومبة 2 فـ 1</p>
-                  <p className="font-bold text-xl text-ink leading-none mt-0.5">699 درهم</p>
+                  <p className="text-xs text-body truncate">{productName}</p>
+                  <p className="font-bold text-xl text-ink leading-none mt-0.5">{productPrice} درهم</p>
                   <div className="mt-1 flex items-center gap-1 text-[10px] text-body/60">
                     <ShieldCheck className="h-3 w-3 shrink-0 text-red/60" />
                     الدفع عند الاستلام · تأكيد قبل الشحن
@@ -182,7 +196,9 @@ export default function OrderFormModal({ open, onClose }: Props) {
                     ref={firstInputRef}
                     type="text"
                     autoComplete="name"
+                    data-clarity-mask="True"
                     value={form.full_name}
+                    onFocus={onFirstFocus}
                     onChange={e => setField("full_name", e.target.value)}
                     placeholder="محمد الحسني"
                     className={`w-full rounded-xl border px-4 py-3.5 text-sm text-ink placeholder:text-ink/25 outline-none transition-all focus:ring-2 focus:ring-ink/10 ${
@@ -205,7 +221,9 @@ export default function OrderFormModal({ open, onClose }: Props) {
                     type="tel"
                     inputMode="numeric"
                     autoComplete="tel"
+                    data-clarity-mask="True"
                     value={form.phone}
+                    onFocus={onFirstFocus}
                     onChange={e => setField("phone", e.target.value)}
                     placeholder="06XXXXXXXX"
                     className={`w-full rounded-xl border px-4 py-3.5 text-sm text-ink placeholder:text-ink/25 outline-none transition-all focus:ring-2 focus:ring-ink/10 ${

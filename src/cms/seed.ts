@@ -1,6 +1,16 @@
 import type { CmsState } from "./types";
 
 export const seed: CmsState = {
+  trackingStats: {
+    whatsappClicks: 0,
+    formStarts: 0,
+    formSubmissions: 0,
+    pageViews: 0,
+  },
+  themeSchema: {
+    sectionOrder: ["hero", "categories", "featured", "trustStrip", "story", "why", "faq", "finalCta"],
+    sections: {},
+  },
   brand: {
     brandName: "Tara Tech",
     tagline: "تكنولوجيا عملية، مختارة بعناية.",
@@ -28,6 +38,7 @@ export const seed: CmsState = {
         "منتجات tech موثوقة، أنيقة ومفكر فيها باش تسهل عليك الحياة اليومية. الدفع عند الاستلام فجميع المغرب.",
     },
     brandLine: "Tara Tech — تكنولوجيا عملية، مختارة بعناية.",
+    clarityId: "wkekl1zk1c",
   },
   nav: {
     labels: {
@@ -56,6 +67,12 @@ export const seed: CmsState = {
       "خدمة محترفة",
     ],
     videoUrl: "",
+    endTitle: "اختيار محرر",
+    endSub: "منتجات مختارة بعناية، أنيقة ومفيدة، باش تسهل عليك الحياة اليومية.",
+    endCta: "كتشف الاختيار",
+    trustChips: ["الدفع عند الاستلام", "تأكيد قبل الإرسال", "مراجعة المنتج قبل الشحن"],
+    scarcityLine: "عروض مختارة متوفرة بكمية محدودة",
+    cardLabel: "اختيار",
   },
   categorySection: {
     title: "الفئات",
@@ -166,10 +183,10 @@ export const seed: CmsState = {
       longDescription: "جهاز 2 فـ 1 مصمم للاستعمال اليومي فالمغرب. كيشعل الطوموبيل إلا ماتت البطارية، وكينفخ الروات بسرعة إلا هبطات. صغير الحجم، عملي، وكيتهز بسهولة فالكوفير. بلا حاجة لميكانيكي ولا dépannage. الحل ديالك واجد فأي وقت.",
       price: 699,
       images: [
-        "https://images.unsplash.com/photo-1609592806596-b02af25e1d0a?auto=format&fit=crop&w=1200&q=80",
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1200&q=80",
-        "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=1200&q=80",
-        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80",
+        "/images/jump-starter/product-hero.jpg",
+        "/images/jump-starter/trunk.jpg",
+        "/images/jump-starter/battery-jump.jpg",
+        "/images/jump-starter/tire-close.jpg",
       ],
       categoryId: "cat-car",
       badge: "جديد",
@@ -200,6 +217,12 @@ export const seed: CmsState = {
       stock: "in",
       guarantee: "ضمان 6 شهور",
       codNote: "الدفع عند الاستلام متوفر فجميع المدن.",
+      features: [
+        { icon: "🌡️", text: "إضاءة دافئة قابلة للتحكم" },
+        { icon: "🎨", text: "ألوان مريحة للعين" },
+        { icon: "🔌", text: "شحن USB سهل" },
+        { icon: "🏠", text: "ديزاين راقي لأي غرفة" },
+      ],
       order: 1,
     },
     {
@@ -222,6 +245,12 @@ export const seed: CmsState = {
       stock: "low",
       guarantee: "ضمان 12 شهر",
       codNote: "الدفع عند الاستلام، التوصيل لجميع المدن.",
+      features: [
+        { icon: "⚡", text: "شحن سريع 15W" },
+        { icon: "🔒", text: "تثبيت قوي فالتهوية" },
+        { icon: "📱", text: "متوافق مع كل الهواتف" },
+        { icon: "🚗", text: "تركيب سهل وسريع" },
+      ],
       order: 2,
     },
     {
@@ -242,6 +271,13 @@ export const seed: CmsState = {
       stock: "in",
       guarantee: "ضمان 12 شهر",
       codNote: "الدفع عند الاستلام.",
+      compareAtPrice: 499,
+      features: [
+        { icon: "🔋", text: "20,000 mAh — كافية للكل" },
+        { icon: "⚡", text: "شحن سريع 22.5W" },
+        { icon: "✈️", text: "مثالية للسفر الطويل" },
+        { icon: "🛡️", text: "حماية ضد الحرارة والتيار" },
+      ],
       order: 3,
     },
     {
@@ -264,6 +300,12 @@ export const seed: CmsState = {
       stock: "in",
       guarantee: "ضمان 6 شهور",
       codNote: "الدفع عند الاستلام متوفر.",
+      features: [
+        { icon: "💡", text: "إضاءة قابلة للتعديل" },
+        { icon: "👁️", text: "مريحة للعين — بلا وميض" },
+        { icon: "🎨", text: "ديزاين بسيط وراقي" },
+        { icon: "🔌", text: "توصيل USB — توفير الطاقة" },
+      ],
       order: 4,
     },
     {
@@ -282,6 +324,16 @@ export const seed: CmsState = {
       featured: false,
       hidden: false,
       stock: "in",
+      badge: "صحة الجو",
+      compareAtPrice: 749,
+      guarantee: "ضمان 12 شهر",
+      codNote: "الدفع عند الاستلام.",
+      features: [
+        { icon: "🌿", text: "ينقي الهواء من الغبار والروائح" },
+        { icon: "🤫", text: "تشغيل هادئ جداً" },
+        { icon: "⚡", text: "استهلاك طاقة منخفض" },
+        { icon: "🏠", text: "مناسب للغرف والمكاتب" },
+      ],
       order: 5,
     },
     {
@@ -299,7 +351,17 @@ export const seed: CmsState = {
       categoryId: "cat-car",
       featured: false,
       hidden: false,
-      stock: "in",
+      stock: "low",
+      badge: "الأكثر مبيعاً",
+      compareAtPrice: 199,
+      guarantee: "ضمان 6 شهور",
+      codNote: "الدفع عند الاستلام.",
+      features: [
+        { icon: "🧲", text: "مغناطيس قوي 360°" },
+        { icon: "🚗", text: "تثبيت سهل فالسيارة" },
+        { icon: "📱", text: "متوافق مع كل الهواتف" },
+        { icon: "🔄", text: "تدوير وضبط كامل" },
+      ],
       order: 6,
     },
   ],
@@ -379,4 +441,24 @@ export const seed: CmsState = {
     email: "admin@taratech.ma",
     password: "TaraTech2026!",
   },
+  landingPages: [
+    {
+      productId: "p-js1",
+      slug: "jump-starter-air-pump",
+      badge: "جهاز طوارئ 2 فـ 1 ⚡",
+      headline: "ما تبقاش واقف فالطريق",
+      subheadline: "بسبب بطارية ولا رويدة",
+      description: "جهاز 2 فـ 1 كيشعل ليك الطوموبيل إلا ماتت البطارية، وكينفخ ليك الروات إلا هبطات. حل عملي، سريع، وديما واجد فالكوفير.",
+      features: [
+        { icon: "⚡", text: "يشعل الطوموبيل" },
+        { icon: "💨", text: "ينفخ الروات" },
+        { icon: "✅", text: "ساهل فالاستعمال" },
+        { icon: "📦", text: "فالكوفير ديما" },
+      ],
+      primaryCta: "أضف للسلة",
+      secondaryCta: "اطلب دابا مباشرة",
+      guarantee: "الدفع عند الاستلام • شوف الطرد قبل ما تخلص • تأكيد قبل الشحن",
+      urgencyText: "⚡ كمية محدودة فهاد الدفعة",
+    },
+  ],
 };

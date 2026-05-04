@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { MessageCircle } from "lucide-react";
 import { useCms } from "../cms/store";
+import { useAnalytics } from "../hooks/useAnalytics";
 
 export default function WhatsAppButton() {
   const { brand } = useCms();
+  const { trackWhatsAppClick } = useAnalytics();
   const [hovered, setHovered] = useState(false);
   const phone = brand.whatsapp.replace(/[^0-9]/g, "");
 
@@ -12,9 +14,10 @@ export default function WhatsAppButton() {
       href={`https://wa.me/${phone}`}
       target="_blank"
       rel="noreferrer"
+      onClick={trackWhatsAppClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="fixed bottom-6 right-6 z-50 flex items-center gap-0 group"
+      className="fixed bottom-6 right-6 z-50 hidden md:flex items-center gap-0 group"
       aria-label="WhatsApp"
     >
       {/* Label that slides out on hover */}
