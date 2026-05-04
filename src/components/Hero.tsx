@@ -12,8 +12,15 @@ const ANIM_VARIANTS: Record<string, AnimVariant> = {
 };
 import { useCms } from "../cms/store";
 
-const HERO_IMAGE = "/images/jump-starter/product-hero.jpg";
-const FALLBACK_IMAGE = "/images/jump-starter/family-road.jpg";
+const HERO_IMAGE = "/images/jump-starter/product-hero.jpg?v=2";
+const FALLBACK_IMAGE = "/images/jump-starter/family-road.jpg?v=2";
+
+// Append ?v=2 to local paths to bust mobile browser cache; leave CDN URLs untouched
+const bust = (url: string) => {
+  if (!url) return url;
+  if (url.startsWith("/")) return url.includes("?") ? url : `${url}?v=2`;
+  return url;
+};
 
 const CARD_W = 320;
 const CARD_H = 460;
@@ -119,10 +126,11 @@ export default function Hero() {
             borderRadius: midRadius,
           }}
         >
-          {hero.mediaType === "video" && hero.videoUrl ? (
+          {hero.mediaType === "video" ? (
             <video
-              src={activeVideoSrc}
-              poster={hero.videoPoster || HERO_IMAGE}
+              key={activeVideoSrc || "hero-video"}
+              src={activeVideoSrc || undefined}
+              poster={bust(hero.videoPoster || HERO_IMAGE)}
               autoPlay
               muted
               loop
@@ -132,7 +140,7 @@ export default function Hero() {
             />
           ) : (
             <img
-              src={hero.videoUrl || HERO_IMAGE}
+              src={bust(hero.videoUrl || HERO_IMAGE)}
               alt=""
               fetchPriority="high"
               loading="eager"
@@ -201,7 +209,7 @@ export default function Hero() {
           {leftProduct && (
             <>
               <img
-                src={leftProduct.images[0]}
+                src={bust(leftProduct.images[0])}
                 alt={leftProduct.title}
                 loading="lazy"
                 onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMAGE; }}
@@ -259,7 +267,7 @@ export default function Hero() {
           {rightProduct && (
             <>
               <img
-                src={rightProduct.images[0]}
+                src={bust(rightProduct.images[0])}
                 alt={rightProduct.title}
                 loading="lazy"
                 onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMAGE; }}
