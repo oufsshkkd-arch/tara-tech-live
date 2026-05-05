@@ -46,6 +46,7 @@ jobs:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+          FTP_TARGET_DIR: ${{ secrets.FTP_TARGET_DIR || 'public_html' }}
         run: |
           lftp -c "
             set ssl:verify-certificate no
@@ -54,6 +55,8 @@ jobs:
             set net:timeout 120
             set net:max-retries 5
             open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+            mkdir -p $FTP_TARGET_DIR
+            cd $FTP_TARGET_DIR
             mirror --reverse --delete --delete-first --verbose --no-perms --parallel=4 --exclude-glob index.html ./dist/ ./
             quit
           "
@@ -63,6 +66,7 @@ jobs:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+          FTP_TARGET_DIR: ${{ secrets.FTP_TARGET_DIR || 'public_html' }}
         run: |
           STAMP=$(date +%s)
           PURGE_FILE="_p${STAMP}.php"
@@ -76,6 +80,8 @@ jobs:
             set net:timeout 30
             set net:max-retries 3
             open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+            mkdir -p $FTP_TARGET_DIR
+            cd $FTP_TARGET_DIR
             put /tmp/purge.php -o $PURGE_FILE
             quit
           "
@@ -90,6 +96,7 @@ jobs:
             set ftp:passive-mode true
             set net:timeout 30
             open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+            cd $FTP_TARGET_DIR
             rm $PURGE_FILE
             quit
           " || true
@@ -99,6 +106,7 @@ jobs:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+          FTP_TARGET_DIR: ${{ secrets.FTP_TARGET_DIR || 'public_html' }}
         run: |
           lftp -c "
             set ssl:verify-certificate no
@@ -107,6 +115,7 @@ jobs:
             set net:timeout 120
             set net:max-retries 5
             open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+            cd $FTP_TARGET_DIR
             put ./dist/index.html -o index.html
             quit
           "
