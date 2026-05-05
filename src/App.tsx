@@ -86,6 +86,7 @@ export default function App() {
       <>
 
         <ClarityTracker />
+
         <ScrollToTop />
         <Routes>
           <Route element={<SiteLayout />}>
