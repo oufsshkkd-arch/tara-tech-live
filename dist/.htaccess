@@ -3,20 +3,24 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ index.html [QSA,L]
 
-# Disable LiteSpeed cache entirely for HTML
+# Disable LiteSpeed cache entirely
 <IfModule LiteSpeed>
   CacheLookup off
+  RewriteRule .* - [E=noabort:1]
 </IfModule>
 
-# Never cache index.html at the HTTP level
+# Never cache index.html — use "always" so the header fires even when
+# LiteSpeed or other modules set their own cache headers first
 <FilesMatch "^index\.html$">
-  Header set Cache-Control "no-cache, no-store, must-revalidate"
-  Header set Pragma "no-cache"
-  Header set Expires "0"
+  Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+  Header always set Pragma "no-cache"
+  Header always set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+  Header always set X-LiteSpeed-Cache-Control "no-cache"
+  Header always unset ETag
   FileETag None
 </FilesMatch>
 
-# Cache hashed assets forever
+# Cache hashed JS/CSS/images forever — safe because Vite content-hashes filenames
 <FilesMatch "\.(js|css|png|jpg|jpeg|svg|webp|woff2)$">
-  Header set Cache-Control "public, max-age=31536000, immutable"
+  Header always set Cache-Control "public, max-age=31536000, immutable"
 </FilesMatch>

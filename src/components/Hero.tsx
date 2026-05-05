@@ -30,6 +30,39 @@ const GAP = 24;
 
 const DEFAULT_CHIPS = ["الدفع عند الاستلام", "تأكيد قبل الإرسال", "مراجعة المنتج قبل الشحن"];
 
+function HeroVideo({
+  src,
+  poster,
+  className,
+}: {
+  src: string;
+  poster: string;
+  className?: string;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    videoRef.current?.setAttribute("webkit-playsinline", "");
+  }, []);
+
+  return (
+    <video
+      key={src || "hero-video"}
+      ref={videoRef}
+      poster={poster}
+      muted
+      autoPlay
+      loop
+      playsInline
+      preload="metadata"
+      style={{ objectFit: "cover" }}
+      className={className}
+    >
+      {src && <source src={src} type="video/mp4" />}
+    </video>
+  );
+}
+
 export default function Hero() {
   const { hero, products, brand } = useCms();
   const featured = products.filter((p) => p.featured && !p.hidden);
@@ -91,7 +124,8 @@ export default function Hero() {
   const midBadgesOpacity = useTransform(scrollYProgress, [0.6, 0.85], [0, 1]);
 
   const isMobile = dims.vw < 768;
-  const activeVideoSrc = (isMobile && hero.mobileVideoUrl) ? hero.mobileVideoUrl : hero.videoUrl;
+  const activeVideoSrc = bust((isMobile && hero.mobileVideoUrl) ? hero.mobileVideoUrl : hero.videoUrl);
+  const activeVideoPoster = bust(hero.videoPoster ?? "");
 
   const overlayMax = hero.overlayDarkness ?? 0.75;
   const overlayMin = Math.max(0, overlayMax - 0.5);
@@ -129,19 +163,21 @@ export default function Hero() {
           }}
         >
           {hero.mediaType === "video" ? (
-            <video
-              key={activeVideoSrc || "hero-video"}
-              ref={(el) => { if (el) el.setAttribute("webkit-playsinline", ""); }}
-              src={activeVideoSrc || undefined}
-              poster={bust(hero.videoPoster || HERO_IMAGE)}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              style={{ objectFit: "cover" }}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
+            <>
+              {activeVideoPoster && (
+                <img
+                  src={activeVideoPoster}
+                  alt=""
+                  aria-hidden
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              )}
+              <HeroVideo
+                src={activeVideoSrc}
+                poster={activeVideoPoster}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            </>
           ) : (
             <img
               src={bust(hero.videoUrl || HERO_IMAGE)}

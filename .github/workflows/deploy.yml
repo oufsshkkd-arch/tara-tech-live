@@ -28,10 +28,20 @@ jobs:
           VITE_SUPABASE_KEY: ${{ secrets.VITE_SUPABASE_KEY }}
         run: npm run build
 
-      - name: Install lftp
-        run: sudo apt-get install -y lftp
+      - name: Stamp build metadata
+        run: |
+          cat > dist/build.json <<EOF
+          {
+            "sha": "${GITHUB_SHA}",
+            "run": "${GITHUB_RUN_NUMBER}",
+            "built_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
 
-      - name: Deploy — full mirror replace (delete stale files)
+      - name: Install lftp
+        run: sudo apt-get update && sudo apt-get install -y lftp
+
+      - name: Deploy assets first with stale-file deletion
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
@@ -44,25 +54,21 @@ jobs:
             set net:timeout 120
             set net:max-retries 5
             open -u $FTP_USER,$FTP_PASS $FTP_SERVER
-            mirror --reverse --verbose --no-perms --parallel=4 --delete --transfer-all ./dist/ ./
+            mirror --reverse --delete --delete-first --verbose --no-perms --parallel=4 --exclude-glob index.html ./dist/ ./
             quit
           "
 
-      - name: Purge LiteSpeed cache (timestamp-based PHP endpoint)
+      - name: Purge LiteSpeed cache
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
         run: |
-          # Unique filename — LiteSpeed has never cached this URL, so it MUST
-          # pass the request through to PHP, which returns X-LiteSpeed-Purge: *
           STAMP=$(date +%s)
           PURGE_FILE="_p${STAMP}.php"
 
-          printf '<?php header("X-LiteSpeed-Purge: *"); echo "purged"; ?>' \
-            > /tmp/purge.php
+          printf '<?php header("X-LiteSpeed-Purge: *"); echo "purged"; ?>' > /tmp/purge.php
 
-          # Upload
           lftp -c "
             set ssl:verify-certificate no
             set ftp:ssl-force true
@@ -74,12 +80,9 @@ jobs:
             quit
           "
 
-          # Wait for file to be visible, then trigger the purge
           sleep 5
-          curl -fsS "https://taratech.pro/${PURGE_FILE}" \
-            -H "Cache-Control: no-cache" || true
+          curl -fsS "https://taratech.pro/${PURGE_FILE}" -H "Cache-Control: no-cache" || true
 
-          # Clean up — ignore errors if file is already gone
           sleep 2
           lftp -c "
             set ssl:verify-certificate no
@@ -90,3 +93,20 @@ jobs:
             rm $PURGE_FILE
             quit
           " || true
+
+      - name: Upload index.html last
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USER: ${{ secrets.FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          lftp -c "
+            set ssl:verify-certificate no
+            set ftp:ssl-force true
+            set ftp:passive-mode true
+            set net:timeout 120
+            set net:max-retries 5
+            open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+            put ./dist/index.html -o index.html
+            quit
+          "

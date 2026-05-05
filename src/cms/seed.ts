@@ -1,6 +1,18 @@
 import type { CmsState } from "./types";
 
 export const seed: CmsState = {
+  trustStrip: [
+    { icon: "Wallet",          title: "الدفع عند الاستلام", sub: "خلص ملي يوصلك المنتج، بكل ثقة." },
+    { icon: "ClipboardCheck",  title: "تأكيد قبل الإرسال",  sub: "كنأكدو الطلب قبل ما نسيفطو." },
+    { icon: "ShieldCheck",     title: "منتجات متحققة",       sub: "كنراجعو الجودة قبل التوصيل." },
+    { icon: "HeadphonesIcon",  title: "خدمة محترمة",         sub: "خدمة سريعة ومحترمة." },
+  ],
+  marqueeItems: [
+    "شحن سريع",
+    "دفع عند الاستلام",
+    "منتجات أصلية 100%",
+    "ضمان الجودة",
+  ],
   trackingStats: {
     whatsappClicks: 0,
     formStarts: 0,

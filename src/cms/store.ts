@@ -1,11 +1,11 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import { loadCmsState, saveCmsState } from "../lib/db";
 import type {
   CmsState,
   TrackingStats,
   ThemeSchema,
   SectionTheme,
+  TrustStripItem,
   Category,
   Product,
   FaqItem,
@@ -31,6 +31,9 @@ type Actions = {
   reset: () => void;
   incrementStat: (key: keyof TrackingStats) => void;
   resetStats: () => void;
+
+  setTrustStrip: (items: TrustStripItem[]) => void;
+  setMarqueeItems: (items: string[]) => void;
 
   setBrand: (b: Partial<BrandSettings>) => void;
   setNav: (n: Partial<Nav>) => void;
@@ -69,25 +72,80 @@ type Actions = {
   reorderSections: (sectionOrder: string[]) => void;
 
   syncToDb: () => Promise<void>;
-  loadFromDb: () => Promise<void>;
+  loadFromDb: () => Promise<boolean>;
+  applyRemoteState: (state: unknown) => void;
 };
 
 export type CmsStore = CmsState & Actions;
 
+const actionKeys = [
+  "reset",
+  "incrementStat",
+  "resetStats",
+  "setTrustStrip",
+  "setMarqueeItems",
+  "setBrand",
+  "setNav",
+  "setHero",
+  "setStory",
+  "setWhy",
+  "setFinalCta",
+  "setCategorySection",
+  "setFeaturedSection",
+  "setFaqSection",
+  "setVisibility",
+  "setAdmin",
+  "upsertCategory",
+  "removeCategory",
+  "reorderCategories",
+  "upsertProduct",
+  "removeProduct",
+  "reorderProducts",
+  "upsertFaq",
+  "removeFaq",
+  "reorderFaq",
+  "setAnnouncementBar",
+  "upsertAnnouncementMessage",
+  "removeAnnouncementMessage",
+  "reorderAnnouncementMessages",
+  "setFooter",
+  "upsertLandingPage",
+  "setThemeSchema",
+  "updateSectionTheme",
+  "reorderSections",
+  "syncToDb",
+  "loadFromDb",
+  "applyRemoteState",
+] as const satisfies readonly (keyof Actions)[];
+
+function stripActions(state: CmsStore): CmsState {
+  const data = { ...state } as Record<string, unknown>;
+  actionKeys.forEach((key) => {
+    delete data[key];
+  });
+  return data as CmsState;
+}
+
+function isCmsPayload(state: unknown): state is Partial<CmsState> {
+  return Boolean(state && typeof state === "object" && !Array.isArray(state));
+}
+
 export const useCms = create<CmsStore>()(
-  persist(
-    (set, _get) => ({
-      ...seed,
+  (set, _get) => ({
+    ...seed,
 
-      reset: () => set((s) => ({ ...seed, trackingStats: s.trackingStats })),
-      incrementStat: (key) =>
-        set((s) => ({
-          trackingStats: { ...s.trackingStats, [key]: (s.trackingStats[key] ?? 0) + 1 },
-        })),
-      resetStats: () =>
-        set({ trackingStats: { whatsappClicks: 0, formStarts: 0, formSubmissions: 0, pageViews: 0 } }),
+    reset: () => set((s) => ({ ...seed, trackingStats: s.trackingStats })),
+    incrementStat: (key) =>
+      set((s) => ({
+        trackingStats: { ...s.trackingStats, [key]: (s.trackingStats[key] ?? 0) + 1 },
+      })),
+    resetStats: () =>
+      set({ trackingStats: { whatsappClicks: 0, formStarts: 0, formSubmissions: 0, pageViews: 0 } }),
 
-      setBrand: (b) =>
+    setTrustStrip: (items) => set({ trustStrip: items }),
+    setMarqueeItems: (items) => set({ marqueeItems: items }),
+
+    setBrand: (b) =>
         set((s) => ({ brand: { ...s.brand, ...b } })),
       setNav: (n) => set((s) => ({ nav: { ...s.nav, ...n } })),
       setHero: (h) => set((s) => ({ hero: { ...s.hero, ...h } })),
@@ -226,22 +284,24 @@ export const useCms = create<CmsStore>()(
         set((s) => ({ themeSchema: { ...s.themeSchema, sectionOrder } })),
 
       syncToDb: async () => {
-        const state = useCms.getState();
-        const { syncToDb: _s, loadFromDb: _l, ...data } = state;
-        await saveCmsState(data);
+        await saveCmsState(stripActions(useCms.getState()));
       },
 
       loadFromDb: async () => {
         const remote = await loadCmsState();
-        if (remote && typeof remote === "object") {
-          set((local) => ({ ...local, ...(remote as object) }));
+        if (isCmsPayload(remote)) {
+          set((local) => ({ ...local, ...remote }));
+          return true;
+        }
+        return false;
+      },
+
+      applyRemoteState: (remote) => {
+        if (isCmsPayload(remote)) {
+          set((local) => ({ ...local, ...remote }));
         }
       },
-    }),
-    {
-      name: "taratech-cms-v2",
-    }
-  )
+    })
 );
 
 export const newId = (prefix: string) =>

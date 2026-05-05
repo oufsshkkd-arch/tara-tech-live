@@ -3,6 +3,12 @@ export type LandingPageFeature = {
   text: string;
 };
 
+export type TrustStripItem = {
+  icon: string; // lucide icon name
+  title: string;
+  sub: string;
+};
+
 export type Category = {
   id: string;
   slug: string;
@@ -287,6 +293,8 @@ export type Nav = {
 };
 
 export type CmsState = {
+  trustStrip: TrustStripItem[];
+  marqueeItems: string[];
   trackingStats: TrackingStats;
   themeSchema: ThemeSchema;
   landingPages: LandingPage[];

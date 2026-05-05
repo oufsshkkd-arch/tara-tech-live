@@ -3,38 +3,26 @@ import {
   ClipboardCheck,
   ShieldCheck,
   HeadphonesIcon,
+  type LucideIcon,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useCms } from "../cms/store";
 
-const items = [
-  {
-    icon: Wallet,
-    title: "الدفع عند الاستلام",
-    sub: "خلص ملي يوصلك المنتج، بكل ثقة.",
-  },
-  {
-    icon: ClipboardCheck,
-    title: "تأكيد قبل الإرسال",
-    sub: "كنأكدو الطلب قبل ما نسيفطو.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "منتجات متحققة",
-    sub: "كنراجعو الجودة قبل التوصيل.",
-  },
-  {
-    icon: HeadphonesIcon,
-    title: "خدمة محترمة",
-    sub: "خدمة سريعة ومحترمة.",
-  },
-];
+const ICON_MAP: Record<string, LucideIcon> = {
+  Wallet,
+  ClipboardCheck,
+  ShieldCheck,
+  HeadphonesIcon,
+};
 
 export default function TrustStrip() {
+  const { trustStrip } = useCms();
+
   return (
-    <section className="container-x pt-24 sm:pt-32">
+    <section data-section="trustStrip" className="container-x pt-24 sm:pt-32">
       <div className="rounded-2xl border border-line bg-white shadow-soft p-6 sm:p-10 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 anim-aurora">
-        {items.map((it, i) => {
-          const Icon = it.icon;
+        {trustStrip.map((it, i) => {
+          const Icon: LucideIcon = ICON_MAP[it.icon] ?? Wallet;
           return (
             <motion.div
               key={it.title}
@@ -48,12 +36,8 @@ export default function TrustStrip() {
                 <Icon className="h-5 w-5" strokeWidth={1.6} />
               </span>
               <div>
-                <div className="text-sm font-semibold text-ink" dir="auto">
-                  {it.title}
-                </div>
-                <div className="text-xs text-body mt-1" dir="auto">
-                  {it.sub}
-                </div>
+                <div className="text-sm font-semibold text-ink" dir="auto">{it.title}</div>
+                <div className="text-xs text-body mt-1" dir="auto">{it.sub}</div>
               </div>
             </motion.div>
           );

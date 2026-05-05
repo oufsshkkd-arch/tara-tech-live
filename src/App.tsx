@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAnalytics } from "./hooks/useAnalytics";
 import HomePage from "./pages/HomePage";
 import CategoryPage from "./pages/CategoryPage";
@@ -27,6 +27,8 @@ import AdminLandingPages from "./admin/sections/AdminLandingPages";
 import AdminInsights from "./admin/sections/AdminInsights";
 import AdminTheme from "./admin/sections/AdminTheme";
 import { useAuth } from "./cms/auth";
+import { useCms } from "./cms/store";
+import { subscribeCmsState } from "./lib/db";
 import SiteLayout from "./components/SiteLayout";
 import ClarityTracker from "./components/ClarityTracker";
 
@@ -46,55 +48,89 @@ function RequireAuth({ children }: { children: JSX.Element }) {
   return children;
 }
 
+function CmsSyncGate({ children }: { children: JSX.Element }) {
+  const loadFromDb = useCms((s) => s.loadFromDb);
+  const applyRemoteState = useCms((s) => s.applyRemoteState);
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    void loadFromDb().finally(() => {
+      if (active) setIsReady(true);
+    });
+
+    const unsubscribe = subscribeCmsState((state) => {
+      applyRemoteState(state);
+    });
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [applyRemoteState, loadFromDb]);
+
+  useEffect(() => {
+    if (isReady) {
+      document.getElementById("init-loader")?.remove();
+    }
+  }, [isReady]);
+
+  if (!isReady) return null;
+  return children;
+}
+
 export default function App() {
   return (
-    <>
-      <ClarityTracker />
-      <ScrollToTop />
-      <Routes>
-        <Route element={<SiteLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="/categories/:slug" element={<CategoryPage />} />
-          <Route path="/products" element={<ProductsPage />} />
-          <Route path="/products/jump-starter-air-pump" element={<JumpStarterPage />} />
-          <Route path="/products/:slug" element={<ProductPage />} />
-          <Route path="/notre-histoire" element={<StoryPage />} />
-          <Route path="/faq" element={<FaqPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/thank-you" element={<ThankYouPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-        </Route>
+    <CmsSyncGate>
+      <>
+        <ClarityTracker />
+        <ScrollToTop />
+        <Routes>
+          <Route element={<SiteLayout />}>
+            <Route index element={<HomePage />} />
+            <Route path="/categories/:slug" element={<CategoryPage />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/products/jump-starter-air-pump" element={<JumpStarterPage />} />
+            <Route path="/products/:slug" element={<ProductPage />} />
+            <Route path="/notre-histoire" element={<StoryPage />} />
+            <Route path="/faq" element={<FaqPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/thank-you" element={<ThankYouPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+          </Route>
 
-        <Route path="/tara-admin/login" element={<AdminLogin />} />
-        <Route
-          path="/tara-admin"
-          element={
-            <RequireAuth>
-              <AdminLayout />
-            </RequireAuth>
-          }
-        >
-          <Route index element={<AdminDashboard />} />
-          <Route path="brand" element={<AdminBrand />} />
-          <Route path="hero" element={<Navigate to="/tara-admin/theme" replace />} />
-          <Route path="sections" element={<Navigate to="/tara-admin/theme" replace />} />
-          <Route path="categories" element={<AdminCategories />} />
-          <Route path="products" element={<AdminProducts />} />
-          <Route path="faq" element={<AdminFaq />} />
-          <Route path="story" element={<AdminStory />} />
-          <Route path="announcement" element={<AdminAnnouncementBar />} />
-          <Route path="footer" element={<AdminFooter />} />
-          <Route path="account" element={<AdminAccount />} />
-          <Route path="orders" element={<AdminOrders />} />
-          <Route path="landing-pages" element={<AdminLandingPages />} />
-          <Route path="insights" element={<AdminInsights />} />
-          <Route path="theme" element={<AdminTheme />} />
-        </Route>
+          <Route path="/tara-admin/login" element={<AdminLogin />} />
+          <Route
+            path="/tara-admin"
+            element={
+              <RequireAuth>
+                <AdminLayout />
+              </RequireAuth>
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="brand" element={<AdminBrand />} />
+            <Route path="hero" element={<Navigate to="/tara-admin/theme" replace />} />
+            <Route path="sections" element={<Navigate to="/tara-admin/theme" replace />} />
+            <Route path="categories" element={<AdminCategories />} />
+            <Route path="products" element={<AdminProducts />} />
+            <Route path="faq" element={<AdminFaq />} />
+            <Route path="story" element={<AdminStory />} />
+            <Route path="announcement" element={<AdminAnnouncementBar />} />
+            <Route path="footer" element={<AdminFooter />} />
+            <Route path="account" element={<AdminAccount />} />
+            <Route path="orders" element={<AdminOrders />} />
+            <Route path="landing-pages" element={<AdminLandingPages />} />
+            <Route path="insights" element={<AdminInsights />} />
+            <Route path="theme" element={<AdminTheme />} />
+          </Route>
 
-        {/* Legacy /admin redirect */}
-        <Route path="/admin/*" element={<Navigate to="/tara-admin" replace />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </>
+          {/* Legacy /admin redirect */}
+          <Route path="/admin/*" element={<Navigate to="/tara-admin" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </>
+    </CmsSyncGate>
   );
 }

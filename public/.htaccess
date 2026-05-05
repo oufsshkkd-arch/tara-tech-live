@@ -1,26 +1,28 @@
 Options -MultiViews
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^ index.html [QSA,L]
 
-# Disable LiteSpeed cache entirely
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.html [QSA,L]
+</IfModule>
+
 <IfModule LiteSpeed>
   CacheLookup off
   RewriteRule .* - [E=noabort:1]
 </IfModule>
 
-# Never cache index.html — use "always" so the header fires even when
-# LiteSpeed or other modules set their own cache headers first
-<FilesMatch "^index\.html$">
-  Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
-  Header always set Pragma "no-cache"
-  Header always set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
-  Header always set X-LiteSpeed-Cache-Control "no-cache"
-  Header always unset ETag
-  FileETag None
-</FilesMatch>
+<IfModule mod_headers.c>
+  <FilesMatch "^(index\.html|sw\.js|build\.json)$">
+    Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header always set Pragma "no-cache"
+    Header always set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+    Header always set X-LiteSpeed-Cache-Control "no-cache"
+    Header always unset ETag
+    FileETag None
+  </FilesMatch>
 
-# Cache hashed JS/CSS/images forever — safe because Vite content-hashes filenames
-<FilesMatch "\.(js|css|png|jpg|jpeg|svg|webp|woff2)$">
-  Header always set Cache-Control "public, max-age=31536000, immutable"
-</FilesMatch>
+  <FilesMatch ".*-[A-Za-z0-9_-]{8,}\.(js|mjs|css|png|jpg|jpeg|gif|svg|webp|avif|ico|woff|woff2)$">
+    Header always set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>
