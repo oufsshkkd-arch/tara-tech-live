@@ -48,111 +48,96 @@ jobs:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_TARGET_DIRS: ${{ secrets.FTP_TARGET_DIRS || secrets.FTP_TARGET_DIR || secrets.FTP_TARGET || '. public_html domains/taratech.pro/public_html' }}
+          FTP_TARGET: ${{ secrets.FTP_TARGET || 'public_html' }}
         run: |
-          for FTP_TARGET_DIR in $FTP_TARGET_DIRS; do
-            echo "Deploying assets to: $FTP_TARGET_DIR"
-            lftp -c "
-              set ssl:verify-certificate no
-              set ftp:ssl-force true
-              set ftp:passive-mode true
-              set net:timeout 120
-              set net:max-retries 5
-              open -u $FTP_USER,$FTP_PASS $FTP_SERVER
-              mkdir -p $FTP_TARGET_DIR
-              cd $FTP_TARGET_DIR
-              mirror --reverse --verbose --no-perms --parallel=4 --exclude-glob index.html ./dist/ ./
-              quit
-            "
-          done
+          echo "Deploying assets to Hostinger folder: $FTP_TARGET"
+          lftp -c "
+            set ssl:verify-certificate no
+            set ftp:ssl-force true
+            set ftp:passive-mode true
+            set net:timeout 120
+            set net:max-retries 5
+            open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+            cd $FTP_TARGET
+            mirror --reverse --delete --delete-first --verbose --no-perms --parallel=4 --exclude-glob index.html ./dist/ ./
+            quit
+          "
 
       - name: Purge LiteSpeed cache
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_TARGET_DIRS: ${{ secrets.FTP_TARGET_DIRS || secrets.FTP_TARGET_DIR || secrets.FTP_TARGET || '. public_html domains/taratech.pro/public_html' }}
+          FTP_TARGET: ${{ secrets.FTP_TARGET || 'public_html' }}
         run: |
           STAMP=$(date +%s)
           PURGE_FILE="_p${STAMP}.php"
 
           printf '<?php header("X-LiteSpeed-Purge: *"); echo "purged"; ?>' > /tmp/purge.php
 
-          for FTP_TARGET_DIR in $FTP_TARGET_DIRS; do
-            echo "Uploading purge file to: $FTP_TARGET_DIR"
-            lftp -c "
-              set ssl:verify-certificate no
-              set ftp:ssl-force true
-              set ftp:passive-mode true
-              set net:timeout 30
-              set net:max-retries 3
-              open -u $FTP_USER,$FTP_PASS $FTP_SERVER
-              mkdir -p $FTP_TARGET_DIR
-              cd $FTP_TARGET_DIR
-              put /tmp/purge.php -o $PURGE_FILE
-              quit
-            "
-          done
+          lftp -c "
+            set ssl:verify-certificate no
+            set ftp:ssl-force true
+            set ftp:passive-mode true
+            set net:timeout 30
+            set net:max-retries 3
+            open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+            cd $FTP_TARGET
+            put /tmp/purge.php -o $PURGE_FILE
+            quit
+          "
 
           sleep 5
           curl -fsS "https://taratech.pro/${PURGE_FILE}" -H "Cache-Control: no-cache" || true
 
           sleep 2
-          for FTP_TARGET_DIR in $FTP_TARGET_DIRS; do
-            lftp -c "
-              set ssl:verify-certificate no
-              set ftp:ssl-force true
-              set ftp:passive-mode true
-              set net:timeout 30
-              open -u $FTP_USER,$FTP_PASS $FTP_SERVER
-              cd $FTP_TARGET_DIR
-              rm $PURGE_FILE
-              quit
-            " || true
-          done
+          lftp -c "
+            set ssl:verify-certificate no
+            set ftp:ssl-force true
+            set ftp:passive-mode true
+            set net:timeout 30
+            open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+            cd $FTP_TARGET
+            rm $PURGE_FILE
+            quit
+          " || true
 
       - name: Upload index.html last to candidate roots
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_TARGET_DIRS: ${{ secrets.FTP_TARGET_DIRS || secrets.FTP_TARGET_DIR || secrets.FTP_TARGET || '. public_html domains/taratech.pro/public_html' }}
+          FTP_TARGET: ${{ secrets.FTP_TARGET || 'public_html' }}
         run: |
-          for FTP_TARGET_DIR in $FTP_TARGET_DIRS; do
-            echo "Uploading index.html last to: $FTP_TARGET_DIR"
-            lftp -c "
-              set ssl:verify-certificate no
-              set ftp:ssl-force true
-              set ftp:passive-mode true
-              set net:timeout 120
-              set net:max-retries 5
-              open -u $FTP_USER,$FTP_PASS $FTP_SERVER
-              cd $FTP_TARGET_DIR
-              put ./dist/index.html -o index.html
-              quit
-            "
-          done
+          lftp -c "
+            set ssl:verify-certificate no
+            set ftp:ssl-force true
+            set ftp:passive-mode true
+            set net:timeout 120
+            set net:max-retries 5
+            open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+            cd $FTP_TARGET
+            put ./dist/index.html -o index.html
+            quit
+          "
 
       - name: Audit remote FTP listing
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_TARGET_DIRS: ${{ secrets.FTP_TARGET_DIRS || secrets.FTP_TARGET_DIR || secrets.FTP_TARGET || '. public_html domains/taratech.pro/public_html' }}
+          FTP_TARGET: ${{ secrets.FTP_TARGET || 'public_html' }}
         run: |
-          for FTP_TARGET_DIR in $FTP_TARGET_DIRS; do
-            echo "Remote audit for: $FTP_TARGET_DIR"
-            lftp -c "
-              set ssl:verify-certificate no
-              set ftp:ssl-force true
-              set ftp:passive-mode true
-              set net:timeout 60
-              set net:max-retries 2
-              open -u $FTP_USER,$FTP_PASS $FTP_SERVER
-              cd $FTP_TARGET_DIR
-              pwd
-              cls -la
-              cls -la assets || true
-              quit
-            "
-          done
+          lftp -c "
+            set ssl:verify-certificate no
+            set ftp:ssl-force true
+            set ftp:passive-mode true
+            set net:timeout 60
+            set net:max-retries 2
+            open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+            cd $FTP_TARGET
+            pwd
+            cls -la
+            cls -la assets || true
+            quit
+          "
