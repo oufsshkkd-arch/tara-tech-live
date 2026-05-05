@@ -12,14 +12,16 @@ const ANIM_VARIANTS: Record<string, AnimVariant> = {
 };
 import { useCms } from "../cms/store";
 
-const HERO_IMAGE = "/images/jump-starter/product-hero.jpg?v=2";
-const FALLBACK_IMAGE = "/images/jump-starter/family-road.jpg?v=2";
+const HERO_IMAGE = "/images/jump-starter/product-hero.jpg";
+const FALLBACK_IMAGE = "/images/jump-starter/family-road.jpg";
 
-// Append ?v=2 to local paths to bust mobile browser cache; leave CDN URLs untouched
+// Append build timestamp to local paths (/…) so every deploy forces a fresh
+// fetch on mobile. CDN URLs (Unsplash etc.) are left untouched.
 const bust = (url: string) => {
   if (!url) return url;
-  if (url.startsWith("/")) return url.includes("?") ? url : `${url}?v=2`;
-  return url;
+  if (!url.startsWith("/")) return url;
+  const sep = url.includes("?") ? "&" : "?";
+  return `${url}${sep}_v=${__BUILD_TS__}`;
 };
 
 const CARD_W = 320;
@@ -129,6 +131,7 @@ export default function Hero() {
           {hero.mediaType === "video" ? (
             <video
               key={activeVideoSrc || "hero-video"}
+              ref={(el) => { if (el) el.setAttribute("webkit-playsinline", ""); }}
               src={activeVideoSrc || undefined}
               poster={bust(hero.videoPoster || HERO_IMAGE)}
               autoPlay
@@ -136,6 +139,7 @@ export default function Hero() {
               loop
               playsInline
               preload="metadata"
+              style={{ objectFit: "cover" }}
               className="absolute inset-0 h-full w-full object-cover"
             />
           ) : (
