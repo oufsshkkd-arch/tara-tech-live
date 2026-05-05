@@ -39,7 +39,9 @@ jobs:
           EOF
 
       - name: Install lftp
-        run: sudo apt-get update && sudo apt-get install -y lftp
+        run: |
+          timeout 180s sudo apt-get update -qq
+          timeout 180s sudo apt-get install -y --no-install-recommends lftp
 
       - name: Deploy assets to Hostinger candidate roots
         env:
