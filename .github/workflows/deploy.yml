@@ -46,7 +46,7 @@ jobs:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_TARGET_DIR: ${{ secrets.FTP_TARGET_DIR || 'public_html' }}
+          FTP_TARGET_DIR: ${{ secrets.FTP_TARGET_DIR || 'domains/taratech.pro/public_html' }}
         run: |
           lftp -c "
             set ssl:verify-certificate no
@@ -66,7 +66,7 @@ jobs:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_TARGET_DIR: ${{ secrets.FTP_TARGET_DIR || 'public_html' }}
+          FTP_TARGET_DIR: ${{ secrets.FTP_TARGET_DIR || 'domains/taratech.pro/public_html' }}
         run: |
           STAMP=$(date +%s)
           PURGE_FILE="_p${STAMP}.php"
@@ -106,7 +106,7 @@ jobs:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_TARGET_DIR: ${{ secrets.FTP_TARGET_DIR || 'public_html' }}
+          FTP_TARGET_DIR: ${{ secrets.FTP_TARGET_DIR || 'domains/taratech.pro/public_html' }}
         run: |
           lftp -c "
             set ssl:verify-certificate no
