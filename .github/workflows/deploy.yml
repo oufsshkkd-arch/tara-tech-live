@@ -31,7 +31,7 @@ jobs:
       - name: Install lftp
         run: sudo apt-get install -y lftp
 
-      - name: Deploy to Hostinger (full mirror with delete)
+      - name: Deploy — full mirror replace (delete stale files)
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
@@ -47,3 +47,46 @@ jobs:
             mirror --reverse --verbose --no-perms --parallel=4 --delete --transfer-all ./dist/ ./
             quit
           "
+
+      - name: Purge LiteSpeed cache (timestamp-based PHP endpoint)
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USER: ${{ secrets.FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          # Unique filename — LiteSpeed has never cached this URL, so it MUST
+          # pass the request through to PHP, which returns X-LiteSpeed-Purge: *
+          STAMP=$(date +%s)
+          PURGE_FILE="_p${STAMP}.php"
+
+          printf '<?php header("X-LiteSpeed-Purge: *"); echo "purged"; ?>' \
+            > /tmp/purge.php
+
+          # Upload
+          lftp -c "
+            set ssl:verify-certificate no
+            set ftp:ssl-force true
+            set ftp:passive-mode true
+            set net:timeout 30
+            set net:max-retries 3
+            open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+            put /tmp/purge.php -o $PURGE_FILE
+            quit
+          "
+
+          # Wait for file to be visible, then trigger the purge
+          sleep 5
+          curl -fsS "https://taratech.pro/${PURGE_FILE}" \
+            -H "Cache-Control: no-cache" || true
+
+          # Clean up — ignore errors if file is already gone
+          sleep 2
+          lftp -c "
+            set ssl:verify-certificate no
+            set ftp:ssl-force true
+            set ftp:passive-mode true
+            set net:timeout 30
+            open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+            rm $PURGE_FILE
+            quit
+          " || true

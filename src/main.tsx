@@ -5,13 +5,18 @@ import App from "./App";
 import "./index.css";
 import { useCms } from "./cms/store";
 
-// Load remote state from Supabase on startup (merge over localStorage)
-useCms.getState().loadFromDb();
+const root = ReactDOM.createRoot(document.getElementById("root")!);
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </React.StrictMode>
-);
+// Block the first render until Supabase responds so every page load — including
+// incognito — shows live data, not stale localStorage or seed defaults.
+// Falls back to whatever is in the store (localStorage / seed) if Supabase fails.
+useCms.getState().loadFromDb().finally(() => {
+  document.getElementById("init-loader")?.remove();
+  root.render(
+    <React.StrictMode>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </React.StrictMode>
+  );
+});
