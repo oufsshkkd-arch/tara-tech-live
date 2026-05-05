@@ -41,81 +41,92 @@ jobs:
       - name: Install lftp
         run: sudo apt-get update && sudo apt-get install -y lftp
 
-      - name: Deploy assets first with stale-file deletion
+      - name: Deploy assets to Hostinger candidate roots
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_TARGET_DIR: ${{ secrets.FTP_TARGET_DIR || 'domains/taratech.pro/public_html' }}
+          FTP_TARGET_DIRS: ${{ secrets.FTP_TARGET_DIRS || secrets.FTP_TARGET_DIR || '. public_html domains/taratech.pro/public_html' }}
         run: |
-          lftp -c "
-            set ssl:verify-certificate no
-            set ftp:ssl-force true
-            set ftp:passive-mode true
-            set net:timeout 120
-            set net:max-retries 5
-            open -u $FTP_USER,$FTP_PASS $FTP_SERVER
-            mkdir -p $FTP_TARGET_DIR
-            cd $FTP_TARGET_DIR
-            mirror --reverse --delete --delete-first --verbose --no-perms --parallel=4 --exclude-glob index.html ./dist/ ./
-            quit
-          "
+          for FTP_TARGET_DIR in $FTP_TARGET_DIRS; do
+            echo "Deploying assets to: $FTP_TARGET_DIR"
+            lftp -c "
+              set ssl:verify-certificate no
+              set ftp:ssl-force true
+              set ftp:passive-mode true
+              set net:timeout 120
+              set net:max-retries 5
+              open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+              mkdir -p $FTP_TARGET_DIR
+              cd $FTP_TARGET_DIR
+              mirror --reverse --verbose --no-perms --parallel=4 --exclude-glob index.html ./dist/ ./
+              quit
+            "
+          done
 
       - name: Purge LiteSpeed cache
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_TARGET_DIR: ${{ secrets.FTP_TARGET_DIR || 'domains/taratech.pro/public_html' }}
+          FTP_TARGET_DIRS: ${{ secrets.FTP_TARGET_DIRS || secrets.FTP_TARGET_DIR || '. public_html domains/taratech.pro/public_html' }}
         run: |
           STAMP=$(date +%s)
           PURGE_FILE="_p${STAMP}.php"
 
           printf '<?php header("X-LiteSpeed-Purge: *"); echo "purged"; ?>' > /tmp/purge.php
 
-          lftp -c "
-            set ssl:verify-certificate no
-            set ftp:ssl-force true
-            set ftp:passive-mode true
-            set net:timeout 30
-            set net:max-retries 3
-            open -u $FTP_USER,$FTP_PASS $FTP_SERVER
-            mkdir -p $FTP_TARGET_DIR
-            cd $FTP_TARGET_DIR
-            put /tmp/purge.php -o $PURGE_FILE
-            quit
-          "
+          for FTP_TARGET_DIR in $FTP_TARGET_DIRS; do
+            echo "Uploading purge file to: $FTP_TARGET_DIR"
+            lftp -c "
+              set ssl:verify-certificate no
+              set ftp:ssl-force true
+              set ftp:passive-mode true
+              set net:timeout 30
+              set net:max-retries 3
+              open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+              mkdir -p $FTP_TARGET_DIR
+              cd $FTP_TARGET_DIR
+              put /tmp/purge.php -o $PURGE_FILE
+              quit
+            "
+          done
 
           sleep 5
           curl -fsS "https://taratech.pro/${PURGE_FILE}" -H "Cache-Control: no-cache" || true
 
           sleep 2
-          lftp -c "
-            set ssl:verify-certificate no
-            set ftp:ssl-force true
-            set ftp:passive-mode true
-            set net:timeout 30
-            open -u $FTP_USER,$FTP_PASS $FTP_SERVER
-            cd $FTP_TARGET_DIR
-            rm $PURGE_FILE
-            quit
-          " || true
+          for FTP_TARGET_DIR in $FTP_TARGET_DIRS; do
+            lftp -c "
+              set ssl:verify-certificate no
+              set ftp:ssl-force true
+              set ftp:passive-mode true
+              set net:timeout 30
+              open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+              cd $FTP_TARGET_DIR
+              rm $PURGE_FILE
+              quit
+            " || true
+          done
 
-      - name: Upload index.html last
+      - name: Upload index.html last to candidate roots
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_TARGET_DIR: ${{ secrets.FTP_TARGET_DIR || 'domains/taratech.pro/public_html' }}
+          FTP_TARGET_DIRS: ${{ secrets.FTP_TARGET_DIRS || secrets.FTP_TARGET_DIR || '. public_html domains/taratech.pro/public_html' }}
         run: |
-          lftp -c "
-            set ssl:verify-certificate no
-            set ftp:ssl-force true
-            set ftp:passive-mode true
-            set net:timeout 120
-            set net:max-retries 5
-            open -u $FTP_USER,$FTP_PASS $FTP_SERVER
-            cd $FTP_TARGET_DIR
-            put ./dist/index.html -o index.html
-            quit
-          "
+          for FTP_TARGET_DIR in $FTP_TARGET_DIRS; do
+            echo "Uploading index.html last to: $FTP_TARGET_DIR"
+            lftp -c "
+              set ssl:verify-certificate no
+              set ftp:ssl-force true
+              set ftp:passive-mode true
+              set net:timeout 120
+              set net:max-retries 5
+              open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+              cd $FTP_TARGET_DIR
+              put ./dist/index.html -o index.html
+              quit
+            "
+          done
