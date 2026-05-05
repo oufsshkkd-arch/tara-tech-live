@@ -43,101 +43,160 @@ jobs:
           timeout 180s sudo apt-get update -qq
           timeout 180s sudo apt-get install -y --no-install-recommends lftp
 
-      - name: Deploy assets to Hostinger candidate roots
+      - name: Deploy assets to Hostinger web roots
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_TARGET: ${{ secrets.FTP_TARGET || 'public_html' }}
+          FTP_TARGET: ${{ secrets.FTP_TARGET }}
         run: |
-          echo "Deploying assets to Hostinger folder: $FTP_TARGET"
-          lftp -c "
-            set ssl:verify-certificate no
-            set ftp:ssl-force true
-            set ftp:passive-mode true
-            set net:timeout 120
-            set net:max-retries 5
-            open -u $FTP_USER,$FTP_PASS $FTP_SERVER
-            cd $FTP_TARGET
-            mirror --reverse --delete --delete-first --verbose --no-perms --parallel=4 --exclude-glob index.html ./dist/ ./
-            quit
-          "
+          set -euo pipefail
+
+          TARGETS="/domains/taratech.pro/public_html /public_html domains/taratech.pro/public_html public_html"
+
+          if [ -n "${FTP_TARGET:-}" ] && [ "$FTP_TARGET" != "." ] && [ "$FTP_TARGET" != "/" ]; then
+            case " $TARGETS " in
+              *" $FTP_TARGET "*) ;;
+              *) TARGETS="$FTP_TARGET $TARGETS" ;;
+            esac
+          fi
+
+          for TARGET in $TARGETS; do
+            echo "Deploying assets to a configured Hostinger web root"
+            lftp -c "
+              set ssl:verify-certificate no
+              set ftp:ssl-force true
+              set ftp:passive-mode true
+              set net:timeout 120
+              set net:max-retries 5
+              open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+              mkdir -p $TARGET
+              cd $TARGET
+              mirror --reverse --delete --delete-first --verbose --no-perms --parallel=4 --exclude-glob index.html ./dist/ ./
+              quit
+            "
+          done
 
       - name: Purge LiteSpeed cache
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_TARGET: ${{ secrets.FTP_TARGET || 'public_html' }}
+          FTP_TARGET: ${{ secrets.FTP_TARGET }}
         run: |
+          set -euo pipefail
+
+          TARGETS="/domains/taratech.pro/public_html /public_html domains/taratech.pro/public_html public_html"
+
+          if [ -n "${FTP_TARGET:-}" ] && [ "$FTP_TARGET" != "." ] && [ "$FTP_TARGET" != "/" ]; then
+            case " $TARGETS " in
+              *" $FTP_TARGET "*) ;;
+              *) TARGETS="$FTP_TARGET $TARGETS" ;;
+            esac
+          fi
+
           STAMP=$(date +%s)
           PURGE_FILE="_p${STAMP}.php"
 
           printf '<?php header("X-LiteSpeed-Purge: *"); echo "purged"; ?>' > /tmp/purge.php
 
-          lftp -c "
-            set ssl:verify-certificate no
-            set ftp:ssl-force true
-            set ftp:passive-mode true
-            set net:timeout 30
-            set net:max-retries 3
-            open -u $FTP_USER,$FTP_PASS $FTP_SERVER
-            cd $FTP_TARGET
-            put /tmp/purge.php -o $PURGE_FILE
-            quit
-          "
+          for TARGET in $TARGETS; do
+            lftp -c "
+              set ssl:verify-certificate no
+              set ftp:ssl-force true
+              set ftp:passive-mode true
+              set net:timeout 30
+              set net:max-retries 3
+              open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+              mkdir -p $TARGET
+              cd $TARGET
+              put /tmp/purge.php -o $PURGE_FILE
+              quit
+            "
+          done
 
           sleep 5
           curl -fsS "https://taratech.pro/${PURGE_FILE}" -H "Cache-Control: no-cache" || true
 
           sleep 2
-          lftp -c "
-            set ssl:verify-certificate no
-            set ftp:ssl-force true
-            set ftp:passive-mode true
-            set net:timeout 30
-            open -u $FTP_USER,$FTP_PASS $FTP_SERVER
-            cd $FTP_TARGET
-            rm $PURGE_FILE
-            quit
-          " || true
+          for TARGET in $TARGETS; do
+            lftp -c "
+              set ssl:verify-certificate no
+              set ftp:ssl-force true
+              set ftp:passive-mode true
+              set net:timeout 30
+              open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+              cd $TARGET
+              rm $PURGE_FILE
+              quit
+            " || true
+          done
 
-      - name: Upload index.html last to candidate roots
+      - name: Upload index.html last to web roots
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_TARGET: ${{ secrets.FTP_TARGET || 'public_html' }}
+          FTP_TARGET: ${{ secrets.FTP_TARGET }}
         run: |
-          lftp -c "
-            set ssl:verify-certificate no
-            set ftp:ssl-force true
-            set ftp:passive-mode true
-            set net:timeout 120
-            set net:max-retries 5
-            open -u $FTP_USER,$FTP_PASS $FTP_SERVER
-            cd $FTP_TARGET
-            put ./dist/index.html -o index.html
-            quit
-          "
+          set -euo pipefail
+
+          TARGETS="/domains/taratech.pro/public_html /public_html domains/taratech.pro/public_html public_html"
+
+          if [ -n "${FTP_TARGET:-}" ] && [ "$FTP_TARGET" != "." ] && [ "$FTP_TARGET" != "/" ]; then
+            case " $TARGETS " in
+              *" $FTP_TARGET "*) ;;
+              *) TARGETS="$FTP_TARGET $TARGETS" ;;
+            esac
+          fi
+
+          for TARGET in $TARGETS; do
+            lftp -c "
+              set ssl:verify-certificate no
+              set ftp:ssl-force true
+              set ftp:passive-mode true
+              set net:timeout 120
+              set net:max-retries 5
+              open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+              mkdir -p $TARGET
+              cd $TARGET
+              put ./dist/index.html -o index.html
+              quit
+            "
+          done
 
       - name: Audit remote FTP listing
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_TARGET: ${{ secrets.FTP_TARGET || 'public_html' }}
+          FTP_TARGET: ${{ secrets.FTP_TARGET }}
         run: |
-          lftp -c "
-            set ssl:verify-certificate no
-            set ftp:ssl-force true
-            set ftp:passive-mode true
-            set net:timeout 60
-            set net:max-retries 2
-            open -u $FTP_USER,$FTP_PASS $FTP_SERVER
-            cd $FTP_TARGET
-            pwd
-            cls -la
-            cls -la assets || true
-            quit
-          "
+          set -euo pipefail
+
+          TARGETS="/domains/taratech.pro/public_html /public_html domains/taratech.pro/public_html public_html"
+
+          if [ -n "${FTP_TARGET:-}" ] && [ "$FTP_TARGET" != "." ] && [ "$FTP_TARGET" != "/" ]; then
+            case " $TARGETS " in
+              *" $FTP_TARGET "*) ;;
+              *) TARGETS="$FTP_TARGET $TARGETS" ;;
+            esac
+          fi
+
+          for TARGET in $TARGETS; do
+            echo "Auditing configured Hostinger web root"
+            lftp -c "
+              set ssl:verify-certificate no
+              set ftp:ssl-force true
+              set ftp:passive-mode true
+              set net:timeout 60
+              set net:max-retries 2
+              open -u $FTP_USER,$FTP_PASS $FTP_SERVER
+              mkdir -p $TARGET
+              cd $TARGET
+              pwd
+              cls -la
+              cls -la assets || true
+              quit
+            "
+          done
