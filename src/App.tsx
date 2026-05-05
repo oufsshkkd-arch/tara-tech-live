@@ -84,6 +84,7 @@ export default function App() {
   return (
     <CmsSyncGate>
       <>
+
         <ClarityTracker />
         <ScrollToTop />
         <Routes>
