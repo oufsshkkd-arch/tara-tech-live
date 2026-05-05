@@ -181,6 +181,8 @@ export type FinalCtaContent = {
 export type CategorySectionContent = {
   title: string;
   intro: string;
+  columns?: number; // 1–4, default 4
+  mobileColumns?: number; // 1–2, default 1
 };
 
 export type FeaturedSectionContent = {

@@ -24,6 +24,8 @@ export default function AdminCategories() {
     upsertCategory,
     removeCategory,
     reorderCategories,
+    categorySection,
+    setCategorySection,
   } = useCms();
   const [editingId, setEditingId] = useState<string | null>(null);
   const sorted = [...categories].sort((a, b) => a.order - b.order);
@@ -55,6 +57,48 @@ export default function AdminCategories() {
           </button>
         }
       />
+
+      {/* Grid layout controls — synced to Supabase via SaveBar */}
+      <Section title="Mise en page de la grille">
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Field label="Colonnes desktop" hint="1 à 4 colonnes sur grand écran.">
+            <div className="flex gap-1">
+              {[1, 2, 3, 4].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setCategorySection({ columns: n })}
+                  className={`flex-1 py-2 text-sm font-medium rounded-lg border transition-colors ${
+                    (categorySection.columns ?? 4) === n
+                      ? "bg-ink text-white border-ink"
+                      : "border-line text-body hover:border-ink/40"
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          </Field>
+          <Field label="Colonnes mobile" hint="1 ou 2 colonnes sur petit écran.">
+            <div className="flex gap-1">
+              {[1, 2].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setCategorySection({ mobileColumns: n })}
+                  className={`flex-1 py-2 text-sm font-medium rounded-lg border transition-colors ${
+                    (categorySection.mobileColumns ?? 1) === n
+                      ? "bg-ink text-white border-ink"
+                      : "border-line text-body hover:border-ink/40"
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          </Field>
+        </div>
+      </Section>
 
       <Section title="Liste">
         <div className="grid gap-2">
