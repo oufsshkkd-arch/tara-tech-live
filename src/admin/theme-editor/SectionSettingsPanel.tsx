@@ -1,5 +1,6 @@
 import { Plus, Settings2, Trash2 } from "lucide-react";
 import type { ReactNode } from "react";
+import { useCms } from "../../cms/store";
 import type {
   AnnouncementThemeSettings,
   Category,
@@ -220,6 +221,7 @@ export default function SectionSettingsPanel({
   onReplaceSettings: (sectionId: SectionId, settings: EditorSection["settings"]) => void;
 }) {
   const meta = SECTION_META[section.type];
+  const { uiLabels, setUiLabels } = useCms();
 
   return (
     <aside className="flex h-full w-[370px] shrink-0 flex-col border-r border-slate-200 bg-white" dir="rtl">
@@ -237,7 +239,12 @@ export default function SectionSettingsPanel({
 
       <div className="min-h-0 flex-1 overflow-y-auto bg-slate-50/80 p-4">
         <div className="mb-4">
-          <ThemeSettingsPanel theme={theme} onChange={onThemeUpdate} />
+          <ThemeSettingsPanel
+            theme={theme}
+            onChange={onThemeUpdate}
+            uiLabels={uiLabels}
+            onUiLabelsChange={setUiLabels}
+          />
         </div>
         <div className="space-y-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3">

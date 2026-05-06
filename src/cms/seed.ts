@@ -143,6 +143,7 @@ export const seed: CmsState = {
     title: "الأسئلة الشائعة",
     intro:
       "جاوبنا على الأسئلة اللي كيتطرحو بزاف باش تبقى الصورة واضحة عندك قبل الطلب.",
+    pillLabel: "الأسئلة",
   },
   finalCta: {
     title: "اكتشف عالم Tara Tech",
@@ -475,10 +476,20 @@ export const seed: CmsState = {
     tagline: "Tara Tech — تكنولوجيا مفيدة، ثقة دائمة.",
     bottomLeft: `© ${new Date().getFullYear()} Tara Tech. جميع الحقوق محفوظة.`,
     bottomRight: "مختارة بعناية فالمغرب.",
+    navLabel: "التنقل",
+    contactLabel: "تواصل",
+    legalLabel: "قانوني",
   },
   admin: {
     email: "admin@taratech.ma",
     password: "TaraTech2026!",
+  },
+  uiLabels: {
+    addToCart: "أضف للسلة",
+    limitedStock: "كمية محدودة",
+    priceOnRequest: "السعر عند الطلب",
+    currency: "درهم",
+    whatsappLabel: "تواصل معنا",
   },
   landingPages: [
     {

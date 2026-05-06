@@ -65,6 +65,7 @@ type Actions = {
   reorderAnnouncementMessages: (orderedIds: string[]) => void;
 
   setFooter: (f: Partial<FooterContent>) => void;
+  setUiLabels: (u: Partial<NonNullable<CmsState["uiLabels"]>>) => void;
   upsertLandingPage: (lp: LandingPage) => void;
 
   setThemeSchema: (t: ThemeSchema) => void;
@@ -109,6 +110,7 @@ const actionKeys = [
   "removeAnnouncementMessage",
   "reorderAnnouncementMessages",
   "setFooter",
+  "setUiLabels",
   "upsertLandingPage",
   "setThemeSchema",
   "updateSectionTheme",
@@ -259,6 +261,9 @@ export const useCms = create<CmsStore>()(
 
       setFooter: (f) =>
         set((st) => ({ footer: { ...st.footer, ...f } })),
+
+      setUiLabels: (u) =>
+        set((st) => ({ uiLabels: { ...st.uiLabels, ...u } })),
 
       upsertLandingPage: (lp) =>
         set((s) => {

@@ -1,5 +1,6 @@
 import { ArrowLeft, Sparkles, Star } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAnalytics } from "../hooks/useAnalytics";
 import type {
   HeroFeaturedProductsSettings,
   HeroThemeSettings,
@@ -183,6 +184,7 @@ function CtaButton({
   variant: "primary" | "secondary";
   mode: Mode;
 }) {
+  const { trackHeroCtaClick } = useAnalytics();
   const cls =
     variant === "primary"
       ? "inline-flex items-center gap-2 rounded-full bg-white text-slate-950 px-6 py-3 text-sm font-black shadow-lg hover:bg-slate-100 transition-colors"
@@ -205,14 +207,14 @@ function CtaButton({
 
   if (/^https?:\/\//i.test(href)) {
     return (
-      <a href={href} target="_blank" rel="noreferrer" className={cls}>
+      <a href={href} target="_blank" rel="noreferrer" className={cls} onClick={() => trackHeroCtaClick(text)}>
         {inner}
       </a>
     );
   }
 
   return (
-    <Link to={href || "/products"} className={cls}>
+    <Link to={href || "/products"} className={cls} onClick={() => trackHeroCtaClick(text)}>
       {inner}
     </Link>
   );

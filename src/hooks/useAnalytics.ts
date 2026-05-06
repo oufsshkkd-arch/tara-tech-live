@@ -41,5 +41,9 @@ export function useAnalytics() {
     incrementStat("pageViews");
   }, [incrementStat]);
 
-  return { trackWhatsAppClick, trackFormStart, trackFormAbandon, trackOrderSuccess, trackPageView };
+  const trackHeroCtaClick = useCallback((label?: string) => {
+    fire("hero_cta_click", "cta_label", label ?? "");
+  }, []);
+
+  return { trackWhatsAppClick, trackFormStart, trackFormAbandon, trackOrderSuccess, trackPageView, trackHeroCtaClick };
 }

@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCms } from "../cms/store";
+import type { WhyContent } from "../cms/types";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Sparkles,
@@ -19,8 +20,9 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
 const DEFAULT_ICONS = ["Sparkles", "ShieldCheck", "Wallet", "ClipboardCheck", "HeadphonesIcon"];
 
-export default function WhyTara() {
-  const { why } = useCms();
+export default function WhyTara({ why: whyProp }: { why?: WhyContent } = {}) {
+  const cms = useCms();
+  const why = whyProp ?? cms.why;
   const pillLabel = why.pillLabel || "علاش حنا";
   const icons = why.icons?.length ? why.icons : DEFAULT_ICONS;
 

@@ -1,7 +1,13 @@
 import { useCms } from "../cms/store";
+import type { AnnouncementBarSettings } from "../cms/types";
 
-export default function AnnouncementBar() {
-  const { announcementBar } = useCms();
+export default function AnnouncementBar({
+  announcementBar: announcementBarProp,
+}: {
+  announcementBar?: AnnouncementBarSettings;
+} = {}) {
+  const cms = useCms();
+  const announcementBar = announcementBarProp ?? cms.announcementBar;
 
   if (!announcementBar.enabled || announcementBar.messages.length === 0) {
     return null;

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight, Home, Car, Plane, Laptop2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCms } from "../cms/store";
+import type { CategorySectionContent, Category } from "../cms/types";
 
 const iconMap: Record<string, any> = { Home, Car, Plane, Laptop2 };
 
@@ -19,8 +20,16 @@ const MOBILE_GRID: Record<number, string> = {
   2: "grid-cols-2",
 };
 
-export default function Categories() {
-  const { categorySection, categories } = useCms();
+export default function Categories({
+  categorySection: categorySectionProp,
+  categories: categoriesProp,
+}: {
+  categorySection?: CategorySectionContent;
+  categories?: Category[];
+} = {}) {
+  const cms = useCms();
+  const categorySection = categorySectionProp ?? cms.categorySection;
+  const categories = categoriesProp ?? cms.categories;
   const visible = categories
     .filter((c) => !c.hidden)
     .sort((a, b) => a.order - b.order);

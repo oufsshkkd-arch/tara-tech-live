@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCms } from "../cms/store";
+import type { StoryContent } from "../cms/types";
 
 const STORY_IMAGE = "/story-editorial.png";
 
@@ -11,8 +12,9 @@ const DEFAULT_VALUE_CHIPS = [
   { label: "محلية", sub: "خدمة المغرب" },
 ];
 
-export default function Story() {
-  const { story } = useCms();
+export default function Story({ story: storyProp }: { story?: StoryContent } = {}) {
+  const cms = useCms();
+  const story = storyProp ?? cms.story;
 
   const values = story.valueChips?.length ? story.valueChips : DEFAULT_VALUE_CHIPS;
   const pillLabel = story.pillLabel || "قصتنا";

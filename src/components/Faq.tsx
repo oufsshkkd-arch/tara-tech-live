@@ -2,9 +2,18 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "lucide-react";
 import { useCms } from "../cms/store";
+import type { FaqSectionContent, FaqItem } from "../cms/types";
 
-export default function Faq() {
-  const { faqSection, faq } = useCms();
+export default function Faq({
+  faqSection: faqSectionProp,
+  faq: faqProp,
+}: {
+  faqSection?: FaqSectionContent;
+  faq?: FaqItem[];
+} = {}) {
+  const cms = useCms();
+  const faqSection = faqSectionProp ?? cms.faqSection;
+  const faq = faqProp ?? cms.faq;
   const items = [...faq].filter((item) => item.enabled !== false).sort((a, b) => a.order - b.order);
   const [open, setOpen] = useState<string | null>(items[0]?.id ?? null);
 
@@ -12,7 +21,7 @@ export default function Faq() {
     <section id="faq" className="container-x pt-24 sm:pt-32">
       <div className="grid lg:grid-cols-12 gap-10">
         <div className="lg:col-span-4">
-          <span className="pill mb-4">الأسئلة</span>
+          <span className="pill mb-4">{faqSection.pillLabel || "الأسئلة"}</span>
           <h2
             className="font-sans font-extrabold text-4xl sm:text-5xl text-ink leading-tight tracking-[-0.02em]"
             dir="auto"

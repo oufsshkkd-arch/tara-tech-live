@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { useCms } from "../cms/store";
+import type { FinalCtaContent } from "../cms/types";
 
-export default function FinalCta() {
-  const { finalCta } = useCms();
+export default function FinalCta({ finalCta: finalCtaProp }: { finalCta?: FinalCtaContent } = {}) {
+  const cms = useCms();
+  const finalCta = finalCtaProp ?? cms.finalCta;
   return (
     <section className="container-x pt-24 sm:pt-32">
       <div className="relative rounded-2xl border border-line bg-white shadow-soft p-8 sm:p-16 anim-wave">

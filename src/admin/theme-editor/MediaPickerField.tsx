@@ -31,6 +31,7 @@ export default function MediaPickerField({
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [urlInput, setUrlInput] = useState("");
 
   async function refreshAssets() {
     setLoading(true);
@@ -124,6 +125,28 @@ export default function MediaPickerField({
       </label>
 
       <input
+        value={urlInput}
+        onChange={(e) => setUrlInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && urlInput.trim()) {
+            const url = urlInput.trim();
+            onChange({ type: "upload", bucket: "", path: url, url, alt: url.split("/").pop() ?? "" });
+            setUrlInput("");
+          }
+        }}
+        onBlur={() => {
+          if (urlInput.trim()) {
+            const url = urlInput.trim();
+            onChange({ type: "upload", bucket: "", path: url, url, alt: url.split("/").pop() ?? "" });
+            setUrlInput("");
+          }
+        }}
+        placeholder="أو الصق رابط الصورة مباشرة..."
+        dir="ltr"
+        className="w-full rounded-xl border border-dashed border-slate-300 bg-white px-3 py-2 text-xs outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+      />
+
+      <input
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         placeholder="بحث فالميديا..."
@@ -131,7 +154,12 @@ export default function MediaPickerField({
       />
 
       {loading && <div className="text-[11px] font-bold text-slate-400">جاري تحميل مكتبة الميديا...</div>}
-      {error && <div className="rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-bold text-amber-700">{error}</div>}
+      {error && (
+        <div className="rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-bold text-amber-700">
+          {error}
+          <span className="block mt-1 font-normal opacity-80">يمكنك استخدام رابط الصورة مباشرة بالحقل أعلاه.</span>
+        </div>
+      )}
 
       {filteredAssets.length > 0 && (
         <div className="grid grid-cols-4 gap-2">

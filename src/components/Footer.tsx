@@ -1,9 +1,21 @@
 import { Link } from "react-router-dom";
 import { Instagram, MessageCircle, Mail } from "lucide-react";
 import { useCms } from "../cms/store";
+import type { BrandSettings, FooterContent, Nav } from "../cms/types";
 
-export default function Footer() {
-  const { brand, nav, footer } = useCms();
+export default function Footer({
+  brand: brandProp,
+  nav: navProp,
+  footer: footerProp,
+}: {
+  brand?: BrandSettings;
+  nav?: Nav;
+  footer?: FooterContent;
+} = {}) {
+  const cms = useCms();
+  const brand = brandProp ?? cms.brand;
+  const nav = navProp ?? cms.nav;
+  const footer = footerProp ?? cms.footer;
   return (
     <footer className="mt-24 border-t border-line bg-white/60">
       <div className="container-x py-16 grid gap-12 lg:grid-cols-4">
@@ -51,7 +63,7 @@ export default function Footer() {
 
         <div>
           <div className="text-xs uppercase tracking-wider text-body mb-4">
-            التنقل
+            {footer.navLabel || "التنقل"}
           </div>
           <ul className="space-y-2.5 text-sm">
             <li><Link to="/" className="hover:text-ink text-body">{nav.labels.home}</Link></li>
@@ -64,14 +76,14 @@ export default function Footer() {
 
         <div>
           <div className="text-xs uppercase tracking-wider text-body mb-4">
-            تواصل
+            {footer.contactLabel || "تواصل"}
           </div>
           <ul className="space-y-2.5 text-sm text-body">
             <li>WhatsApp: {brand.whatsapp}</li>
             <li>Email: {brand.email}</li>
           </ul>
           <div className="text-xs uppercase tracking-wider text-body mt-6 mb-3">
-            قانوني
+            {footer.legalLabel || "قانوني"}
           </div>
           <ul className="space-y-2 text-sm">
             {brand.legalLinks.map((l) => (

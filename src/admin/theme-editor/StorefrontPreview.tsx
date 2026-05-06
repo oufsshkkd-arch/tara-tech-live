@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import type {
   AnnouncementThemeSettings,
   CategoriesThemeSettings,
-  FaqThemeSettings,
   FeaturedThemeSettings,
   FooterThemeSettings,
   GenericThemeSettings,
@@ -13,6 +12,7 @@ import type {
   StoryThemeSettings,
   TrustThemeSettings,
 } from "../../cms/types";
+import Faq from "../../components/Faq";
 import HeroRevolut from "../../components/HeroRevolut";
 import { SECTION_META } from "./themeConfig";
 import type { DeviceMode, EditorSection, PreviewPage, ThemeConfig } from "./types";
@@ -157,9 +157,7 @@ export default function StorefrontPreview({
                 {section.type === "story" && (
                   <StoryPreview section={section} settings={section.settings as StoryThemeSettings} />
                 )}
-                {section.type === "faq" && (
-                  <FaqPreview section={section} settings={section.settings as FaqThemeSettings} />
-                )}
+                {section.type === "faq" && <Faq />}
                 {section.type === "footer" && (
                   <FooterPreview section={section} settings={section.settings as FooterThemeSettings} />
                 )}
@@ -729,23 +727,6 @@ function StoryPreview({ section, settings }: { section: EditorSection; settings:
   );
 }
 
-function FaqPreview({ section, settings }: { section: EditorSection; settings: FaqThemeSettings }) {
-  return (
-    <SectionShell section={section}>
-      <h3 className="mb-5 text-3xl font-black">الأسئلة الشائعة</h3>
-      <div className="space-y-3">
-        {settings.items
-          .filter((item) => item.enabled)
-          .map((item) => (
-            <div key={item.id} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-              <div className="font-black">{item.question}</div>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{item.answer}</p>
-            </div>
-          ))}
-      </div>
-    </SectionShell>
-  );
-}
 
 function FooterPreview({ section, settings }: { section: EditorSection; settings: FooterThemeSettings }) {
   return (

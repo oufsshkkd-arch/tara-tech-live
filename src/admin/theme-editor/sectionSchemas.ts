@@ -125,9 +125,83 @@ export const categoriesSchema: SectionSchema = {
   defaultBlocks: [],
 };
 
+export const finalCtaSchema: SectionSchema = {
+  type: "finalCta",
+  label: "العرض النهائي",
+  icon: "Target",
+  settingsSchema: [
+    { id: "title", label: "العنوان", type: "text" },
+    { id: "body", label: "الوصف", type: "textarea" },
+    { id: "pillLabel", label: "نص الـ Pill", type: "text" },
+    { id: "primaryCta", label: "CTA الأساسي", type: "text" },
+    { id: "primaryCtaLink", label: "رابط CTA الأساسي", type: "link" },
+    { id: "secondaryCta", label: "CTA الثانوي", type: "text" },
+    { id: "secondaryCtaLink", label: "رابط CTA الثانوي", type: "link" },
+  ],
+  blocksSchema: [],
+  defaultSettings: {
+    title: "اكتشف عالم Tara Tech",
+    body: "منتجات ذكية ومختارة بعناية — الدفع عند الاستلام في جميع أنحاء المغرب.",
+    pillLabel: "مرحبا فـ Tara Tech",
+    primaryCta: "تسوق الآن",
+    primaryCtaLink: "/products",
+    secondaryCta: "تواصل معنا",
+    secondaryCtaLink: "/contact",
+  },
+  defaultBlocks: [],
+};
+
+export const whyTaraSchema: SectionSchema = {
+  type: "whyTara",
+  label: "علاش حنا؟",
+  icon: "ShieldCheck",
+  settingsSchema: [
+    { id: "title", label: "العنوان", type: "text" },
+    { id: "intro", label: "المقدمة", type: "textarea" },
+    { id: "pillLabel", label: "نص الـ Pill", type: "text" },
+  ],
+  blocksSchema: [],
+  defaultSettings: {
+    title: "علاش Tara Tech؟",
+    intro: "اخترنا أفضل المنتجات اللي كتزيد راحتك وتنظيمك فحياتك اليومية.",
+    pillLabel: "علاش حنا",
+    points: [
+      { text: "توصيل سريع لجميع مدن المغرب", icon: "Sparkles" },
+      { text: "منتجات مختارة بعناية ومضمونة 100%", icon: "ShieldCheck" },
+      { text: "الدفع عند الاستلام — بلا مخاطر", icon: "Wallet" },
+      { text: "دعم متواصل على WhatsApp", icon: "HeadphonesIcon" },
+    ],
+  },
+  defaultBlocks: [],
+};
+
+export const footerSchema: SectionSchema = {
+  type: "footer",
+  label: "تذييل الصفحة",
+  icon: "Layout",
+  settingsSchema: [
+    { id: "logoText", label: "اسم المتجر", type: "text" },
+    { id: "description", label: "وصف المتجر", type: "textarea" },
+    { id: "contactWhatsApp", label: "WhatsApp", type: "text" },
+    { id: "copyrightText", label: "نص الحقوق", type: "text" },
+  ],
+  blocksSchema: [],
+  defaultSettings: {
+    logoText: "Tara Tech",
+    description: "كنوفرو ليك أفضل المنتجات التكنولوجية اللي كتسهل حياتك اليومية.",
+    contactWhatsApp: "+212600000000",
+    copyrightText: `© ${new Date().getFullYear()} Tara Tech. جميع الحقوق محفوظة.`,
+    socialLinks: { instagram: "", tiktok: "", facebook: "" },
+  },
+  defaultBlocks: [],
+};
+
 export const SECTION_SCHEMAS: Partial<Record<ThemeEditorSectionType, SectionSchema>> = {
   announcementBar: announcementBarSchema,
   categories: categoriesSchema,
+  finalCta: finalCtaSchema,
+  footer: footerSchema,
+  whyTara: whyTaraSchema,
   hero_revolut: {
     type: "hero_revolut",
     label: "Hero Revolut",

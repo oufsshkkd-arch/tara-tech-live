@@ -1,6 +1,6 @@
-import { Palette, SlidersHorizontal } from "lucide-react";
+import { Palette, SlidersHorizontal, Type } from "lucide-react";
 import type { ReactNode } from "react";
-import type { StorefrontThemeConfig } from "../../cms/types";
+import type { CmsState, StorefrontThemeConfig } from "../../cms/types";
 
 type ThemeSettings = StorefrontThemeConfig["theme"];
 
@@ -127,12 +127,18 @@ function ColorField({
   );
 }
 
+type UiLabels = NonNullable<CmsState["uiLabels"]>;
+
 export default function GlobalThemeSettings({
   theme,
   onChange,
+  uiLabels,
+  onUiLabelsChange,
 }: {
   theme: ThemeSettings;
   onChange: (patch: Partial<ThemeSettings>) => void;
+  uiLabels?: UiLabels;
+  onUiLabelsChange?: (patch: Partial<UiLabels>) => void;
 }) {
   return (
     <details className="group rounded-3xl border border-slate-200 bg-white shadow-sm">
@@ -327,6 +333,32 @@ export default function GlobalThemeSettings({
             />
           </Field>
         </div>
+
+        {onUiLabelsChange && (
+          <details className="rounded-2xl border border-slate-100">
+            <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5">
+              <Type className="h-3.5 w-3.5 text-slate-400" />
+              <span className="text-[11px] font-black text-slate-600">Labels &amp; Translations</span>
+            </summary>
+            <div className="grid grid-cols-2 gap-3 border-t border-slate-100 p-3">
+              <Field label="Add to cart">
+                <Input value={uiLabels?.addToCart || ""} onChange={(v) => onUiLabelsChange({ addToCart: v })} />
+              </Field>
+              <Field label="Currency">
+                <Input value={uiLabels?.currency || ""} onChange={(v) => onUiLabelsChange({ currency: v })} dir="ltr" />
+              </Field>
+              <Field label="Limited stock">
+                <Input value={uiLabels?.limitedStock || ""} onChange={(v) => onUiLabelsChange({ limitedStock: v })} />
+              </Field>
+              <Field label="Price on request">
+                <Input value={uiLabels?.priceOnRequest || ""} onChange={(v) => onUiLabelsChange({ priceOnRequest: v })} />
+              </Field>
+              <Field label="WhatsApp label">
+                <Input value={uiLabels?.whatsappLabel || ""} onChange={(v) => onUiLabelsChange({ whatsappLabel: v })} />
+              </Field>
+            </div>
+          </details>
+        )}
       </div>
     </details>
   );

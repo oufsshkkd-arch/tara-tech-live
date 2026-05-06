@@ -69,6 +69,9 @@ export type FooterContent = {
   tagline: string;
   bottomLeft: string;
   bottomRight: string;
+  navLabel?: string;
+  contactLabel?: string;
+  legalLabel?: string;
 };
 
 export type SectionVisibility = {
@@ -548,6 +551,7 @@ export type FeaturedSectionContent = {
 export type FaqSectionContent = {
   title: string;
   intro: string;
+  pillLabel?: string;
 };
 
 export type ProductPageReview = {
@@ -662,4 +666,11 @@ export type CmsState = {
   announcementBar: AnnouncementBarSettings;
   footer: FooterContent;
   admin: AdminUser;
+  uiLabels?: {
+    addToCart?: string;
+    limitedStock?: string;
+    priceOnRequest?: string;
+    currency?: string;
+    whatsappLabel?: string;
+  };
 };

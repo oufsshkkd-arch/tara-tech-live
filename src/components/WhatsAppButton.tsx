@@ -4,7 +4,7 @@ import { useCms } from "../cms/store";
 import { useAnalytics } from "../hooks/useAnalytics";
 
 export default function WhatsAppButton() {
-  const { brand } = useCms();
+  const { brand, uiLabels } = useCms();
   const { trackWhatsAppClick } = useAnalytics();
   const [hovered, setHovered] = useState(false);
   const phone = brand.whatsapp.replace(/[^0-9]/g, "");
@@ -28,7 +28,7 @@ export default function WhatsAppButton() {
           ${hovered ? "max-w-[160px] pl-5 pr-2 py-3" : "max-w-0 px-0 py-3"}
         `}
       >
-        تواصل معنا
+        {uiLabels?.whatsappLabel || "تواصل معنا"}
       </span>
       {/* Green circle */}
       <span className="relative h-14 w-14 grid place-items-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform duration-200 group-hover:scale-105">

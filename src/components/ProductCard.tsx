@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ShoppingCart, Star } from "lucide-react";
 import type { Product } from "../cms/types";
 import { useCart } from "../store/cart";
+import { useCms } from "../cms/store";
 
 export default function ProductCard({
   product,
@@ -15,6 +16,11 @@ export default function ProductCard({
   showDiscountBadge?: boolean;
 }) {
   const { addItem } = useCart();
+  const { uiLabels } = useCms();
+  const currency = uiLabels?.currency || "درهم";
+  const addToCartText = uiLabels?.addToCart || "أضف للسلة";
+  const limitedStockText = uiLabels?.limitedStock || "كمية محدودة";
+  const priceOnRequestText = uiLabels?.priceOnRequest || "السعر عند الطلب";
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault();
@@ -47,7 +53,7 @@ export default function ProductCard({
         )}
         {product.stock === "low" && (
           <span className="absolute top-3 right-3 pill-red text-[10px]">
-            كمية محدودة
+            {limitedStockText}
           </span>
         )}
       </div>
@@ -69,16 +75,16 @@ export default function ProductCard({
           {showPrice ? (
             <div className="flex items-baseline gap-2">
               <span className="text-lg font-semibold text-ink">
-                {product.price} <span className="text-xs font-normal">درهم</span>
+                {product.price} <span className="text-xs font-normal">{currency}</span>
               </span>
               {product.compareAtPrice && (
                 <span className="text-xs text-body line-through">
-                  {product.compareAtPrice} درهم
+                  {product.compareAtPrice} {currency}
                 </span>
               )}
             </div>
           ) : (
-            <span className="text-xs font-medium text-body">السعر عند الطلب</span>
+            <span className="text-xs font-medium text-body">{priceOnRequestText}</span>
           )}
           <button
             onClick={handleAddToCart}
@@ -86,7 +92,7 @@ export default function ProductCard({
             dir="rtl"
           >
             <ShoppingCart className="h-3.5 w-3.5" />
-            أضف للسلة
+            {addToCartText}
           </button>
         </div>
       </div>

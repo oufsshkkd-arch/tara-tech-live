@@ -2,10 +2,19 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCms } from "../cms/store";
+import type { FeaturedSectionContent, Product } from "../cms/types";
 import ProductCard from "./ProductCard";
 
-export default function FeaturedProducts() {
-  const { featuredSection, products } = useCms();
+export default function FeaturedProducts({
+  featuredSection: featuredSectionProp,
+  products: productsProp,
+}: {
+  featuredSection?: FeaturedSectionContent;
+  products?: Product[];
+} = {}) {
+  const cms = useCms();
+  const featuredSection = featuredSectionProp ?? cms.featuredSection;
+  const products = productsProp ?? cms.products;
   const configuredIds = featuredSection.productIds ?? [];
   const configured = configuredIds
     .map((id) => products.find((product) => product.id === id && !product.hidden))
