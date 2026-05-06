@@ -8,14 +8,20 @@ import type {
   FaqThemeSettings,
   FeaturedThemeSettings,
   FooterThemeSettings,
+  GenericThemeSettings,
   HeroThemeSettings,
   Product,
   StoryThemeSettings,
   TrustThemeItem,
   TrustThemeSettings,
+  StorefrontThemeConfig,
+  ThemeEditorBlock,
 } from "../../cms/types";
+import BlockSettingsPanel from "./BlockSettingsPanel";
+import DynamicSourceButton from "./DynamicSourceButton";
+import ThemeSettingsPanel from "./ThemeSettingsPanel";
 import { SECTION_META } from "./themeConfig";
-import type { EditorSection, SectionType } from "./types";
+import type { EditorSection, SectionId } from "./types";
 
 function Field({
   label,
@@ -40,20 +46,30 @@ function TextInput({
   onChange,
   placeholder,
   dir = "auto",
+  dynamic = true,
 }: {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   dir?: "auto" | "rtl" | "ltr";
+  dynamic?: boolean;
 }) {
   return (
-    <input
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      placeholder={placeholder}
-      dir={dir}
-      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
-    />
+    <div className="flex items-center gap-2">
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        dir={dir}
+        className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+      />
+      {dynamic && (
+        <DynamicSourceButton
+          fallback={value}
+          onPick={(_, token) => onChange(value ? `${value} ${token}` : token)}
+        />
+      )}
+    </div>
   );
 }
 
@@ -61,19 +77,29 @@ function TextArea({
   value,
   onChange,
   rows = 3,
+  dynamic = true,
 }: {
   value: string;
   onChange: (value: string) => void;
   rows?: number;
+  dynamic?: boolean;
 }) {
   return (
-    <textarea
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      rows={rows}
-      dir="auto"
-      className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
-    />
+    <div className="flex items-start gap-2">
+      <textarea
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        rows={rows}
+        dir="auto"
+        className="min-w-0 flex-1 resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+      />
+      {dynamic && (
+        <DynamicSourceButton
+          fallback={value}
+          onPick={(_, token) => onChange(value ? `${value} ${token}` : token)}
+        />
+      )}
+    </div>
   );
 }
 
@@ -143,7 +169,7 @@ function ColorInput({
         onChange={(event) => onChange(event.target.value)}
         className="h-10 w-12 rounded-xl border border-slate-200 bg-white p-1"
       />
-      <TextInput value={value} onChange={onChange} dir="ltr" />
+      <TextInput value={value} onChange={onChange} dir="ltr" dynamic={false} />
     </div>
   );
 }
@@ -166,14 +192,22 @@ function ArrayToolbar({ label, onAdd }: { label: string; onAdd: () => void }) {
 
 export default function SectionSettingsPanel({
   section,
+  theme,
+  selectedBlock,
   products,
+  onThemeUpdate,
+  onBlockChange,
   onUpdate,
   onReplaceSettings,
 }: {
   section: EditorSection;
+  theme: StorefrontThemeConfig["theme"];
+  selectedBlock: ThemeEditorBlock | null;
   products: Product[];
-  onUpdate: (sectionId: SectionType, patch: Record<string, unknown>) => void;
-  onReplaceSettings: (sectionId: SectionType, settings: EditorSection["settings"]) => void;
+  onThemeUpdate: (patch: Partial<StorefrontThemeConfig["theme"]>) => void;
+  onBlockChange: (block: ThemeEditorBlock) => void;
+  onUpdate: (sectionId: SectionId, patch: Record<string, unknown>) => void;
+  onReplaceSettings: (sectionId: SectionId, settings: EditorSection["settings"]) => void;
 }) {
   const meta = SECTION_META[section.type];
 
@@ -192,6 +226,9 @@ export default function SectionSettingsPanel({
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto bg-slate-50/80 p-4">
+        <div className="mb-4">
+          <ThemeSettingsPanel theme={theme} onChange={onThemeUpdate} />
+        </div>
         <div className="space-y-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
             <Settings2 className="h-4 w-4 text-slate-500" />
@@ -201,21 +238,21 @@ export default function SectionSettingsPanel({
           {section.type === "hero" && (
             <HeroSettings
               settings={section.settings as HeroThemeSettings}
-              onChange={(patch) => onUpdate("hero", patch)}
+              onChange={(patch) => onUpdate(section.id, patch)}
             />
           )}
 
           {section.type === "announcementBar" && (
             <AnnouncementSettings
               settings={section.settings as AnnouncementThemeSettings}
-              onChange={(patch) => onUpdate("announcementBar", patch)}
+              onChange={(patch) => onUpdate(section.id, patch)}
             />
           )}
 
           {section.type === "categories" && (
             <CategoriesSettings
               settings={section.settings as CategoriesThemeSettings}
-              onChange={(settings) => onReplaceSettings("categories", settings)}
+              onChange={(settings) => onReplaceSettings(section.id, settings)}
             />
           )}
 
@@ -223,40 +260,91 @@ export default function SectionSettingsPanel({
             <FeaturedSettings
               settings={section.settings as FeaturedThemeSettings}
               products={products}
-              onChange={(patch) => onUpdate("featured", patch)}
+              onChange={(patch) => onUpdate(section.id, patch)}
             />
           )}
 
           {section.type === "trustStrip" && (
             <TrustSettings
               settings={section.settings as TrustThemeSettings}
-              onChange={(settings) => onReplaceSettings("trustStrip", settings)}
+              onChange={(settings) => onReplaceSettings(section.id, settings)}
+            />
+          )}
+
+          {section.type === "codBenefits" && (
+            <TrustSettings
+              settings={section.settings as TrustThemeSettings}
+              onChange={(settings) => onReplaceSettings(section.id, settings)}
             />
           )}
 
           {section.type === "story" && (
             <StorySettings
               settings={section.settings as StoryThemeSettings}
-              onChange={(patch) => onUpdate("story", patch)}
+              onChange={(patch) => onUpdate(section.id, patch)}
             />
           )}
 
           {section.type === "faq" && (
             <FaqSettings
               settings={section.settings as FaqThemeSettings}
-              onChange={(settings) => onReplaceSettings("faq", settings)}
+              onChange={(settings) => onReplaceSettings(section.id, settings)}
             />
           )}
 
           {section.type === "footer" && (
             <FooterSettings
               settings={section.settings as FooterThemeSettings}
-              onChange={(settings) => onReplaceSettings("footer", settings)}
+              onChange={(settings) => onReplaceSettings(section.id, settings)}
+            />
+          )}
+
+          {["header", "productHighlight", "reviews", "whatsappCta"].includes(section.type) && (
+            <GenericSettings
+              settings={section.settings as GenericThemeSettings}
+              onChange={(patch) => onUpdate(section.id, patch)}
             />
           )}
         </div>
+
+        <div className="mt-4">
+          <BlockSettingsPanel block={selectedBlock} onChange={onBlockChange} />
+        </div>
       </div>
     </aside>
+  );
+}
+
+function GenericSettings({
+  settings,
+  onChange,
+}: {
+  settings: GenericThemeSettings;
+  onChange: (patch: Partial<GenericThemeSettings>) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <Field label="العنوان">
+        <TextInput value={settings.title ?? ""} onChange={(title) => onChange({ title })} />
+      </Field>
+      <Field label="الوصف">
+        <TextArea value={settings.subtitle ?? ""} onChange={(subtitle) => onChange({ subtitle })} rows={3} />
+      </Field>
+      <Field label="الصورة">
+        <TextInput value={settings.imageUrl ?? ""} onChange={(imageUrl) => onChange({ imageUrl })} dir="ltr" />
+      </Field>
+      <Field label="الفيديو">
+        <TextInput value={settings.videoUrl ?? ""} onChange={(videoUrl) => onChange({ videoUrl })} dir="ltr" />
+      </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="لون الخلفية">
+          <ColorInput value={settings.backgroundColor ?? ""} onChange={(backgroundColor) => onChange({ backgroundColor })} />
+        </Field>
+        <Field label="لون النص">
+          <ColorInput value={settings.textColor ?? ""} onChange={(textColor) => onChange({ textColor })} />
+        </Field>
+      </div>
+    </div>
   );
 }
 

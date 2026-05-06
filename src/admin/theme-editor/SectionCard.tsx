@@ -1,8 +1,9 @@
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
-import { ChevronDown, Eye, EyeOff, GripVertical, MoveDown, MoveUp } from "lucide-react";
+import { ChevronDown, Copy, Eye, EyeOff, GripVertical, MoveDown, MoveUp, Plus, Trash2 } from "lucide-react";
+import BlocksList from "./BlocksList";
 import { SECTION_META } from "./themeConfig";
-import type { EditorSection, SectionType } from "./types";
+import type { EditorSection, SectionId } from "./types";
 
 export default function SectionCard({
   section,
@@ -13,6 +14,13 @@ export default function SectionCard({
   onSelect,
   onToggleExpand,
   onToggleVisibility,
+  onDuplicate,
+  onDelete,
+  onAddBlock,
+  onSelectBlock,
+  onToggleBlock,
+  onDuplicateBlock,
+  onDeleteBlock,
   onMove,
 }: {
   section: EditorSection;
@@ -20,10 +28,17 @@ export default function SectionCard({
   expanded: boolean;
   canMoveUp: boolean;
   canMoveDown: boolean;
-  onSelect: (sectionId: SectionType) => void;
-  onToggleExpand: (sectionId: SectionType) => void;
-  onToggleVisibility: (sectionId: SectionType) => void;
-  onMove: (sectionId: SectionType, direction: -1 | 1) => void;
+  onSelect: (sectionId: SectionId) => void;
+  onToggleExpand: (sectionId: SectionId) => void;
+  onToggleVisibility: (sectionId: SectionId) => void;
+  onDuplicate: (sectionId: SectionId) => void;
+  onDelete: (sectionId: SectionId) => void;
+  onAddBlock: (sectionId: SectionId) => void;
+  onSelectBlock: (sectionId: SectionId, blockId: string) => void;
+  onToggleBlock: (sectionId: SectionId, blockId: string) => void;
+  onDuplicateBlock: (sectionId: SectionId, blockId: string) => void;
+  onDeleteBlock: (sectionId: SectionId, blockId: string) => void;
+  onMove: (sectionId: SectionId, direction: -1 | 1) => void;
 }) {
   const sortable = useSortable({ id: section.id });
   const meta = SECTION_META[section.type];
@@ -85,27 +100,67 @@ export default function SectionCard({
       </div>
 
       {expanded && (
-        <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3">
-          <span className="text-[11px] font-bold text-slate-500">ترتيب السكشن: {section.order}</span>
-          <div className="flex items-center gap-1">
+        <div className="border-t border-slate-100 px-4 py-3">
+          <div className="mb-3">
+            <BlocksList
+              blocks={section.blocks ?? []}
+              onAdd={() => onAddBlock(section.id)}
+              onSelect={(blockId) => onSelectBlock(section.id, blockId)}
+              onToggle={(blockId) => onToggleBlock(section.id, blockId)}
+              onDuplicate={(blockId) => onDuplicateBlock(section.id, blockId)}
+              onDelete={(blockId) => onDeleteBlock(section.id, blockId)}
+            />
+          </div>
+
+          <div className="mb-3 grid grid-cols-3 gap-1">
             <button
               type="button"
-              disabled={!canMoveUp}
-              onClick={() => onMove(section.id, -1)}
-              className="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-30"
-              title="طلع الفوق"
+              onClick={() => onAddBlock(section.id)}
+              className="inline-flex items-center justify-center gap-1 rounded-lg border border-slate-200 px-2 py-1.5 text-[11px] font-black text-slate-600 hover:bg-slate-50"
             >
-              <MoveUp className="h-4 w-4" />
+              <Plus className="h-3.5 w-3.5" />
+              Block
             </button>
             <button
               type="button"
-              disabled={!canMoveDown}
-              onClick={() => onMove(section.id, 1)}
-              className="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-30"
-              title="هبط لتحت"
+              onClick={() => onDuplicate(section.id)}
+              className="inline-flex items-center justify-center gap-1 rounded-lg border border-slate-200 px-2 py-1.5 text-[11px] font-black text-slate-600 hover:bg-slate-50"
             >
-              <MoveDown className="h-4 w-4" />
+              <Copy className="h-3.5 w-3.5" />
+              Duplicate
             </button>
+            <button
+              type="button"
+              onClick={() => onDelete(section.id)}
+              className="inline-flex items-center justify-center gap-1 rounded-lg border border-red-100 px-2 py-1.5 text-[11px] font-black text-red-600 hover:bg-red-50"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Delete
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500">ترتيب السكشن: {section.order}</span>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                disabled={!canMoveUp}
+                onClick={() => onMove(section.id, -1)}
+                className="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-30"
+                title="طلع الفوق"
+              >
+                <MoveUp className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                disabled={!canMoveDown}
+                onClick={() => onMove(section.id, 1)}
+                className="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-30"
+                title="هبط لتحت"
+              >
+                <MoveDown className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
       )}

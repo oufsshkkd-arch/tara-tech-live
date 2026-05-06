@@ -1,18 +1,33 @@
-import { ArrowUpRight, Redo2, RotateCcw, Save, Undo2 } from "lucide-react";
+import { ArrowUpRight, Redo2, RefreshCw, RotateCcw, Save, Undo2 } from "lucide-react";
 import DevicePreviewToggle from "./DevicePreviewToggle";
 import SaveStatusBadge from "./SaveStatusBadge";
-import type { DeviceMode, SaveStatus } from "./types";
+import TemplateSelector from "./TemplateSelector";
+import type { DeviceMode, PreviewPage, SaveStatus } from "./types";
 
 export default function EditorTopBar({
   device,
+  previewPage,
   status,
+  canUndo,
+  canRedo,
   onDeviceChange,
+  onPreviewPageChange,
+  onUndo,
+  onRedo,
+  onRefreshPreview,
   onReset,
   onSave,
 }: {
   device: DeviceMode;
+  previewPage: PreviewPage;
   status: SaveStatus;
+  canUndo: boolean;
+  canRedo: boolean;
   onDeviceChange: (mode: DeviceMode) => void;
+  onPreviewPageChange: (page: PreviewPage) => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  onRefreshPreview: () => void;
   onReset: () => void;
   onSave: () => void;
 }) {
@@ -44,18 +59,20 @@ export default function EditorTopBar({
         <div className="hidden items-center gap-1 rounded-xl bg-slate-100 p-1 md:inline-flex">
           <button
             type="button"
-            disabled
-            className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-slate-400"
-            title="Undo placeholder"
+            disabled={!canUndo}
+            onClick={onUndo}
+            className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-slate-600 transition hover:bg-white disabled:cursor-not-allowed disabled:text-slate-400"
+            title="Undo"
           >
             <Undo2 className="h-4 w-4" />
             تراجع
           </button>
           <button
             type="button"
-            disabled
-            className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-slate-400"
-            title="Redo placeholder"
+            disabled={!canRedo}
+            onClick={onRedo}
+            className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-slate-600 transition hover:bg-white disabled:cursor-not-allowed disabled:text-slate-400"
+            title="Redo"
           >
             <Redo2 className="h-4 w-4" />
             إعادة
@@ -64,7 +81,19 @@ export default function EditorTopBar({
 
         <div className="flex-1" />
 
+        <TemplateSelector value={previewPage} onChange={onPreviewPageChange} />
+
         <DevicePreviewToggle value={device} onChange={onDeviceChange} />
+
+        <button
+          type="button"
+          onClick={onRefreshPreview}
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+          title="Refresh preview"
+        >
+          <RefreshCw className="h-4 w-4" />
+          <span className="hidden xl:inline">Refresh</span>
+        </button>
 
         <button
           type="button"

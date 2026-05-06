@@ -201,42 +201,100 @@ export type FooterThemeSettings = {
 };
 
 export type ThemeEditorSectionType =
+  | "header"
   | "hero"
   | "announcementBar"
   | "categories"
   | "featured"
+  | "productHighlight"
   | "trustStrip"
+  | "codBenefits"
+  | "reviews"
   | "story"
   | "faq"
+  | "whatsappCta"
   | "footer";
 
+export type ThemeEditorBlock = {
+  id: string;
+  type: string;
+  enabled: boolean;
+  order: number;
+  settings: Record<string, unknown>;
+};
+
+export type GenericThemeSettings = {
+  title: string;
+  subtitle?: string;
+  imageUrl?: string;
+  videoUrl?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  accentColor?: string;
+  spacing?: number;
+  radius?: number;
+};
+
 export type ThemeEditorSectionSettingsMap = {
+  header: GenericThemeSettings;
   hero: HeroThemeSettings;
   announcementBar: AnnouncementThemeSettings;
   categories: CategoriesThemeSettings;
   featured: FeaturedThemeSettings;
+  productHighlight: GenericThemeSettings;
   trustStrip: TrustThemeSettings;
+  codBenefits: TrustThemeSettings;
+  reviews: GenericThemeSettings;
   story: StoryThemeSettings;
   faq: FaqThemeSettings;
+  whatsappCta: GenericThemeSettings;
   footer: FooterThemeSettings;
 };
 
 export type ThemeEditorSection<T extends ThemeEditorSectionType = ThemeEditorSectionType> = {
-  id: T;
+  id: string;
   type: T;
   enabled: boolean;
   order: number;
   settings: ThemeEditorSectionSettingsMap[T];
+  blocks?: ThemeEditorBlock[];
+};
+
+export type ThemeTemplateId = "home" | "product" | "collection" | "cart" | "faq";
+
+export type ThemeTemplate = {
+  sections: ThemeEditorSection[];
 };
 
 export type StorefrontThemeConfig = {
   sections: ThemeEditorSection[];
+  templates?: Partial<Record<ThemeTemplateId, ThemeTemplate>>;
   theme: {
     direction: "rtl" | "ltr";
     fontFamily: string;
+    headingFontFamily?: string;
+    bodyFontFamily?: string;
     primaryColor: string;
+    secondaryColor?: string;
+    backgroundColor?: string;
+    textColor?: string;
     radius: "small" | "medium" | "large";
     stylePreset: "minimal" | "bold" | "editorial";
+    colorPreset?: "default" | "minimal" | "dark" | "warm" | "sage";
+    layoutWidth?: "contained" | "wide" | "full";
+    shadowStyle?: "none" | "soft" | "deep";
+    spacingScale?: "compact" | "normal" | "airy";
+    buttonStyle?: "rounded" | "pill" | "sharp";
+    productCardStyle?: "minimal" | "elevated" | "bordered";
+    headerStyle?: "clean" | "sticky" | "transparent";
+    cartDrawerStyle?: "compact" | "comfortable";
+    searchStyle?: "minimal" | "prominent";
+    whatsapp?: string;
+    socialLinks?: {
+      instagram?: string;
+      tiktok?: string;
+      facebook?: string;
+    };
   };
 };
 

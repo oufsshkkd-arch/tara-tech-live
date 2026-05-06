@@ -3,20 +3,27 @@ import type {
   Category,
   CmsState,
   FaqItem,
+  GenericThemeSettings,
   StorefrontThemeConfig,
   ThemeEditorSection,
   ThemeEditorSectionSettingsMap,
   ThemeEditorSectionType,
+  ThemeTemplateId,
 } from "../../cms/types";
 
 export const SECTION_TYPES: ThemeEditorSectionType[] = [
+  "header",
   "hero",
   "announcementBar",
   "categories",
   "featured",
+  "productHighlight",
   "trustStrip",
+  "codBenefits",
+  "reviews",
   "story",
   "faq",
+  "whatsappCta",
   "footer",
 ];
 
@@ -24,13 +31,18 @@ export const SECTION_META: Record<
   ThemeEditorSectionType,
   { label: string; badge: string; description: string }
 > = {
+  header: { label: "الهيدر", badge: "N", description: "Logo، navigation، cart/search" },
   hero: { label: "الهيرو", badge: "H", description: "العنوان، CTA، الصورة والفيديو" },
   announcementBar: { label: "شريط الإعلان", badge: "A", description: "رسالة قصيرة أعلى الموقع" },
   categories: { label: "الفئات", badge: "C", description: "بطاقات التصنيفات الرئيسية" },
   featured: { label: "منتجات مختارة", badge: "P", description: "اختيار المنتجات وطريقة العرض" },
+  productHighlight: { label: "Product Card Hero", badge: "PH", description: "منتج بارز مع COD CTA" },
   trustStrip: { label: "شريط الثقة", badge: "T", description: "COD، ضمان، دعم وخدمة" },
+  codBenefits: { label: "مزايا COD", badge: "COD", description: "الدفع عند الاستلام والثقة" },
+  reviews: { label: "آراء الزبناء", badge: "R", description: "Reviews وشهادات اجتماعية" },
   story: { label: "القصة", badge: "S", description: "About / Story section" },
   faq: { label: "الأسئلة", badge: "Q", description: "أسئلة وأجوبة قابلة للتفعيل" },
+  whatsappCta: { label: "WhatsApp CTA", badge: "W", description: "دعوة مباشرة للتواصل" },
   footer: { label: "الفوتر", badge: "F", description: "الشعار، السوشيال والتواصل" },
 };
 
@@ -42,6 +54,8 @@ const PUBLIC_SECTION_IDS: Partial<Record<ThemeEditorSectionType, string>> = {
   story: "story",
   faq: "faq",
 };
+
+const TEMPLATE_IDS: ThemeTemplateId[] = ["home", "product", "collection", "cart", "faq"];
 
 function isSectionType(value: unknown): value is ThemeEditorSectionType {
   return typeof value === "string" && SECTION_TYPES.includes(value as ThemeEditorSectionType);
@@ -57,7 +71,21 @@ function section<T extends ThemeEditorSectionType>(
   order: number,
   settings: ThemeEditorSectionSettingsMap[T],
 ): ThemeEditorSection<T> {
-  return { id: type, type, enabled, order, settings };
+  return { id: type, type, enabled, order, settings, blocks: [] };
+}
+
+function genericSettings(title: string, subtitle = ""): GenericThemeSettings {
+  return {
+    title,
+    subtitle,
+    imageUrl: "",
+    videoUrl: "",
+    backgroundColor: "",
+    textColor: "",
+    accentColor: "",
+    spacing: 64,
+    radius: 24,
+  };
 }
 
 function slugify(value: string, fallback: string) {
@@ -110,9 +138,11 @@ export function createThemeConfigFromCmsState(state: CmsState): StorefrontThemeC
     (state.hero.mediaType === "image" ? state.hero.videoUrl : "") ||
     firstProductImage(state);
 
-  return {
-    sections: [
-      section("hero", state.visibility.hero, 1, {
+  const homeSections: ThemeEditorSection[] = [
+      section("header", true, 1, {
+        ...genericSettings(state.brand.logoText, "Navigation, search and cart drawer"),
+      }),
+      section("hero", state.visibility.hero, 2, {
         title: state.hero.headline,
         subtitle: state.hero.subheadline,
         primaryCtaText: state.hero.primaryCta,
@@ -127,14 +157,14 @@ export function createThemeConfigFromCmsState(state: CmsState): StorefrontThemeC
         backgroundStyle: state.hero.backgroundStyle || "dark",
         textAlign: state.hero.textAlign || "right",
       }),
-      section("announcementBar", state.announcementBar.enabled, 2, {
+      section("announcementBar", state.announcementBar.enabled, 3, {
         enabled: state.announcementBar.enabled,
         text: firstAnnouncementText(state),
         link: state.announcementBar.link || "",
         backgroundColor: state.announcementBar.backgroundColor || "#111111",
         textColor: state.announcementBar.textColor || "#ffffff",
       }),
-      section("categories", state.visibility.categories, 3, {
+      section("categories", state.visibility.categories, 4, {
         title: state.categorySection.title,
         categories: byOrder(state.categories).map((category) => ({
           id: category.id,
@@ -144,7 +174,7 @@ export function createThemeConfigFromCmsState(state: CmsState): StorefrontThemeC
           enabled: !category.hidden,
         })),
       }),
-      section("featured", state.visibility.featured && state.featuredSection.enabled, 4, {
+      section("featured", state.visibility.featured && state.featuredSection.enabled, 5, {
         title: state.featuredSection.title,
         productIds: featuredProductIds,
         layout: state.featuredSection.layout || "grid",
@@ -152,19 +182,37 @@ export function createThemeConfigFromCmsState(state: CmsState): StorefrontThemeC
         showRating: state.featuredSection.showRating ?? true,
         showDiscountBadge: state.featuredSection.showDiscountBadge ?? true,
       }),
-      section("trustStrip", state.visibility.trustStrip, 5, {
+      section("productHighlight", true, 6, {
+        ...genericSettings(
+          visibleProducts[0]?.title || "منتج مختار",
+          visibleProducts[0]?.shortDescription || "منتج COD مختار بعناية",
+        ),
+        imageUrl: visibleProducts[0]?.images?.[0] || "",
+        accentColor: state.brand.ctaColor,
+      }),
+      section("trustStrip", state.visibility.trustStrip, 7, {
         items: state.trustStrip.map((item) => ({
           icon: item.icon,
           title: item.title,
           description: item.sub,
         })),
       }),
-      section("story", state.visibility.story, 6, {
+      section("codBenefits", true, 8, {
+        items: [
+          { icon: "Wallet", title: "الدفع عند الاستلام", description: "خلص غير ملي توصلك السلعة." },
+          { icon: "PhoneCall", title: "تأكيد قبل الشحن", description: "كنأكدو الطلب معاك قبل الإرسال." },
+          { icon: "Truck", title: "توصيل للمغرب", description: "خدمة مناسبة للتجارة المغربية." },
+        ],
+      }),
+      section("reviews", true, 9, {
+        ...genericSettings("آراء الزبناء", "ثقة اجتماعية كتعاون الزبون يقرر."),
+      }),
+      section("story", state.visibility.story, 10, {
         title: state.story.title,
         description: state.story.body,
         imageUrl: state.story.image,
       }),
-      section("faq", state.visibility.faq, 7, {
+      section("faq", state.visibility.faq, 11, {
         items: byOrder(state.faq).map((item) => ({
           id: item.id,
           question: item.question,
@@ -172,7 +220,11 @@ export function createThemeConfigFromCmsState(state: CmsState): StorefrontThemeC
           enabled: item.enabled !== false,
         })),
       }),
-      section("footer", true, 8, {
+      section("whatsappCta", true, 12, {
+        ...genericSettings("بغيتي تسول قبل الطلب؟", "تواصل معنا مباشرة فالواتساب."),
+        accentColor: "#25D366",
+      }),
+      section("footer", true, 13, {
         logoText: state.brand.logoText,
         description: state.footer.tagline,
         socialLinks: {
@@ -183,13 +235,43 @@ export function createThemeConfigFromCmsState(state: CmsState): StorefrontThemeC
         contactWhatsApp: state.brand.whatsapp,
         copyrightText: state.footer.bottomLeft,
       }),
-    ],
+    ];
+
+  return {
+    sections: homeSections,
+    templates: {
+      home: { sections: homeSections },
+      product: { sections: [] },
+      collection: { sections: [] },
+      cart: { sections: [] },
+      faq: { sections: [] },
+    },
     theme: {
       direction: "rtl",
       fontFamily: "Cairo",
+      headingFontFamily: "Cairo",
+      bodyFontFamily: "Cairo",
       primaryColor: state.brand.primaryColor || "#2563eb",
+      secondaryColor: state.brand.ctaColor || "#B42318",
+      backgroundColor: state.brand.bgColor || "#FAF8F5",
+      textColor: state.brand.textColor || "#111111",
       radius: "large",
       stylePreset: "minimal",
+      colorPreset: "default",
+      layoutWidth: "contained",
+      shadowStyle: "soft",
+      spacingScale: "normal",
+      buttonStyle: "pill",
+      productCardStyle: "elevated",
+      headerStyle: "sticky",
+      cartDrawerStyle: "comfortable",
+      searchStyle: "minimal",
+      whatsapp: state.brand.whatsapp,
+      socialLinks: {
+        instagram: state.brand.socials.instagram || "",
+        tiktok: state.brand.socials.tiktok || "",
+        facebook: state.brand.socials.facebook || "",
+      },
     },
   };
 }
@@ -198,16 +280,39 @@ export function normalizeThemeConfig(state: CmsState): StorefrontThemeConfig {
   const live = createThemeConfigFromCmsState(state);
   const saved = state.themeSchema?.editor;
 
-  if (!saved?.sections?.length) return live;
+  const hasSavedSections = Boolean(saved?.templates?.home?.sections?.length || saved?.sections?.length);
+  if (!saved || !hasSavedSections) return live;
+  const savedHomeSections = saved.templates?.home?.sections?.length ? saved.templates.home.sections : saved.sections;
 
   const liveByType = new Map(live.sections.map((item) => [item.type, item]));
-  const savedByType = new Map(
-    saved.sections.filter((item) => isSectionType(item.type)).map((item) => [item.type, item]),
-  );
-  const orderedTypes = [
-    ...saved.sections.map((item) => item.type).filter(isSectionType),
-    ...SECTION_TYPES.filter((type) => !savedByType.has(type)),
-  ];
+  const savedValidSections = savedHomeSections.filter((item) => isSectionType(item.type));
+  const savedTypes = new Set(savedValidSections.map((item) => item.type));
+  const savedMergedSections = savedValidSections.map((savedSection, index) => {
+    const liveSection = liveByType.get(savedSection.type);
+    if (!liveSection) return { ...savedSection, order: index + 1 } as ThemeEditorSection;
+
+    return {
+      ...liveSection,
+      ...savedSection,
+      id: savedSection.id || savedSection.type,
+      type: savedSection.type,
+      order: index + 1,
+      enabled: savedSection.enabled ?? liveSection.enabled,
+      blocks: savedSection.blocks ?? liveSection.blocks ?? [],
+      settings: {
+        ...(liveSection.settings as Record<string, unknown>),
+        ...((savedSection.settings as Record<string, unknown> | undefined) ?? {}),
+      },
+    } as ThemeEditorSection;
+  });
+  const missingSections = SECTION_TYPES.filter((type) => !savedTypes.has(type)).map((type, index) => {
+    const liveSection = liveByType.get(type);
+    return { ...(liveSection as ThemeEditorSection), order: savedMergedSections.length + index + 1 };
+  });
+  const homeSections = [...savedMergedSections, ...missingSections].map((item, index) => ({
+    ...item,
+    order: index + 1,
+  })) as ThemeEditorSection[];
 
   return {
     theme: {
@@ -215,31 +320,22 @@ export function normalizeThemeConfig(state: CmsState): StorefrontThemeConfig {
       ...saved.theme,
       direction: "rtl",
       fontFamily: saved.theme?.fontFamily || "Cairo",
+      headingFontFamily: saved.theme?.headingFontFamily || "Cairo",
+      bodyFontFamily: saved.theme?.bodyFontFamily || "Cairo",
     },
-    sections: orderedTypes.map((type, index) => {
-      const liveSection = liveByType.get(type);
-      const savedSection = savedByType.get(type);
-      if (!liveSection) return savedSection as ThemeEditorSection;
-
-      return {
-        ...liveSection,
-        ...savedSection,
-        id: type,
-        type,
-        order: index + 1,
-        enabled: savedSection?.enabled ?? liveSection.enabled,
-        settings: {
-          ...(liveSection.settings as Record<string, unknown>),
-          ...((savedSection?.settings as Record<string, unknown> | undefined) ?? {}),
-        },
-      } as ThemeEditorSection;
-    }),
+    sections: homeSections,
+    templates: TEMPLATE_IDS.reduce<StorefrontThemeConfig["templates"]>((templates, id) => {
+      templates![id] = id === "home"
+        ? { sections: homeSections }
+        : saved.templates?.[id] ?? live.templates?.[id] ?? { sections: [] };
+      return templates;
+    }, {}),
   };
 }
 
 export function updateSectionSettings<T extends ThemeEditorSectionType>(
   config: StorefrontThemeConfig,
-  sectionId: T,
+  sectionId: string,
   patch: Partial<ThemeEditorSectionSettingsMap[T]>,
 ): StorefrontThemeConfig {
   return {
@@ -260,7 +356,7 @@ export function updateSectionSettings<T extends ThemeEditorSectionType>(
 
 export function replaceSectionSettings<T extends ThemeEditorSectionType>(
   config: StorefrontThemeConfig,
-  sectionId: T,
+  sectionId: string,
   settings: ThemeEditorSectionSettingsMap[T],
 ): StorefrontThemeConfig {
   return {
@@ -273,7 +369,7 @@ export function replaceSectionSettings<T extends ThemeEditorSectionType>(
 
 export function toggleSectionVisibility(
   config: StorefrontThemeConfig,
-  sectionId: ThemeEditorSectionType,
+  sectionId: string,
 ): StorefrontThemeConfig {
   return {
     ...config,
@@ -285,8 +381,8 @@ export function toggleSectionVisibility(
 
 export function reorderSections(
   config: StorefrontThemeConfig,
-  activeId: ThemeEditorSectionType,
-  overId: ThemeEditorSectionType,
+  activeId: string,
+  overId: string,
 ): StorefrontThemeConfig {
   const from = config.sections.findIndex((item) => item.id === activeId);
   const to = config.sections.findIndex((item) => item.id === overId);
@@ -304,7 +400,7 @@ export function reorderSections(
 
 export function moveSection(
   config: StorefrontThemeConfig,
-  sectionId: ThemeEditorSectionType,
+  sectionId: string,
   direction: -1 | 1,
 ): StorefrontThemeConfig {
   const index = config.sections.findIndex((item) => item.id === sectionId);
@@ -329,14 +425,25 @@ function getSection<T extends ThemeEditorSectionType>(
 }
 
 function normalizedEditorConfig(config: StorefrontThemeConfig): StorefrontThemeConfig {
+  const homeSections = config.sections.map((item, index) => ({ ...item, order: index + 1 }));
   return {
     ...config,
     theme: {
       ...config.theme,
       direction: "rtl",
       fontFamily: config.theme.fontFamily || "Cairo",
+      headingFontFamily: config.theme.headingFontFamily || config.theme.fontFamily || "Cairo",
+      bodyFontFamily: config.theme.bodyFontFamily || config.theme.fontFamily || "Cairo",
     },
-    sections: config.sections.map((item, index) => ({ ...item, order: index + 1 })),
+    sections: homeSections,
+    templates: {
+      ...(config.templates ?? {}),
+      home: { sections: homeSections },
+      product: config.templates?.product ?? { sections: [] },
+      collection: config.templates?.collection ?? { sections: [] },
+      cart: config.templates?.cart ?? { sections: [] },
+      faq: config.templates?.faq ?? { sections: [] },
+    },
   };
 }
 
@@ -356,7 +463,8 @@ export function applyThemeConfigToCmsState(
 
   const publicOrder = normalized.sections
     .map((item) => PUBLIC_SECTION_IDS[item.type])
-    .filter((item): item is string => Boolean(item));
+    .filter((item): item is string => Boolean(item))
+    .filter((item, index, items) => items.indexOf(item) === index);
   const preservedPublicSections = (state.themeSchema?.sectionOrder ?? []).filter(
     (item) => !publicOrder.includes(item),
   );
@@ -498,12 +606,16 @@ export function applyThemeConfigToCmsState(
     brand: footer
       ? {
           ...state.brand,
+          primaryColor: normalized.theme.primaryColor || state.brand.primaryColor,
+          ctaColor: normalized.theme.secondaryColor || state.brand.ctaColor,
+          bgColor: normalized.theme.backgroundColor || state.brand.bgColor,
+          textColor: normalized.theme.textColor || state.brand.textColor,
           logoText: footer.settings.logoText,
-          whatsapp: footer.settings.contactWhatsApp,
+          whatsapp: normalized.theme.whatsapp || footer.settings.contactWhatsApp,
           socials: {
-            instagram: footer.settings.socialLinks.instagram,
-            tiktok: footer.settings.socialLinks.tiktok,
-            facebook: footer.settings.socialLinks.facebook,
+            instagram: normalized.theme.socialLinks?.instagram ?? footer.settings.socialLinks.instagram,
+            tiktok: normalized.theme.socialLinks?.tiktok ?? footer.settings.socialLinks.tiktok,
+            facebook: normalized.theme.socialLinks?.facebook ?? footer.settings.socialLinks.facebook,
           },
         }
       : state.brand,

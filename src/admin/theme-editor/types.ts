@@ -6,9 +6,13 @@ import type {
 
 export type DeviceMode = "desktop" | "tablet" | "mobile";
 
+export type PreviewPage = "home" | "product" | "collection" | "cart" | "faq";
+
 export type SaveStatus = "idle" | "dirty" | "saving" | "saved" | "error";
 
 export type EditorSection = ThemeEditorSection;
+
+export type SectionId = string;
 
 export type SectionType = ThemeEditorSectionType;
 
