@@ -86,6 +86,7 @@ export type BrandSettings = {
   brandName: string;
   tagline: string;
   logoText: string;
+  logoTagline?: string; // subtitle below logo, e.g. "Tech & Style"
   primaryColor: string;
   ctaColor: string;
   ctaHoverColor: string;
@@ -193,6 +194,7 @@ export type HeroThemeSettings = {
   enableVideo?: boolean;
   enableAnimation?: boolean;
   enableHeroProducts?: boolean;
+  starRatingText?: string;
 };
 
 export type AnnouncementThemeSettings = {
@@ -239,6 +241,12 @@ export type StoryThemeSettings = {
   title: string;
   description: string;
   imageUrl: string;
+  ctaText?: string;
+  ctaLink?: string;
+  pillLabel?: string;
+  overlayTitle?: string;
+  overlaySub?: string;
+  valueChips?: { label: string; sub: string }[];
 };
 
 export type FaqThemeItem = {
@@ -264,6 +272,43 @@ export type FooterThemeSettings = {
   copyrightText: string;
 };
 
+export type RevolutBenefitCard = {
+  id: string;
+  badge: string;
+  title: string;
+  description: string;
+  ctaText: string;
+  ctaLink: string;
+  image: string;
+  theme: "light" | "dark";
+};
+
+export type RevolutBenefitsThemeSettings = {
+  cards: RevolutBenefitCard[];
+};
+
+export type WhyTaraThemeSettings = {
+  title: string;
+  intro: string;
+  pillLabel: string;
+  points: { text: string; icon: string }[];
+};
+
+export type FinalCtaThemeSettings = {
+  title: string;
+  body: string;
+  primaryCta: string;
+  secondaryCta: string;
+  primaryCtaLink: string;
+  secondaryCtaLink: string;
+  pillLabel: string;
+};
+
+export type TrustMarqueeThemeSettings = {
+  items: string[];
+  speed: number;
+};
+
 export type ThemeEditorSectionType =
   | "hero"
   | "header"
@@ -279,7 +324,11 @@ export type ThemeEditorSectionType =
   | "story"
   | "faq"
   | "whatsappCta"
-  | "footer";
+  | "footer"
+  | "revolutBenefits"
+  | "whyTara"
+  | "finalCta"
+  | "trustMarquee";
 
 export type ThemeEditorBlock = {
   id: string;
@@ -317,6 +366,10 @@ export type ThemeEditorSectionSettingsMap = {
   faq: FaqThemeSettings;
   whatsappCta: GenericThemeSettings;
   footer: FooterThemeSettings;
+  revolutBenefits: RevolutBenefitsThemeSettings;
+  whyTara: WhyTaraThemeSettings;
+  finalCta: FinalCtaThemeSettings;
+  trustMarquee: TrustMarqueeThemeSettings;
 };
 
 export type ThemeEditorSection<T extends ThemeEditorSectionType = ThemeEditorSectionType> = {
@@ -394,11 +447,13 @@ export type HeroContent = {
   headline: string;
   subheadline: string;
   primaryCta: string;
-  secondaryCta: string;
   primaryCtaLink?: string;
+  secondaryCta: string;
   secondaryCtaLink?: string;
   imageUrl?: string;
   mobileImageUrl?: string;
+  starRatingText?: string; // default "آلاف العملاء الراضين"
+  productCtaText?: string; // default "اشتري الآن"
   trustLine: string;
   urgencyBadge: string;
   backgroundStyle?: "light" | "dark" | "gradient";
@@ -442,12 +497,20 @@ export type StoryContent = {
   title: string;
   body: string;
   image: string;
+  ctaText?: string;
+  ctaLink?: string;
+  pillLabel?: string;
+  overlayTitle?: string;
+  overlaySub?: string;
+  valueChips?: { label: string; sub: string }[];
 };
 
 export type WhyContent = {
   title: string;
   intro: string;
   points: string[];
+  pillLabel?: string;
+  icons?: string[];
 };
 
 export type FinalCtaContent = {
@@ -455,6 +518,9 @@ export type FinalCtaContent = {
   body: string;
   primaryCta: string;
   secondaryCta: string;
+  primaryCtaLink?: string;
+  secondaryCtaLink?: string;
+  pillLabel?: string;
 };
 
 export type CategorySectionContent = {
@@ -462,6 +528,8 @@ export type CategorySectionContent = {
   intro: string;
   columns?: number; // 1–4, default 4
   mobileColumns?: number; // 1–2, default 1
+  pillLabel?: string;
+  discoverText?: string;
 };
 
 export type FeaturedSectionContent = {
@@ -473,6 +541,8 @@ export type FeaturedSectionContent = {
   showPrice?: boolean;
   showRating?: boolean;
   showDiscountBadge?: boolean;
+  pillLabel?: string;
+  viewAllText?: string;
 };
 
 export type FaqSectionContent = {

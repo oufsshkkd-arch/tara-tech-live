@@ -25,6 +25,9 @@ export default function Categories() {
     .filter((c) => !c.hidden)
     .sort((a, b) => a.order - b.order);
 
+  const pillLabel = categorySection.pillLabel || "الفئات";
+  const discoverText = categorySection.discoverText || "اكتشف";
+
   const desktopCols = Math.min(4, Math.max(1, categorySection.columns ?? 4));
   const mobileCols  = Math.min(2, Math.max(1, categorySection.mobileColumns ?? 1));
 
@@ -40,7 +43,7 @@ export default function Categories() {
   return (
     <section id="categories" data-section="categories" className="container-x pt-24 sm:pt-32">
       <div className="flex flex-col items-center text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-        <span className="pill mb-5">الفئات</span>
+        <span className="pill mb-5">{pillLabel}</span>
         <h2
           className="font-sans font-extrabold text-4xl sm:text-5xl lg:text-6xl text-ink leading-[1.05] tracking-[-0.03em]"
           dir="auto"
@@ -96,7 +99,7 @@ export default function Categories() {
                   </p>
                   <div className="mt-auto flex items-center justify-between pt-1">
                     <span className="inline-flex items-center gap-1.5 text-sm font-medium text-ink" dir="auto">
-                      اكتشف
+                      {discoverText}
                     </span>
                     <span className="h-9 w-9 grid place-items-center rounded-full bg-ink/5 text-ink transition-all duration-300 group-hover:bg-ink group-hover:text-white">
                       <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:rotate-12" />

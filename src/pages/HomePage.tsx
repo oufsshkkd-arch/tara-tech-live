@@ -1,4 +1,3 @@
-import Hero from "../components/Hero";
 import HeroRevolut from "../components/HeroRevolut";
 import TrustMarquee from "../components/TrustMarquee";
 import RevolutBenefits from "../components/RevolutBenefits";
@@ -41,19 +40,19 @@ export default function HomePage() {
     switch (id) {
       case "hero": {
         if (!visibility.hero) return null;
+        // Always use HeroRevolut (legacy Hero.tsx is deprecated)
         const heroRevolutSection = themeSchema?.editor?.sections?.find(
           (s) => s.type === "hero_revolut" && s.enabled,
         );
-        content = heroRevolutSection ? (
-          <HeroRevolut
-            settings={heroRevolutSection.settings as HeroThemeSettings}
-            products={products}
-            blocks={heroRevolutSection.blocks ?? []}
-            mode="public"
-          />
-        ) : (
+        const heroSettings = (heroRevolutSection?.settings ?? {}) as HeroThemeSettings;
+        content = (
           <>
-            <Hero />
+            <HeroRevolut
+              settings={heroSettings}
+              products={products}
+              blocks={heroRevolutSection?.blocks ?? []}
+              mode="public"
+            />
             <TrustMarquee />
             <RevolutBenefits />
           </>

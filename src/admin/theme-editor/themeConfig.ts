@@ -18,6 +18,8 @@ export const SECTION_TYPES: ThemeEditorSectionType[] = [
   "header",
   "announcementBar",
   "hero_revolut",
+  "trustMarquee",
+  "revolutBenefits",
   "categories",
   "featured",
   "bestSellers",
@@ -26,7 +28,9 @@ export const SECTION_TYPES: ThemeEditorSectionType[] = [
   "codBenefits",
   "reviews",
   "story",
+  "whyTara",
   "faq",
+  "finalCta",
   "whatsappCta",
   "footer",
 ];
@@ -47,19 +51,27 @@ export const SECTION_META: Record<
   codBenefits: { label: "مزايا COD", badge: "COD", description: "الدفع عند الاستلام والثقة" },
   reviews: { label: "آراء الزبناء", badge: "R", description: "Reviews وشهادات اجتماعية" },
   story: { label: "القصة", badge: "S", description: "About / Story section" },
+  whyTara: { label: "علاش حنا", badge: "Wت", description: "نقاط القوة والميزات" },
   faq: { label: "الأسئلة", badge: "Q", description: "أسئلة وأجوبة قابلة للتفعيل" },
+  finalCta: { label: "CTA النهائي", badge: "FC", description: "دعوة للعمل فـ آخر الصفحة" },
   whatsappCta: { label: "WhatsApp CTA", badge: "W", description: "دعوة مباشرة للتواصل" },
+  trustMarquee: { label: "شريط الثقة", badge: "TM", description: "شريط متحرك ديال الثقة" },
+  revolutBenefits: { label: "بطاقات المزايا", badge: "RB", description: "Revolut-style benefit cards" },
   footer: { label: "الفوتر", badge: "F", description: "الشعار، السوشيال والتواصل" },
 };
 
 const PUBLIC_SECTION_IDS: Partial<Record<ThemeEditorSectionType, string>> = {
   hero: "hero",
   hero_revolut: "hero",
+  trustMarquee: "hero",
+  revolutBenefits: "hero",
   categories: "categories",
   featured: "featured",
   trustStrip: "trustStrip",
   story: "story",
+  whyTara: "why",
   faq: "faq",
+  finalCta: "finalCta",
 };
 
 const TEMPLATE_IDS: ThemeTemplateId[] = ["home", "product", "collection", "cart", "faq"];
@@ -294,6 +306,34 @@ export function createThemeConfigFromCmsState(state: CmsState): StorefrontThemeC
           { icon: "Truck", title: "توصيل للمغرب", description: "خدمة مناسبة للتجارة المغربية." },
         ],
       }),
+      section("trustMarquee", true, 10, {
+        items: state.marqueeItems,
+        speed: state.announcementBar.speed || 40,
+      }),
+      section("revolutBenefits", true, 10.5, {
+        cards: [
+          {
+            id: "rb-1",
+            badge: "حياة ذكية",
+            title: "تكنولوجيا كتسهل عليك يومك.",
+            description: "اختارنا ليك أفضل المنتجات اللي كتزيد من الراحة والتنظيم فدارك وفي حياتك اليومية بطريقة ذكية وعملية.",
+            ctaText: "كتشف المزيد",
+            ctaLink: "/products",
+            image: "https://images.unsplash.com/photo-1584006682522-dc17d6c0d0cb?auto=format&fit=crop&w=800&q=80",
+            theme: "light" as const,
+          },
+          {
+            id: "rb-2",
+            badge: "جودة ممتازة",
+            title: "منتجات مختارة بعناية.",
+            description: "الجودة هي الأساس ديالنا. كل منتج داز من تجارب صارمة باش نضمنو ليك تجربة شراء راقية ومضمونة 100%.",
+            ctaText: "اطلب دابا",
+            ctaLink: "/products",
+            image: "https://images.unsplash.com/photo-1603351154351-5e2d0600bb77?auto=format&fit=crop&w=800&q=80",
+            theme: "dark" as const,
+          },
+        ],
+      }),
       section("reviews", true, 10, {
         ...genericSettings("آراء الزبناء", "ثقة اجتماعية كتعاون الزبون يقرر."),
       }),
@@ -301,8 +341,27 @@ export function createThemeConfigFromCmsState(state: CmsState): StorefrontThemeC
         title: state.story.title,
         description: state.story.body,
         imageUrl: state.story.image,
+        ctaText: state.story.ctaText || "اقرأ قصتنا",
+        ctaLink: state.story.ctaLink || "/notre-histoire",
+        pillLabel: state.story.pillLabel || "قصتنا",
+        overlayTitle: state.story.overlayTitle || "براند مغربية",
+        overlaySub: state.story.overlaySub || "مفكر فيها بعناية · مختارة بذوق",
+        valueChips: state.story.valueChips || [
+          { label: "مختارة", sub: "تنسيق تحريري" },
+          { label: "موثوقة", sub: "ثقة وجودة" },
+          { label: "محلية", sub: "خدمة المغرب" },
+        ],
       }),
-      section("faq", state.visibility.faq, 12, {
+      section("whyTara", state.visibility.why, 12, {
+        title: state.why.title,
+        intro: state.why.intro,
+        pillLabel: state.why.pillLabel || "علاش حنا",
+        points: state.why.points.map((text, i) => ({
+          text,
+          icon: state.why.icons?.[i] || ["Sparkles", "ShieldCheck", "Wallet", "ClipboardCheck", "HeadphonesIcon"][i % 5],
+        })),
+      }),
+      section("faq", state.visibility.faq, 13, {
         items: byOrder(state.faq).map((item) => ({
           id: item.id,
           question: item.question,
@@ -310,11 +369,20 @@ export function createThemeConfigFromCmsState(state: CmsState): StorefrontThemeC
           enabled: item.enabled !== false,
         })),
       }),
-      section("whatsappCta", true, 13, {
+      section("finalCta", state.visibility.finalCta, 14, {
+        title: state.finalCta.title,
+        body: state.finalCta.body,
+        primaryCta: state.finalCta.primaryCta,
+        secondaryCta: state.finalCta.secondaryCta,
+        primaryCtaLink: state.finalCta.primaryCtaLink || "/products",
+        secondaryCtaLink: state.finalCta.secondaryCtaLink || "/contact",
+        pillLabel: state.finalCta.pillLabel || "مرحبا فـ Tara Tech",
+      }),
+      section("whatsappCta", true, 15, {
         ...genericSettings("بغيتي تسول قبل الطلب؟", "تواصل معنا مباشرة فالواتساب."),
         accentColor: "#25D366",
       }),
-      section("footer", true, 14, {
+      section("footer", true, 16, {
         logoText: state.brand.logoText,
         description: state.footer.tagline,
         socialLinks: {
@@ -600,6 +668,9 @@ export function applyThemeConfigToCmsState(
   const story = getSection(normalized, "story");
   const faq = getSection(normalized, "faq");
   const footer = getSection(normalized, "footer");
+  const whyTara = getSection(normalized, "whyTara");
+  const finalCtaSection = getSection(normalized, "finalCta");
+  const trustMarquee = getSection(normalized, "trustMarquee");
 
   const publicOrder = normalized.sections
     .map((item) => PUBLIC_SECTION_IDS[item.type])
@@ -669,7 +740,9 @@ export function applyThemeConfigToCmsState(
       featured: featured?.enabled ?? state.visibility.featured,
       trustStrip: trustStrip?.enabled ?? state.visibility.trustStrip,
       story: story?.enabled ?? state.visibility.story,
+      why: whyTara?.enabled ?? state.visibility.why,
       faq: faq?.enabled ?? state.visibility.faq,
+      finalCta: finalCtaSection?.enabled ?? state.visibility.finalCta,
     },
     hero: hero
       ? {
@@ -739,9 +812,38 @@ export function applyThemeConfigToCmsState(
           title: story.settings.title,
           body: story.settings.description,
           image: story.settings.imageUrl,
+          ctaText: story.settings.ctaText,
+          ctaLink: story.settings.ctaLink,
+          pillLabel: story.settings.pillLabel,
+          overlayTitle: story.settings.overlayTitle,
+          overlaySub: story.settings.overlaySub,
+          valueChips: story.settings.valueChips,
         }
       : state.story,
     faq: faqItems,
+    why: whyTara
+      ? {
+          ...state.why,
+          title: whyTara.settings.title,
+          intro: whyTara.settings.intro,
+          pillLabel: whyTara.settings.pillLabel,
+          points: whyTara.settings.points.map((p) => p.text),
+          icons: whyTara.settings.points.map((p) => p.icon),
+        }
+      : state.why,
+    finalCta: finalCtaSection
+      ? {
+          ...state.finalCta,
+          title: finalCtaSection.settings.title,
+          body: finalCtaSection.settings.body,
+          primaryCta: finalCtaSection.settings.primaryCta,
+          secondaryCta: finalCtaSection.settings.secondaryCta,
+          primaryCtaLink: finalCtaSection.settings.primaryCtaLink,
+          secondaryCtaLink: finalCtaSection.settings.secondaryCtaLink,
+          pillLabel: finalCtaSection.settings.pillLabel,
+        }
+      : state.finalCta,
+    marqueeItems: trustMarquee ? trustMarquee.settings.items : state.marqueeItems,
     footer: footer
       ? {
           ...state.footer,

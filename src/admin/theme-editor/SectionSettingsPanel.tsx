@@ -8,15 +8,20 @@ import type {
   FaqThemeItem,
   FaqThemeSettings,
   FeaturedThemeSettings,
+  FinalCtaThemeSettings,
   FooterThemeSettings,
   GenericThemeSettings,
   HeroThemeSettings,
   Product,
+  RevolutBenefitCard,
+  RevolutBenefitsThemeSettings,
   StoryThemeSettings,
+  TrustMarqueeThemeSettings,
   TrustThemeItem,
   TrustThemeSettings,
   StorefrontThemeConfig,
   ThemeEditorBlock,
+  WhyTaraThemeSettings,
 } from "../../cms/types";
 import BlockSettingsPanel from "./BlockSettingsPanel";
 import DynamicSourceButton from "./DynamicSourceButton";
@@ -308,6 +313,34 @@ export default function SectionSettingsPanel({
             <GenericSettings
               settings={section.settings as GenericThemeSettings}
               onChange={(patch) => onUpdate(section.id, patch)}
+            />
+          )}
+
+          {section.type === "revolutBenefits" && (
+            <RevolutBenefitsSettings
+              settings={section.settings as RevolutBenefitsThemeSettings}
+              onChange={(settings) => onReplaceSettings(section.id, settings)}
+            />
+          )}
+
+          {section.type === "whyTara" && (
+            <WhyTaraSettings
+              settings={section.settings as WhyTaraThemeSettings}
+              onChange={(settings) => onReplaceSettings(section.id, settings)}
+            />
+          )}
+
+          {section.type === "finalCta" && (
+            <FinalCtaSettings
+              settings={section.settings as FinalCtaThemeSettings}
+              onChange={(patch) => onUpdate(section.id, patch)}
+            />
+          )}
+
+          {section.type === "trustMarquee" && (
+            <TrustMarqueeSettings
+              settings={section.settings as TrustMarqueeThemeSettings}
+              onChange={(settings) => onReplaceSettings(section.id, settings)}
             />
           )}
         </div>
@@ -727,6 +760,12 @@ function StorySettings({
   settings: StoryThemeSettings;
   onChange: (patch: Partial<StoryThemeSettings>) => void;
 }) {
+  const updateChip = (index: number, patch: Partial<{ label: string; sub: string }>) => {
+    const chips = [...(settings.valueChips || [])];
+    chips[index] = { ...chips[index], ...patch };
+    onChange({ valueChips: chips });
+  };
+
   return (
     <div className="space-y-4">
       <Field label="العنوان">
@@ -742,6 +781,43 @@ function StorySettings({
         folder="story"
         onChange={(asset) => onChange({ imageUrl: asset?.url ?? "" })}
       />
+      <Field label="نص الـ Pill">
+        <TextInput value={settings.pillLabel ?? "قصتنا"} onChange={(pillLabel) => onChange({ pillLabel })} />
+      </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="نص CTA">
+          <TextInput value={settings.ctaText ?? "اقرأ قصتنا"} onChange={(ctaText) => onChange({ ctaText })} />
+        </Field>
+        <Field label="رابط CTA">
+          <TextInput value={settings.ctaLink ?? "/notre-histoire"} onChange={(ctaLink) => onChange({ ctaLink })} dir="ltr" />
+        </Field>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="عنوان الكارد">
+          <TextInput value={settings.overlayTitle ?? "براند مغربية"} onChange={(overlayTitle) => onChange({ overlayTitle })} />
+        </Field>
+        <Field label="وصف الكارد">
+          <TextInput value={settings.overlaySub ?? ""} onChange={(overlaySub) => onChange({ overlaySub })} />
+        </Field>
+      </div>
+      <ArrayToolbar
+        label="Value Chips"
+        onAdd={() =>
+          onChange({
+            valueChips: [...(settings.valueChips || []), { label: "جديد", sub: "وصف" }],
+          })
+        }
+      />
+      {(settings.valueChips || []).map((chip, index) => (
+        <div key={index} className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+          <Field label="العنوان">
+            <TextInput value={chip.label} onChange={(label) => updateChip(index, { label })} />
+          </Field>
+          <Field label="الوصف">
+            <TextInput value={chip.sub} onChange={(sub) => updateChip(index, { sub })} />
+          </Field>
+        </div>
+      ))}
     </div>
   );
 }
@@ -851,6 +927,255 @@ function FooterSettings({
         <TextInput
           value={settings.copyrightText}
           onChange={(copyrightText) => onChange({ ...settings, copyrightText })}
+        />
+      </Field>
+    </div>
+  );
+}
+
+function RevolutBenefitsSettings({
+  settings,
+  onChange,
+}: {
+  settings: RevolutBenefitsThemeSettings;
+  onChange: (settings: RevolutBenefitsThemeSettings) => void;
+}) {
+  const updateCard = (index: number, patch: Partial<RevolutBenefitCard>) => {
+    onChange({
+      cards: settings.cards.map((card, i) => (i === index ? { ...card, ...patch } : card)),
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      <ArrayToolbar
+        label="بطاقات المزايا"
+        onAdd={() =>
+          onChange({
+            cards: [
+              ...settings.cards,
+              {
+                id: `rb-${Date.now()}`,
+                badge: "جديد",
+                title: "عنوان البطاقة",
+                description: "وصف البطاقة",
+                ctaText: "اكتشف",
+                ctaLink: "/products",
+                image: "",
+                theme: "light",
+              },
+            ],
+          })
+        }
+      />
+      {settings.cards.map((card, index) => (
+        <div key={card.id} className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-black text-slate-700">
+              {card.theme === "dark" ? "⚫ Dark" : "⚪ Light"}
+            </span>
+            <button
+              type="button"
+              onClick={() =>
+                onChange({ cards: settings.cards.filter((_, i) => i !== index) })
+              }
+              className="grid h-8 w-8 place-items-center rounded-xl text-red-600 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+          <Field label="Badge">
+            <TextInput value={card.badge} onChange={(badge) => updateCard(index, { badge })} />
+          </Field>
+          <Field label="العنوان">
+            <TextInput value={card.title} onChange={(title) => updateCard(index, { title })} />
+          </Field>
+          <Field label="الوصف">
+            <TextArea value={card.description} onChange={(description) => updateCard(index, { description })} rows={3} />
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="CTA نص">
+              <TextInput value={card.ctaText} onChange={(ctaText) => updateCard(index, { ctaText })} />
+            </Field>
+            <Field label="CTA رابط">
+              <TextInput value={card.ctaLink} onChange={(ctaLink) => updateCard(index, { ctaLink })} dir="ltr" />
+            </Field>
+          </div>
+          <MediaPickerField
+            label="صورة البطاقة"
+            value={card.image ? { type: "external", url: card.image, alt: card.title } : null}
+            kind="image"
+            folder="benefits"
+            onChange={(asset) => updateCard(index, { image: asset?.url ?? "" })}
+          />
+          <Field label="الثيم">
+            <SelectInput
+              value={card.theme}
+              onChange={(theme) => updateCard(index, { theme: theme as "light" | "dark" })}
+              options={[
+                { label: "Light", value: "light" },
+                { label: "Dark", value: "dark" },
+              ]}
+            />
+          </Field>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function WhyTaraSettings({
+  settings,
+  onChange,
+}: {
+  settings: WhyTaraThemeSettings;
+  onChange: (settings: WhyTaraThemeSettings) => void;
+}) {
+  const updatePoint = (index: number, patch: Partial<{ text: string; icon: string }>) => {
+    onChange({
+      ...settings,
+      points: settings.points.map((p, i) => (i === index ? { ...p, ...patch } : p)),
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      <Field label="العنوان">
+        <TextInput value={settings.title} onChange={(title) => onChange({ ...settings, title })} />
+      </Field>
+      <Field label="المقدمة">
+        <TextArea value={settings.intro} onChange={(intro) => onChange({ ...settings, intro })} rows={3} />
+      </Field>
+      <Field label="نص الـ Pill">
+        <TextInput value={settings.pillLabel} onChange={(pillLabel) => onChange({ ...settings, pillLabel })} />
+      </Field>
+      <ArrayToolbar
+        label="نقاط القوة"
+        onAdd={() =>
+          onChange({
+            ...settings,
+            points: [...settings.points, { text: "نقطة جديدة", icon: "Sparkles" }],
+          })
+        }
+      />
+      {settings.points.map((point, index) => (
+        <div key={index} className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() =>
+                onChange({
+                  ...settings,
+                  points: settings.points.filter((_, i) => i !== index),
+                })
+              }
+              className="grid h-8 w-8 place-items-center rounded-xl text-red-600 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+          <Field label="النص">
+            <TextInput value={point.text} onChange={(text) => updatePoint(index, { text })} />
+          </Field>
+          <Field label="Icon" hint="Sparkles, ShieldCheck, Wallet, ClipboardCheck, HeadphonesIcon">
+            <TextInput value={point.icon} onChange={(icon) => updatePoint(index, { icon })} dir="ltr" />
+          </Field>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FinalCtaSettings({
+  settings,
+  onChange,
+}: {
+  settings: FinalCtaThemeSettings;
+  onChange: (patch: Partial<FinalCtaThemeSettings>) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <Field label="العنوان">
+        <TextInput value={settings.title} onChange={(title) => onChange({ title })} />
+      </Field>
+      <Field label="الوصف">
+        <TextArea value={settings.body} onChange={(body) => onChange({ body })} rows={3} />
+      </Field>
+      <Field label="نص الـ Pill">
+        <TextInput value={settings.pillLabel} onChange={(pillLabel) => onChange({ pillLabel })} />
+      </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="CTA الأساسي">
+          <TextInput value={settings.primaryCta} onChange={(primaryCta) => onChange({ primaryCta })} />
+        </Field>
+        <Field label="رابط">
+          <TextInput value={settings.primaryCtaLink} onChange={(primaryCtaLink) => onChange({ primaryCtaLink })} dir="ltr" />
+        </Field>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="CTA الثانوي">
+          <TextInput value={settings.secondaryCta} onChange={(secondaryCta) => onChange({ secondaryCta })} />
+        </Field>
+        <Field label="رابط">
+          <TextInput value={settings.secondaryCtaLink} onChange={(secondaryCtaLink) => onChange({ secondaryCtaLink })} dir="ltr" />
+        </Field>
+      </div>
+    </div>
+  );
+}
+
+function TrustMarqueeSettings({
+  settings,
+  onChange,
+}: {
+  settings: TrustMarqueeThemeSettings;
+  onChange: (settings: TrustMarqueeThemeSettings) => void;
+}) {
+  const updateItem = (index: number, text: string) => {
+    onChange({
+      ...settings,
+      items: settings.items.map((item, i) => (i === index ? text : item)),
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      <ArrayToolbar
+        label="عناصر الشريط"
+        onAdd={() =>
+          onChange({
+            ...settings,
+            items: [...settings.items, "عنصر جديد"],
+          })
+        }
+      />
+      {settings.items.map((item, index) => (
+        <div key={index} className="flex items-center gap-2">
+          <div className="flex-1">
+            <TextInput value={item} onChange={(text) => updateItem(index, text)} />
+          </div>
+          <button
+            type="button"
+            onClick={() =>
+              onChange({
+                ...settings,
+                items: settings.items.filter((_, i) => i !== index),
+              })
+            }
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-red-600 hover:bg-red-50"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      ))}
+      <Field label="سرعة الشريط" hint="القيمة بالثواني">
+        <input
+          type="number"
+          value={settings.speed}
+          onChange={(e) => onChange({ ...settings, speed: parseInt(e.target.value) || 40 })}
+          min={5}
+          max={120}
+          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
         />
       </Field>
     </div>

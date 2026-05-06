@@ -10,7 +10,7 @@ export default function FinalCta() {
         <div className="absolute inset-0 bg-bg/40 rounded-2xl" />
         <div className="relative grid lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-8">
-            <span className="pill-red mb-4">مرحبا فـ Tara Tech</span>
+            <span className="pill-red mb-4">{finalCta.pillLabel || "مرحبا فـ Tara Tech"}</span>
             <h2
               className="font-sans font-extrabold text-4xl sm:text-6xl text-ink leading-[1.05] tracking-[-0.03em]"
               dir="auto"
@@ -22,11 +22,11 @@ export default function FinalCta() {
             </p>
           </div>
           <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3">
-            <Link to="/products" className="btn-primary justify-center w-full">
+            <Link to={finalCta.primaryCtaLink || "/products"} className="btn-primary justify-center w-full">
               {finalCta.primaryCta}
               <ArrowUpRight className="h-4 w-4" />
             </Link>
-            <Link to="/contact" className="btn-ghost justify-center w-full">
+            <Link to={finalCta.secondaryCtaLink || "/contact"} className="btn-ghost justify-center w-full">
               {finalCta.secondaryCta}
             </Link>
           </div>

@@ -4,14 +4,26 @@ import {
   Wallet,
   ClipboardCheck,
   HeadphonesIcon,
+  type LucideIcon,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCms } from "../cms/store";
 
-const icons = [Sparkles, ShieldCheck, Wallet, ClipboardCheck, HeadphonesIcon];
+const ICON_MAP: Record<string, LucideIcon> = {
+  Sparkles,
+  ShieldCheck,
+  Wallet,
+  ClipboardCheck,
+  HeadphonesIcon,
+};
+
+const DEFAULT_ICONS = ["Sparkles", "ShieldCheck", "Wallet", "ClipboardCheck", "HeadphonesIcon"];
 
 export default function WhyTara() {
   const { why } = useCms();
+  const pillLabel = why.pillLabel || "علاش حنا";
+  const icons = why.icons?.length ? why.icons : DEFAULT_ICONS;
+
   return (
     <section id="why" className="container-x pt-24 sm:pt-32">
       <div className="rounded-2xl bg-ink text-white p-8 sm:p-14 relative overflow-hidden">
@@ -36,7 +48,7 @@ export default function WhyTara() {
           {/* ── Left column: heading ── */}
           <div className="lg:col-span-5">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-3 py-1 text-xs font-medium text-white/70 mb-5">
-              علاش حنا
+              {pillLabel}
             </span>
             <h2
               className="font-sans font-extrabold text-4xl sm:text-5xl leading-tight tracking-[-0.02em]"
@@ -55,7 +67,8 @@ export default function WhyTara() {
           {/* ── Right column: feature cards ── */}
           <div className="lg:col-span-7 grid sm:grid-cols-2 gap-3">
             {why.points.map((p, i) => {
-              const Icon = icons[i % icons.length];
+              const iconName = icons[i % icons.length];
+              const Icon = ICON_MAP[iconName] ?? Sparkles;
               return (
                 <motion.div
                   key={p}

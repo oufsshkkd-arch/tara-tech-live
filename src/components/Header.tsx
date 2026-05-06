@@ -70,7 +70,7 @@ export default function Header() {
                   overPhoto ? "text-white/50" : "text-body/60"
                 }`}
               >
-                Tech &amp; Style
+                {brand.logoTagline || "Tech & Style"}
               </span>
             </div>
           </Link>

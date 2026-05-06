@@ -30,11 +30,13 @@ function MiniProductCard({
   cardStyle,
   show,
   mode,
+  ctaText,
 }: {
   product: Product;
   cardStyle: HeroFeaturedProductsSettings["cardStyle"];
   show: Pick<HeroFeaturedProductsSettings, "showImage" | "showTitle" | "showPrice" | "showOldPrice" | "showBadge" | "showCTA">;
   mode: Mode;
+  ctaText?: string;
 }) {
   const image = product.images[0] ?? "";
   const isPremium = cardStyle === "premium";
@@ -82,11 +84,11 @@ function MiniProductCard({
             )}
           </div>
         )}
-        {show.showCTA && (
+            {show.showCTA && (
           <span
             className={`mt-auto inline-block rounded-full px-3 py-1 text-[10px] font-bold text-center ${ctaBg}`}
           >
-            اشتري الآن
+            {ctaText || "اشتري الآن"}
           </span>
         )}
       </div>
@@ -163,6 +165,7 @@ function HeroProductsStrip({
           cardStyle={cardStyle}
           mode={mode}
           show={{ showImage, showTitle, showPrice, showOldPrice, showBadge, showCTA }}
+          ctaText={(s as Record<string, unknown>).ctaText as string | undefined}
         />
       ))}
     </div>
@@ -370,7 +373,7 @@ export default function HeroRevolut({
           className="text-[11px] font-medium"
           style={{ color: isLight ? "#94a3b8" : "rgba(255,255,255,0.55)" }}
         >
-          آلاف العملاء الراضين
+          {settings.starRatingText || "آلاف العملاء الراضين"}
         </span>
       </div>
 

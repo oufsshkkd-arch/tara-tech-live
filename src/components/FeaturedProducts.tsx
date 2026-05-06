@@ -19,7 +19,7 @@ export default function FeaturedProducts() {
     <section className="container-x pt-24 sm:pt-32">
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-10">
         <div className="max-w-2xl">
-          <span className="pill mb-4">مختار</span>
+          <span className="pill mb-4">{featuredSection.pillLabel || "مختار"}</span>
           <h2
             className="font-sans font-extrabold text-4xl sm:text-5xl text-ink leading-tight tracking-[-0.02em]"
             dir="auto"
@@ -59,7 +59,7 @@ export default function FeaturedProducts() {
 
       <div className="mt-10 flex justify-center">
         <Link to="/products" className="btn-ghost">
-          شوف المنتجات كاملة
+          {featuredSection.viewAllText || "شوف المنتجات كاملة"}
           <ArrowUpRight className="h-4 w-4" />
         </Link>
       </div>

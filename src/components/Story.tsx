@@ -5,7 +5,7 @@ import { useCms } from "../cms/store";
 
 const STORY_IMAGE = "/story-editorial.png";
 
-const values = [
+const DEFAULT_VALUE_CHIPS = [
   { label: "مختارة", sub: "تنسيق تحريري" },
   { label: "موثوقة", sub: "ثقة وجودة" },
   { label: "محلية", sub: "خدمة المغرب" },
@@ -13,6 +13,14 @@ const values = [
 
 export default function Story() {
   const { story } = useCms();
+
+  const values = story.valueChips?.length ? story.valueChips : DEFAULT_VALUE_CHIPS;
+  const pillLabel = story.pillLabel || "قصتنا";
+  const ctaText = story.ctaText || "اقرأ قصتنا";
+  const ctaLink = story.ctaLink || "/notre-histoire";
+  const overlayTitle = story.overlayTitle || "براند مغربية";
+  const overlaySub = story.overlaySub || "مفكر فيها بعناية · مختارة بذوق";
+
   return (
     <section id="story" className="container-x pt-24 sm:pt-32">
       <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-center">
@@ -47,10 +55,10 @@ export default function Story() {
                       className="font-sans font-bold text-[15px] leading-tight text-ink"
                       dir="auto"
                     >
-                      براند مغربية
+                      {overlayTitle}
                     </div>
                     <div className="text-[11px] text-body mt-0.5" dir="auto">
-                      مفكر فيها بعناية · مختارة بذوق
+                      {overlaySub}
                     </div>
                   </div>
                 </div>
@@ -67,7 +75,7 @@ export default function Story() {
           transition={{ duration: 0.7, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
           className="lg:col-span-7"
         >
-          <span className="pill mb-5">قصتنا</span>
+          <span className="pill mb-5">{pillLabel}</span>
           <h2
             className="font-sans font-extrabold text-4xl sm:text-5xl text-ink leading-tight tracking-[-0.02em]"
             dir="auto"
@@ -104,10 +112,10 @@ export default function Story() {
           {/* CTA */}
           <div className="mt-8">
             <Link
-              to="/notre-histoire"
+              to={ctaLink}
               className="btn-ghost inline-flex"
             >
-              اقرأ قصتنا
+              {ctaText}
               <ArrowUpRight className="h-4 w-4" />
             </Link>
           </div>

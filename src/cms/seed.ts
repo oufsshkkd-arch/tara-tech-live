@@ -50,6 +50,7 @@ export const seed: CmsState = {
         "منتجات tech موثوقة، أنيقة ومفكر فيها باش تسهل عليك الحياة اليومية. الدفع عند الاستلام فجميع المغرب.",
     },
     brandLine: "Tara Tech — تكنولوجيا عملية، مختارة بعناية.",
+    logoTagline: "Tech & Style",
     clarityId: "wkekl1zk1c",
   },
   nav: {
@@ -97,18 +98,32 @@ export const seed: CmsState = {
     title: "الفئات",
     intro:
       "اختار الفئة اللي كتناسبك، واكتشف منتجات مختارة بعناية باش تعطيك الراحة، العملية، والثقة.",
+    pillLabel: "الفئات",
+    discoverText: "اكتشف",
   },
   featuredSection: {
     title: "منتجات مختارة",
     intro:
       "اكتشف بعض من المنتجات اللي كتعكس روح Tara Tech: الجودة، الفائدة، والتقديم الراقي.",
     enabled: true,
+    pillLabel: "مختار",
+    viewAllText: "شوف المنتجات كاملة",
   },
   story: {
     title: "قصتنا",
     body: "Tara Tech تزادت من رغبة بسيطة: نقدمو للمغاربة منتجات tech عملية، موثوقة ومختارة بعناية، بطريقة راقية وواضحة. الهدف ديالنا هو نوفر تجربة شراء مريحة، واضحة، وعلى مستوى الجودة اللي كيبحث عليها الزبون.",
     image:
       "https://images.unsplash.com/photo-1519183071298-a2962be96f83?auto=format&fit=crop&w=1200&q=80",
+    ctaText: "اقرأ قصتنا",
+    ctaLink: "/notre-histoire",
+    pillLabel: "قصتنا",
+    overlayTitle: "براند مغربية",
+    overlaySub: "مفكر فيها بعناية · مختارة بذوق",
+    valueChips: [
+      { label: "مختارة", sub: "تنسيق تحريري" },
+      { label: "موثوقة", sub: "ثقة وجودة" },
+      { label: "محلية", sub: "خدمة المغرب" },
+    ],
   },
   why: {
     title: "علاش تختار Tara Tech؟",
@@ -121,6 +136,8 @@ export const seed: CmsState = {
       "تأكيد قبل الإرسال",
       "خدمة محترفة",
     ],
+    pillLabel: "علاش حنا",
+    icons: ["Sparkles", "ShieldCheck", "Wallet", "ClipboardCheck", "HeadphonesIcon"],
   },
   faqSection: {
     title: "الأسئلة الشائعة",
@@ -132,6 +149,9 @@ export const seed: CmsState = {
     body: "اختار من بين منتجات عملية، راقية، ومختارة بعناية باش تسهّل عليك الحياة اليومية بثقة وراحة.",
     primaryCta: "اكتشف المنتجات",
     secondaryCta: "تواصل معنا",
+    primaryCtaLink: "/products",
+    secondaryCtaLink: "/contact",
+    pillLabel: "مرحبا فـ Tara Tech",
   },
   visibility: {
     hero: true,
