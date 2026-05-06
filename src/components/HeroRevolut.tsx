@@ -274,8 +274,10 @@ export default function HeroRevolut({
   }[backgroundStyle];
 
   const baseTextColor = isLight ? "#0f172a" : "#ffffff";
-  const resolvedTitleColor = titleColor || baseTextColor;
-  const resolvedSubtitleColor = subtitleColor || (isLight ? "#64748b" : "rgba(255,255,255,0.75)");
+  const resolvedTitleColor =
+    isLight && titleColor === "#ffffff" ? "#0f172a" : (titleColor || baseTextColor);
+  const resolvedSubtitleColor =
+    isLight && subtitleColor === "#cbd5e1" ? "#475569" : (subtitleColor || (isLight ? "#64748b" : "rgba(255,255,255,0.75)"));
 
   const titlePx = isMobile ? (titleFontSize?.mobile ?? 30) : (titleFontSize?.desktop ?? 54);
   const subtitlePx = isMobile ? (subtitleFontSize?.mobile ?? 15) : (subtitleFontSize?.desktop ?? 18);
