@@ -8,6 +8,7 @@ export default function BlocksList({
   onToggle,
   onDuplicate,
   onDelete,
+  onMove,
 }: {
   blocks: ThemeEditorBlock[];
   onAdd: () => void;
@@ -15,6 +16,7 @@ export default function BlocksList({
   onToggle: (blockId: string) => void;
   onDuplicate: (blockId: string) => void;
   onDelete: (blockId: string) => void;
+  onMove: (blockId: string, direction: -1 | 1) => void;
 }) {
   return (
     <div className="space-y-1">
@@ -33,6 +35,12 @@ export default function BlocksList({
           </button>
           <button type="button" onClick={() => onDuplicate(block.id)} className="text-slate-400 hover:text-slate-700">
             <Copy className="h-3.5 w-3.5" />
+          </button>
+          <button type="button" onClick={() => onMove(block.id, -1)} className="text-[10px] font-black text-slate-400 hover:text-slate-700">
+            ↑
+          </button>
+          <button type="button" onClick={() => onMove(block.id, 1)} className="text-[10px] font-black text-slate-400 hover:text-slate-700">
+            ↓
           </button>
           <button type="button" onClick={() => onDelete(block.id)} className="text-red-400 hover:text-red-600">
             <Trash2 className="h-3.5 w-3.5" />

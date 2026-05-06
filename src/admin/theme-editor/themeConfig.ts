@@ -4,8 +4,11 @@ import type {
   CmsState,
   FaqItem,
   GenericThemeSettings,
+  HeroFeaturedProductsSettings,
+  HeroThemeMedia,
   StorefrontThemeConfig,
   ThemeEditorSection,
+  ThemeEditorBlock,
   ThemeEditorSectionSettingsMap,
   ThemeEditorSectionType,
   ThemeTemplateId,
@@ -13,10 +16,11 @@ import type {
 
 export const SECTION_TYPES: ThemeEditorSectionType[] = [
   "header",
-  "hero",
   "announcementBar",
+  "hero_revolut",
   "categories",
   "featured",
+  "bestSellers",
   "productHighlight",
   "trustStrip",
   "codBenefits",
@@ -32,10 +36,12 @@ export const SECTION_META: Record<
   { label: string; badge: string; description: string }
 > = {
   header: { label: "الهيدر", badge: "N", description: "Logo، navigation، cart/search" },
-  hero: { label: "الهيرو", badge: "H", description: "العنوان، CTA، الصورة والفيديو" },
+  hero: { label: "Hero Legacy", badge: "H", description: "Legacy hero migrated to Hero Revolut" },
+  hero_revolut: { label: "Hero Revolut", badge: "HR", description: "Premium hero with media + 3 products strip" },
   announcementBar: { label: "شريط الإعلان", badge: "A", description: "رسالة قصيرة أعلى الموقع" },
   categories: { label: "الفئات", badge: "C", description: "بطاقات التصنيفات الرئيسية" },
   featured: { label: "منتجات مختارة", badge: "P", description: "اختيار المنتجات وطريقة العرض" },
+  bestSellers: { label: "الأكثر مبيعاً", badge: "B", description: "Best sellers grid for COD products" },
   productHighlight: { label: "Product Card Hero", badge: "PH", description: "منتج بارز مع COD CTA" },
   trustStrip: { label: "شريط الثقة", badge: "T", description: "COD، ضمان، دعم وخدمة" },
   codBenefits: { label: "مزايا COD", badge: "COD", description: "الدفع عند الاستلام والثقة" },
@@ -48,6 +54,7 @@ export const SECTION_META: Record<
 
 const PUBLIC_SECTION_IDS: Partial<Record<ThemeEditorSectionType, string>> = {
   hero: "hero",
+  hero_revolut: "hero",
   categories: "categories",
   featured: "featured",
   trustStrip: "trustStrip",
@@ -118,6 +125,52 @@ function firstProductImage(state: CmsState) {
   return state.products.find((product) => product.images?.[0])?.images[0] ?? "";
 }
 
+function mediaFromUrl(url: string | undefined, alt: string) {
+  if (!url) return null;
+  return {
+    type: "external" as const,
+    url,
+    alt,
+    mimeType: /\.(mp4|webm|mov)$/i.test(url) ? "video/mp4" : "image/webp",
+  };
+}
+
+function mediaUrl(media: HeroThemeMedia | undefined, key: keyof HeroThemeMedia, fallback = "") {
+  return media?.[key]?.url || fallback;
+}
+
+function heroFeaturedProductsBlock(productIds: string[]): ThemeEditorBlock {
+  const settings: HeroFeaturedProductsSettings = {
+    selectionMode: "manual",
+    selectedProductIds: productIds.slice(0, 3),
+    collectionId: null,
+    productLimit: 3,
+    showImage: true,
+    showTitle: true,
+    showPrice: true,
+    showOldPrice: true,
+    showRating: true,
+    showBadge: true,
+    showCTA: true,
+    cardStyle: "premium",
+    revealOnScroll: true,
+    spacing: 16,
+    background: "rgba(255,255,255,0.08)",
+    textColor: "#ffffff",
+    priceColor: "#ffffff",
+    badgeText: "اختيار Tara",
+    badgeColor: "#2563eb",
+  };
+
+  return {
+    id: "hero-featured-products",
+    type: "featured_products_strip",
+    enabled: true,
+    order: 1,
+    settings: settings as unknown as Record<string, unknown>,
+  };
+}
+
 export async function loadCmsState() {
   return loadSupabaseCmsState();
 }
@@ -138,11 +191,26 @@ export function createThemeConfigFromCmsState(state: CmsState): StorefrontThemeC
     (state.hero.mediaType === "image" ? state.hero.videoUrl : "") ||
     firstProductImage(state);
 
+  const heroMedia: HeroThemeMedia = {
+    image: mediaFromUrl(imageUrl, state.hero.headline),
+    mobileImage: mediaFromUrl(state.hero.mobileImageUrl, state.hero.headline),
+    video: mediaFromUrl(state.hero.mediaType === "video" ? state.hero.videoUrl : "", state.hero.headline),
+    poster: mediaFromUrl(state.hero.videoPoster, `${state.hero.headline} poster`),
+  };
+
   const homeSections: ThemeEditorSection[] = [
       section("header", true, 1, {
         ...genericSettings(state.brand.logoText, "Navigation, search and cart drawer"),
       }),
-      section("hero", state.visibility.hero, 2, {
+      section("announcementBar", state.announcementBar.enabled, 2, {
+        enabled: state.announcementBar.enabled,
+        text: firstAnnouncementText(state),
+        link: state.announcementBar.link || "",
+        backgroundColor: state.announcementBar.backgroundColor || "#111111",
+        textColor: state.announcementBar.textColor || "#ffffff",
+      }),
+      {
+        ...section("hero_revolut", state.visibility.hero, 3, {
         title: state.hero.headline,
         subtitle: state.hero.subheadline,
         primaryCtaText: state.hero.primaryCta,
@@ -156,14 +224,24 @@ export function createThemeConfigFromCmsState(state: CmsState): StorefrontThemeC
         badgeText: state.hero.urgencyBadge,
         backgroundStyle: state.hero.backgroundStyle || "dark",
         textAlign: state.hero.textAlign || "right",
+        titleFontSize: { desktop: state.hero.titleFontSize || 64, mobile: 36 },
+        subtitleFontSize: { desktop: state.hero.subtitleFontSize || 18, mobile: 14 },
+        titleColor: state.hero.titleColor || "#ffffff",
+        subtitleColor: state.hero.subtitleColor || "#cbd5e1",
+        accentColor: state.brand.primaryColor || "#2563eb",
+        buttonStyle: "premium",
+        sectionHeight: 720,
+        spacing: 72,
+        borderRadius: 32,
+        mediaPosition: "left",
+        media: heroMedia,
+        enableVideo: state.hero.mediaType === "video",
+        enableAnimation: true,
+        enableHeroProducts: true,
       }),
-      section("announcementBar", state.announcementBar.enabled, 3, {
-        enabled: state.announcementBar.enabled,
-        text: firstAnnouncementText(state),
-        link: state.announcementBar.link || "",
-        backgroundColor: state.announcementBar.backgroundColor || "#111111",
-        textColor: state.announcementBar.textColor || "#ffffff",
-      }),
+      id: "hero-main",
+      blocks: [heroFeaturedProductsBlock(featuredProductIds)],
+    } as ThemeEditorSection,
       section("categories", state.visibility.categories, 4, {
         title: state.categorySection.title,
         categories: byOrder(state.categories).map((category) => ({
@@ -182,7 +260,19 @@ export function createThemeConfigFromCmsState(state: CmsState): StorefrontThemeC
         showRating: state.featuredSection.showRating ?? true,
         showDiscountBadge: state.featuredSection.showDiscountBadge ?? true,
       }),
-      section("productHighlight", true, 6, {
+      section("bestSellers", true, 6, {
+        title: "الأكثر مبيعاً",
+        productIds: visibleProducts
+          .slice()
+          .sort((a, b) => a.order - b.order)
+          .map((product) => product.id)
+          .slice(0, 8),
+        layout: "grid",
+        showPrice: true,
+        showRating: true,
+        showDiscountBadge: true,
+      }),
+      section("productHighlight", true, 7, {
         ...genericSettings(
           visibleProducts[0]?.title || "منتج مختار",
           visibleProducts[0]?.shortDescription || "منتج COD مختار بعناية",
@@ -190,29 +280,29 @@ export function createThemeConfigFromCmsState(state: CmsState): StorefrontThemeC
         imageUrl: visibleProducts[0]?.images?.[0] || "",
         accentColor: state.brand.ctaColor,
       }),
-      section("trustStrip", state.visibility.trustStrip, 7, {
+      section("trustStrip", state.visibility.trustStrip, 8, {
         items: state.trustStrip.map((item) => ({
           icon: item.icon,
           title: item.title,
           description: item.sub,
         })),
       }),
-      section("codBenefits", true, 8, {
+      section("codBenefits", true, 9, {
         items: [
           { icon: "Wallet", title: "الدفع عند الاستلام", description: "خلص غير ملي توصلك السلعة." },
           { icon: "PhoneCall", title: "تأكيد قبل الشحن", description: "كنأكدو الطلب معاك قبل الإرسال." },
           { icon: "Truck", title: "توصيل للمغرب", description: "خدمة مناسبة للتجارة المغربية." },
         ],
       }),
-      section("reviews", true, 9, {
+      section("reviews", true, 10, {
         ...genericSettings("آراء الزبناء", "ثقة اجتماعية كتعاون الزبون يقرر."),
       }),
-      section("story", state.visibility.story, 10, {
+      section("story", state.visibility.story, 11, {
         title: state.story.title,
         description: state.story.body,
         imageUrl: state.story.image,
       }),
-      section("faq", state.visibility.faq, 11, {
+      section("faq", state.visibility.faq, 12, {
         items: byOrder(state.faq).map((item) => ({
           id: item.id,
           question: item.question,
@@ -220,11 +310,11 @@ export function createThemeConfigFromCmsState(state: CmsState): StorefrontThemeC
           enabled: item.enabled !== false,
         })),
       }),
-      section("whatsappCta", true, 12, {
+      section("whatsappCta", true, 13, {
         ...genericSettings("بغيتي تسول قبل الطلب؟", "تواصل معنا مباشرة فالواتساب."),
         accentColor: "#25D366",
       }),
-      section("footer", true, 13, {
+      section("footer", true, 14, {
         logoText: state.brand.logoText,
         description: state.footer.tagline,
         socialLinks: {
@@ -246,6 +336,24 @@ export function createThemeConfigFromCmsState(state: CmsState): StorefrontThemeC
       cart: { sections: [] },
       faq: { sections: [] },
     },
+    media: [],
+    analytics: {
+      enabled: true,
+      plannedEvents: [
+        "hero_cta_click",
+        "secondary_cta_click",
+        "hero_product_click",
+        "product_card_click",
+        "add_to_cart",
+        "checkout_start",
+        "order_created",
+        "whatsapp_click",
+        "section_view",
+        "scroll_depth",
+        "image_load_error",
+        "video_load_error",
+      ],
+    },
     theme: {
       direction: "rtl",
       fontFamily: "Cairo",
@@ -255,9 +363,15 @@ export function createThemeConfigFromCmsState(state: CmsState): StorefrontThemeC
       secondaryColor: state.brand.ctaColor || "#B42318",
       backgroundColor: state.brand.bgColor || "#FAF8F5",
       textColor: state.brand.textColor || "#111111",
+      accentColor: state.brand.primaryColor || "#2563eb",
       radius: "large",
-      stylePreset: "minimal",
+      stylePreset: "premium",
       colorPreset: "default",
+      pageWidth: "1200px",
+      sectionSpacing: 64,
+      buttonRadius: 18,
+      cardRadius: 24,
+      shadows: true,
       layoutWidth: "contained",
       shadowStyle: "soft",
       spacingScale: "normal",
@@ -285,7 +399,17 @@ export function normalizeThemeConfig(state: CmsState): StorefrontThemeConfig {
   const savedHomeSections = saved.templates?.home?.sections?.length ? saved.templates.home.sections : saved.sections;
 
   const liveByType = new Map(live.sections.map((item) => [item.type, item]));
-  const savedValidSections = savedHomeSections.filter((item) => isSectionType(item.type));
+  const savedValidSections = savedHomeSections
+    .map((item) => {
+      if (item.type !== "hero") return item;
+      return {
+        ...item,
+        id: item.id === "hero" ? "hero-main" : item.id,
+        type: "hero_revolut",
+        blocks: item.blocks?.length ? item.blocks : [heroFeaturedProductsBlock([])],
+      } as ThemeEditorSection;
+    })
+    .filter((item) => isSectionType(item.type));
   const savedTypes = new Set(savedValidSections.map((item) => item.type));
   const savedMergedSections = savedValidSections.map((savedSection, index) => {
     const liveSection = liveByType.get(savedSection.type);
@@ -302,6 +426,10 @@ export function normalizeThemeConfig(state: CmsState): StorefrontThemeConfig {
       settings: {
         ...(liveSection.settings as Record<string, unknown>),
         ...((savedSection.settings as Record<string, unknown> | undefined) ?? {}),
+        media: {
+          ...((liveSection.settings as { media?: HeroThemeMedia }).media ?? {}),
+          ...((savedSection.settings as { media?: HeroThemeMedia }).media ?? {}),
+        },
       },
     } as ThemeEditorSection;
   });
@@ -324,6 +452,11 @@ export function normalizeThemeConfig(state: CmsState): StorefrontThemeConfig {
       bodyFontFamily: saved.theme?.bodyFontFamily || "Cairo",
     },
     sections: homeSections,
+    media: saved.media ?? live.media ?? [],
+    analytics: {
+      ...(live.analytics ?? { enabled: true }),
+      ...(saved.analytics ?? {}),
+    },
     templates: TEMPLATE_IDS.reduce<StorefrontThemeConfig["templates"]>((templates, id) => {
       templates![id] = id === "home"
         ? { sections: homeSections }
@@ -434,6 +567,13 @@ function normalizedEditorConfig(config: StorefrontThemeConfig): StorefrontThemeC
       fontFamily: config.theme.fontFamily || "Cairo",
       headingFontFamily: config.theme.headingFontFamily || config.theme.fontFamily || "Cairo",
       bodyFontFamily: config.theme.bodyFontFamily || config.theme.fontFamily || "Cairo",
+      stylePreset: config.theme.stylePreset || "premium",
+      accentColor: config.theme.accentColor || config.theme.primaryColor,
+      pageWidth: config.theme.pageWidth || "1200px",
+      sectionSpacing: config.theme.sectionSpacing ?? 64,
+      buttonRadius: config.theme.buttonRadius ?? 18,
+      cardRadius: config.theme.cardRadius ?? 24,
+      shadows: config.theme.shadows ?? true,
     },
     sections: homeSections,
     templates: {
@@ -452,7 +592,7 @@ export function applyThemeConfigToCmsState(
   config: StorefrontThemeConfig,
 ): Partial<CmsState> {
   const normalized = normalizedEditorConfig(config);
-  const hero = getSection(normalized, "hero");
+  const hero = getSection(normalized, "hero_revolut") ?? getSection(normalized, "hero");
   const announcement = getSection(normalized, "announcementBar");
   const categories = getSection(normalized, "categories");
   const featured = getSection(normalized, "featured");
@@ -540,14 +680,20 @@ export function applyThemeConfigToCmsState(
           primaryCtaLink: hero.settings.primaryCtaLink,
           secondaryCta: hero.settings.secondaryCtaText,
           secondaryCtaLink: hero.settings.secondaryCtaLink,
-          imageUrl: hero.settings.imageUrl,
-          mobileImageUrl: hero.settings.mobileImageUrl,
-          videoUrl: hero.settings.videoUrl || hero.settings.imageUrl,
-          videoPoster: hero.settings.posterUrl,
-          mediaType: hero.settings.videoUrl ? "video" : "image",
+          imageUrl: mediaUrl(hero.settings.media, "image", hero.settings.imageUrl),
+          mobileImageUrl: mediaUrl(hero.settings.media, "mobileImage", hero.settings.mobileImageUrl),
+          videoUrl:
+            mediaUrl(hero.settings.media, "video", hero.settings.videoUrl) ||
+            mediaUrl(hero.settings.media, "image", hero.settings.imageUrl),
+          videoPoster: mediaUrl(hero.settings.media, "poster", hero.settings.posterUrl),
+          mediaType: hero.settings.enableVideo && mediaUrl(hero.settings.media, "video", hero.settings.videoUrl) ? "video" : "image",
           urgencyBadge: hero.settings.badgeText,
-          backgroundStyle: hero.settings.backgroundStyle,
+          backgroundStyle: hero.settings.backgroundStyle === "glass" ? "gradient" : hero.settings.backgroundStyle,
           textAlign: hero.settings.textAlign,
+          titleFontSize: hero.settings.titleFontSize?.desktop ?? state.hero.titleFontSize,
+          subtitleFontSize: hero.settings.subtitleFontSize?.desktop ?? state.hero.subtitleFontSize,
+          titleColor: hero.settings.titleColor ?? state.hero.titleColor,
+          subtitleColor: hero.settings.subtitleColor ?? state.hero.subtitleColor,
         }
       : state.hero,
     announcementBar: announcement

@@ -33,6 +33,7 @@ export default function SectionsPanel({
   onToggleBlock,
   onDuplicateBlock,
   onDeleteBlock,
+  onMoveBlock,
   onMove,
   onDragReorder,
 }: {
@@ -50,6 +51,7 @@ export default function SectionsPanel({
   onToggleBlock: (sectionId: SectionId, blockId: string) => void;
   onDuplicateBlock: (sectionId: SectionId, blockId: string) => void;
   onDeleteBlock: (sectionId: SectionId, blockId: string) => void;
+  onMoveBlock: (sectionId: SectionId, blockId: string, direction: -1 | 1) => void;
   onMove: (sectionId: SectionId, direction: -1 | 1) => void;
   onDragReorder: (activeId: SectionId, overId: SectionId) => void;
 }) {
@@ -133,6 +135,7 @@ export default function SectionsPanel({
                   onToggleBlock={onToggleBlock}
                   onDuplicateBlock={onDuplicateBlock}
                   onDeleteBlock={onDeleteBlock}
+                  onMoveBlock={onMoveBlock}
                   onMove={onMove}
                 />
                 );

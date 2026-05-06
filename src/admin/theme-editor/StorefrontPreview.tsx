@@ -7,6 +7,7 @@ import type {
   FeaturedThemeSettings,
   FooterThemeSettings,
   GenericThemeSettings,
+  HeroFeaturedProductsSettings,
   HeroThemeSettings,
   Product,
   StoryThemeSettings,
@@ -130,8 +131,8 @@ export default function StorefrontPreview({
                   selected ? "outline outline-2 outline-offset-[-2px] outline-blue-500" : "hover:outline hover:outline-1 hover:outline-slate-200"
                 }`}
               >
-                {section.type === "hero" && (
-                  <HeroPreview settings={section.settings as HeroThemeSettings} products={products} isMobile={isMobile} />
+                {(section.type === "hero" || section.type === "hero_revolut") && (
+                  <HeroPreview section={section} settings={section.settings as HeroThemeSettings} products={products} isMobile={isMobile} />
                 )}
                 {section.type === "announcementBar" && (
                   <AnnouncementPreview section={section} settings={section.settings as AnnouncementThemeSettings} />
@@ -139,7 +140,7 @@ export default function StorefrontPreview({
                 {section.type === "categories" && (
                   <CategoriesPreview section={section} settings={section.settings as CategoriesThemeSettings} />
                 )}
-                {section.type === "featured" && (
+                {(section.type === "featured" || section.type === "bestSellers") && (
                   <FeaturedPreview
                     section={section}
                     settings={section.settings as FeaturedThemeSettings}
@@ -178,8 +179,10 @@ function resolveDynamic(value: unknown, product?: Product) {
   const sources: Record<string, string> = {
     "product.name": product?.title ?? "",
     "product.oldPrice": product?.compareAtPrice ? `${product.compareAtPrice} درهم` : "",
+    "product.description": product?.shortDescription ?? "",
     "collection.image": image,
     "store.whatsapp": "WhatsApp",
+    "store.name": "Tara Tech",
     "{{ product.title }}": product?.title ?? "",
     "{{ product.name }}": product?.title ?? "",
     "{{ product.price }}": product ? `${product.price} درهم` : "",
@@ -188,12 +191,14 @@ function resolveDynamic(value: unknown, product?: Product) {
     "{{ product.image }}": image,
     "{{ product.rating }}": "★★★★★",
     "{{ product.stock }}": product?.stock ?? "",
+    "{{ product.description }}": product?.shortDescription ?? "",
     "{{ product.codBadge }}": product?.codNote ?? "الدفع عند الاستلام",
     "{{ collection.title }}": "Collection",
     "{{ collection.image }}": image,
     "{{ page.title }}": "Page",
     "{{ shop.whatsapp }}": "WhatsApp",
     "{{ store.whatsapp }}": "WhatsApp",
+    "{{ store.name }}": "Tara Tech",
     "{{ custom.metafield }}": "",
   };
 
@@ -208,6 +213,10 @@ function resolveDynamic(value: unknown, product?: Product) {
     (resolved, [token, sourceValue]) => resolved.split(token).join(sourceValue),
     text,
   );
+}
+
+function assetUrl(asset: { url?: string } | null | undefined) {
+  return asset?.url ?? "";
 }
 
 function PreviewHeader({ config, previewPage }: { config: ThemeConfig; previewPage: PreviewPage }) {
@@ -234,9 +243,28 @@ function PreviewHeader({ config, previewPage }: { config: ThemeConfig; previewPa
   );
 }
 
-function HeroPreview({ settings, products, isMobile }: { settings: HeroThemeSettings; products: Product[]; isMobile: boolean }) {
-  const product = products[0];
-  const media = resolveDynamic((isMobile && settings.mobileImageUrl) || settings.imageUrl || settings.posterUrl, product);
+function HeroPreview({
+  section,
+  settings,
+  products,
+  isMobile,
+}: {
+  section: EditorSection;
+  settings: HeroThemeSettings;
+  products: Product[];
+  isMobile: boolean;
+}) {
+  const product = products.find((item) => !item.hidden);
+  const imageMedia =
+    (isMobile && assetUrl(settings.media?.mobileImage)) ||
+    assetUrl(settings.media?.image) ||
+    (isMobile && settings.mobileImageUrl) ||
+    settings.imageUrl ||
+    assetUrl(settings.media?.poster) ||
+    settings.posterUrl;
+  const videoMedia = assetUrl(settings.media?.video) || settings.videoUrl;
+  const posterMedia = assetUrl(settings.media?.poster) || settings.posterUrl || imageMedia;
+  const media = resolveDynamic(imageMedia, product);
   const alignClass =
     settings.textAlign === "center"
       ? "items-center text-center"
@@ -246,25 +274,55 @@ function HeroPreview({ settings, products, isMobile }: { settings: HeroThemeSett
   const bgClass =
     settings.backgroundStyle === "gradient"
       ? "bg-[radial-gradient(circle_at_top_right,#dbeafe,transparent_35%),linear-gradient(135deg,#0f172a,#1e293b)] text-white"
+      : settings.backgroundStyle === "glass"
+        ? "bg-[radial-gradient(circle_at_top_left,#dbeafe,transparent_28%),linear-gradient(135deg,#020617,#172554)] text-white"
       : settings.backgroundStyle === "dark"
         ? "bg-slate-950 text-white"
         : "bg-slate-50 text-slate-950";
+  const heroBlocks = section.blocks?.filter((block) => block.enabled) ?? [];
 
   return (
-    <section className={`relative overflow-hidden px-6 py-10 sm:px-10 sm:py-14 ${bgClass}`}>
-      <div className="grid items-center gap-8 md:grid-cols-2">
-        <div className={`flex flex-col gap-4 ${alignClass}`}>
+    <section
+      className={`relative overflow-hidden px-6 sm:px-10 ${bgClass}`}
+      style={{
+        minHeight: settings.sectionHeight ? `${settings.sectionHeight}px` : undefined,
+        paddingTop: settings.spacing ? `${settings.spacing}px` : undefined,
+        paddingBottom: settings.spacing ? `${settings.spacing}px` : undefined,
+      }}
+    >
+      <div className={`grid items-center gap-8 ${settings.mediaPosition === "top" ? "" : "md:grid-cols-2"}`}>
+        <div className={`flex flex-col gap-4 ${alignClass} ${settings.mediaPosition === "left" ? "md:order-2" : ""}`}>
           {settings.badgeText && (
-            <span className="inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-black ring-1 ring-white/20">
+            <span
+              className="inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-black ring-1 ring-white/20"
+              style={{ color: settings.subtitleColor }}
+            >
               {resolveDynamic(settings.badgeText, product)}
             </span>
           )}
-          <h2 className="max-w-xl text-4xl font-black leading-tight tracking-tight sm:text-5xl">
+          <h2
+            className="max-w-xl font-black leading-tight tracking-tight"
+            style={{
+              color: settings.titleColor,
+              fontSize: `${isMobile ? settings.titleFontSize?.mobile ?? 36 : settings.titleFontSize?.desktop ?? 64}px`,
+            }}
+          >
             {resolveDynamic(settings.title, product)}
           </h2>
-          <p className="max-w-lg text-sm leading-7 opacity-75">{resolveDynamic(settings.subtitle, product)}</p>
+          <p
+            className="max-w-lg leading-7 opacity-80"
+            style={{
+              color: settings.subtitleColor,
+              fontSize: `${isMobile ? settings.subtitleFontSize?.mobile ?? 14 : settings.subtitleFontSize?.desktop ?? 18}px`,
+            }}
+          >
+            {resolveDynamic(settings.subtitle, product)}
+          </p>
           <div className="flex flex-wrap gap-2">
-            <span className="rounded-full bg-[var(--preview-primary)] px-5 py-2.5 text-xs font-black text-white">
+            <span
+              className="rounded-full px-5 py-2.5 text-xs font-black text-white shadow-lg"
+              style={{ backgroundColor: settings.accentColor || "var(--preview-primary)" }}
+            >
               {resolveDynamic(settings.primaryCtaText, product)}
             </span>
             <span className="rounded-full border border-current/20 px-5 py-2.5 text-xs font-black">
@@ -272,19 +330,22 @@ function HeroPreview({ settings, products, isMobile }: { settings: HeroThemeSett
             </span>
           </div>
         </div>
-        <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-white/10 shadow-2xl">
-          {settings.videoUrl ? (
+        <div
+          className="relative aspect-[4/5] overflow-hidden bg-white/10 shadow-2xl"
+          style={{ borderRadius: `${settings.borderRadius ?? 32}px` }}
+        >
+          {settings.enableVideo && videoMedia ? (
             <video
-              key={settings.videoUrl}
+              key={videoMedia}
               muted
               autoPlay
               loop
               playsInline
               webkit-playsinline="true"
-              poster={settings.posterUrl || media}
+              poster={posterMedia || media}
               className="h-full w-full object-cover"
             >
-              <source src={settings.videoUrl} type="video/mp4" />
+              <source src={videoMedia} type="video/mp4" />
             </video>
           ) : media ? (
             <img src={media} alt="" className="h-full w-full object-cover" />
@@ -293,7 +354,98 @@ function HeroPreview({ settings, products, isMobile }: { settings: HeroThemeSett
           )}
         </div>
       </div>
+      {settings.enableHeroProducts !== false &&
+        heroBlocks
+          .filter((block) => block.type === "featured_products_strip")
+          .map((block) => (
+            <HeroProductsStrip
+              key={block.id}
+              settings={block.settings as unknown as HeroFeaturedProductsSettings}
+              products={products}
+            />
+          ))}
     </section>
+  );
+}
+
+function HeroProductsStrip({
+  settings,
+  products,
+}: {
+  settings: HeroFeaturedProductsSettings;
+  products: Product[];
+}) {
+  const limit = settings.productLimit || 3;
+  const selectedProducts =
+    settings.selectionMode === "manual"
+      ? settings.selectedProductIds
+          .map((id) => products.find((product) => product.id === id && !product.hidden))
+          .filter(Boolean) as Product[]
+      : products.filter((product) => !product.hidden && (!settings.collectionId || product.categoryId === settings.collectionId));
+  const visibleProducts = selectedProducts.slice(0, limit);
+
+  if (visibleProducts.length === 0) {
+    return (
+      <div className="mt-10 rounded-[2rem] border border-dashed border-white/20 bg-white/5 p-5 text-center text-xs font-black text-white/50">
+        اختار 3 منتجات من Theme Editor باش يبان Hero Products Strip
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`mt-10 grid gap-3 ${visibleProducts.length === 3 ? "md:grid-cols-3" : "md:grid-cols-2"}`}
+      style={{ color: settings.textColor || "inherit" }}
+    >
+      {visibleProducts.map((product) => (
+        <div
+          key={product.id}
+          className={`group overflow-hidden border p-3 shadow-2xl transition ${
+            settings.cardStyle === "glass"
+              ? "border-white/15 bg-white/10 backdrop-blur"
+              : settings.cardStyle === "minimal"
+                ? "border-white/10 bg-transparent"
+                : "border-white/15 bg-white/95 text-slate-950"
+          }`}
+          style={{ borderRadius: `${settings.cardStyle === "compact" ? 20 : 30}px` }}
+        >
+          {settings.showImage && (
+            <div className="aspect-[4/3] overflow-hidden rounded-2xl bg-slate-100">
+              {product.images?.[0] ? (
+                <img src={product.images[0]} alt={product.title} className="h-full w-full object-cover transition group-hover:scale-105" />
+              ) : (
+                <EmptyMedia label="Product media" />
+              )}
+            </div>
+          )}
+          <div className="space-y-2 p-2">
+            {settings.showBadge && (
+              <span
+                className="inline-flex rounded-full px-2 py-1 text-[10px] font-black text-white"
+                style={{ backgroundColor: settings.badgeColor || "var(--preview-primary)" }}
+              >
+                {settings.badgeText || product.badge || "COD"}
+              </span>
+            )}
+            {settings.showTitle && <div className="line-clamp-2 text-sm font-black">{product.title}</div>}
+            {settings.showRating && <div className="text-xs text-amber-400">★★★★★</div>}
+            {settings.showPrice && (
+              <div className="flex items-center gap-2 text-sm font-black" style={{ color: settings.priceColor }}>
+                <span>{product.price} درهم</span>
+                {settings.showOldPrice && product.compareAtPrice && (
+                  <span className="text-xs opacity-50 line-through">{product.compareAtPrice} درهم</span>
+                )}
+              </div>
+            )}
+            {settings.showCTA && (
+              <span className="inline-flex rounded-full bg-slate-950 px-3 py-1.5 text-[11px] font-black text-white">
+                شوف المنتج
+              </span>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 

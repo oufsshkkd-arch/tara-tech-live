@@ -115,6 +115,56 @@ export type SectionTheme = {
   borderColor?: string;     // hex or ""
 };
 
+export type MediaAsset = {
+  type: "upload" | "external";
+  bucket?: string;
+  path?: string;
+  url: string;
+  alt?: string;
+  mimeType?: string;
+  size?: number;
+};
+
+export type ResponsiveNumber = {
+  desktop: number;
+  mobile: number;
+};
+
+export type DynamicSourceValue = {
+  type: "dynamic";
+  source: string;
+  fallback: string;
+};
+
+export type HeroThemeMedia = {
+  image: MediaAsset | null;
+  mobileImage: MediaAsset | null;
+  video: MediaAsset | null;
+  poster: MediaAsset | null;
+};
+
+export type HeroFeaturedProductsSettings = {
+  selectionMode: "manual" | "collection";
+  selectedProductIds: string[];
+  collectionId: string | null;
+  productLimit: number;
+  showImage: boolean;
+  showTitle: boolean;
+  showPrice: boolean;
+  showOldPrice: boolean;
+  showRating: boolean;
+  showBadge: boolean;
+  showCTA: boolean;
+  cardStyle: "minimal" | "glass" | "premium" | "compact";
+  revealOnScroll: boolean;
+  spacing?: number;
+  background?: string;
+  textColor?: string;
+  priceColor?: string;
+  badgeText?: string;
+  badgeColor?: string;
+};
+
 export type HeroThemeSettings = {
   title: string;
   subtitle: string;
@@ -127,8 +177,22 @@ export type HeroThemeSettings = {
   videoUrl: string;
   posterUrl: string;
   badgeText: string;
-  backgroundStyle: "light" | "dark" | "gradient";
+  backgroundStyle: "light" | "dark" | "gradient" | "glass";
   textAlign: "left" | "center" | "right";
+  titleFontSize?: ResponsiveNumber;
+  subtitleFontSize?: ResponsiveNumber;
+  titleColor?: string;
+  subtitleColor?: string;
+  accentColor?: string;
+  buttonStyle?: "rounded" | "pill" | "sharp" | "premium";
+  sectionHeight?: number;
+  spacing?: number;
+  borderRadius?: number;
+  mediaPosition?: "right" | "left" | "top" | "background";
+  media?: HeroThemeMedia;
+  enableVideo?: boolean;
+  enableAnimation?: boolean;
+  enableHeroProducts?: boolean;
 };
 
 export type AnnouncementThemeSettings = {
@@ -201,11 +265,13 @@ export type FooterThemeSettings = {
 };
 
 export type ThemeEditorSectionType =
-  | "header"
   | "hero"
+  | "header"
+  | "hero_revolut"
   | "announcementBar"
   | "categories"
   | "featured"
+  | "bestSellers"
   | "productHighlight"
   | "trustStrip"
   | "codBenefits"
@@ -238,9 +304,11 @@ export type GenericThemeSettings = {
 export type ThemeEditorSectionSettingsMap = {
   header: GenericThemeSettings;
   hero: HeroThemeSettings;
+  hero_revolut: HeroThemeSettings;
   announcementBar: AnnouncementThemeSettings;
   categories: CategoriesThemeSettings;
   featured: FeaturedThemeSettings;
+  bestSellers: FeaturedThemeSettings;
   productHighlight: GenericThemeSettings;
   trustStrip: TrustThemeSettings;
   codBenefits: TrustThemeSettings;
@@ -269,6 +337,11 @@ export type ThemeTemplate = {
 export type StorefrontThemeConfig = {
   sections: ThemeEditorSection[];
   templates?: Partial<Record<ThemeTemplateId, ThemeTemplate>>;
+  media?: MediaAsset[];
+  analytics?: {
+    enabled: boolean;
+    plannedEvents?: string[];
+  };
   theme: {
     direction: "rtl" | "ltr";
     fontFamily: string;
@@ -278,9 +351,15 @@ export type StorefrontThemeConfig = {
     secondaryColor?: string;
     backgroundColor?: string;
     textColor?: string;
+    accentColor?: string;
     radius: "small" | "medium" | "large";
-    stylePreset: "minimal" | "bold" | "editorial";
+    stylePreset: "minimal" | "bold" | "editorial" | "premium";
     colorPreset?: "default" | "minimal" | "dark" | "warm" | "sage";
+    pageWidth?: string;
+    sectionSpacing?: number;
+    buttonRadius?: number;
+    cardRadius?: number;
+    shadows?: boolean;
     layoutWidth?: "contained" | "wide" | "full";
     shadowStyle?: "none" | "soft" | "deep";
     spacingScale?: "compact" | "normal" | "airy";

@@ -2,6 +2,7 @@ import { Plus, Settings2, Trash2 } from "lucide-react";
 import type { ReactNode } from "react";
 import type {
   AnnouncementThemeSettings,
+  Category,
   CategoriesThemeSettings,
   CategoryThemeItem,
   FaqThemeItem,
@@ -19,6 +20,8 @@ import type {
 } from "../../cms/types";
 import BlockSettingsPanel from "./BlockSettingsPanel";
 import DynamicSourceButton from "./DynamicSourceButton";
+import MediaPickerField from "./MediaPickerField";
+import ProductPickerField from "./ProductPickerField";
 import ThemeSettingsPanel from "./ThemeSettingsPanel";
 import { SECTION_META } from "./themeConfig";
 import type { EditorSection, SectionId } from "./types";
@@ -195,6 +198,7 @@ export default function SectionSettingsPanel({
   theme,
   selectedBlock,
   products,
+  collections,
   onThemeUpdate,
   onBlockChange,
   onUpdate,
@@ -204,6 +208,7 @@ export default function SectionSettingsPanel({
   theme: StorefrontThemeConfig["theme"];
   selectedBlock: ThemeEditorBlock | null;
   products: Product[];
+  collections: Category[];
   onThemeUpdate: (patch: Partial<StorefrontThemeConfig["theme"]>) => void;
   onBlockChange: (block: ThemeEditorBlock) => void;
   onUpdate: (sectionId: SectionId, patch: Record<string, unknown>) => void;
@@ -235,7 +240,7 @@ export default function SectionSettingsPanel({
             <span className="text-xs font-black text-slate-700">إعدادات السكشن</span>
           </div>
 
-          {section.type === "hero" && (
+          {(section.type === "hero" || section.type === "hero_revolut") && (
             <HeroSettings
               settings={section.settings as HeroThemeSettings}
               onChange={(patch) => onUpdate(section.id, patch)}
@@ -256,7 +261,7 @@ export default function SectionSettingsPanel({
             />
           )}
 
-          {section.type === "featured" && (
+          {(section.type === "featured" || section.type === "bestSellers") && (
             <FeaturedSettings
               settings={section.settings as FeaturedThemeSettings}
               products={products}
@@ -308,7 +313,12 @@ export default function SectionSettingsPanel({
         </div>
 
         <div className="mt-4">
-          <BlockSettingsPanel block={selectedBlock} onChange={onBlockChange} />
+          <BlockSettingsPanel
+            block={selectedBlock}
+            products={products}
+            collections={collections}
+            onChange={onBlockChange}
+          />
         </div>
       </div>
     </aside>
@@ -330,9 +340,13 @@ function GenericSettings({
       <Field label="الوصف">
         <TextArea value={settings.subtitle ?? ""} onChange={(subtitle) => onChange({ subtitle })} rows={3} />
       </Field>
-      <Field label="الصورة">
-        <TextInput value={settings.imageUrl ?? ""} onChange={(imageUrl) => onChange({ imageUrl })} dir="ltr" />
-      </Field>
+      <MediaPickerField
+        label="الصورة"
+        value={settings.imageUrl ? { type: "external", url: settings.imageUrl, alt: settings.title } : null}
+        kind="image"
+        folder="sections"
+        onChange={(asset) => onChange({ imageUrl: asset?.url ?? "" })}
+      />
       <Field label="الفيديو">
         <TextInput value={settings.videoUrl ?? ""} onChange={(videoUrl) => onChange({ videoUrl })} dir="ltr" />
       </Field>
@@ -355,8 +369,18 @@ function HeroSettings({
   settings: HeroThemeSettings;
   onChange: (patch: Partial<HeroThemeSettings>) => void;
 }) {
+  const media = settings.media ?? {
+    image: settings.imageUrl ? { type: "external" as const, url: settings.imageUrl, alt: settings.title } : null,
+    mobileImage: settings.mobileImageUrl ? { type: "external" as const, url: settings.mobileImageUrl, alt: settings.title } : null,
+    video: settings.videoUrl ? { type: "external" as const, url: settings.videoUrl, alt: settings.title, mimeType: "video/mp4" } : null,
+    poster: settings.posterUrl ? { type: "external" as const, url: settings.posterUrl, alt: `${settings.title} poster` } : null,
+  };
+
   return (
     <div className="space-y-4">
+      <div className="rounded-2xl border border-blue-100 bg-blue-50 px-3 py-2 text-[11px] font-bold leading-5 text-blue-800">
+        Hero Revolut template: الستايل ثابت premium، وانت كتبدل المحتوى، الميديا، CTA، و3 منتجات من البلوك.
+      </div>
       <Field label="العنوان">
         <TextArea value={settings.title} onChange={(title) => onChange({ title })} rows={2} />
       </Field>
@@ -393,22 +417,47 @@ function HeroSettings({
           />
         </Field>
       </div>
-      <Field label="Hero image URL">
-        <TextInput value={settings.imageUrl} onChange={(imageUrl) => onChange({ imageUrl })} dir="ltr" />
-      </Field>
-      <Field label="Mobile image URL">
-        <TextInput
-          value={settings.mobileImageUrl}
-          onChange={(mobileImageUrl) => onChange({ mobileImageUrl })}
-          dir="ltr"
+      <div className="space-y-3">
+        <MediaPickerField
+          label="Hero image"
+          value={media.image}
+          kind="image"
+          folder="hero"
+          onChange={(asset) => onChange({ media: { ...media, image: asset }, imageUrl: asset?.url ?? "" })}
         />
-      </Field>
-      <Field label="Hero video URL">
-        <TextInput value={settings.videoUrl} onChange={(videoUrl) => onChange({ videoUrl })} dir="ltr" />
-      </Field>
-      <Field label="Poster URL">
-        <TextInput value={settings.posterUrl} onChange={(posterUrl) => onChange({ posterUrl })} dir="ltr" />
-      </Field>
+        <MediaPickerField
+          label="Mobile image"
+          value={media.mobileImage}
+          kind="image"
+          folder="hero"
+          onChange={(asset) => onChange({ media: { ...media, mobileImage: asset }, mobileImageUrl: asset?.url ?? "" })}
+        />
+        <MediaPickerField
+          label="Hero video"
+          value={media.video}
+          kind="video"
+          folder="hero"
+          onChange={(asset) => onChange({ media: { ...media, video: asset }, videoUrl: asset?.url ?? "" })}
+        />
+        <MediaPickerField
+          label="Video poster"
+          value={media.poster}
+          kind="image"
+          folder="hero"
+          onChange={(asset) => onChange({ media: { ...media, poster: asset }, posterUrl: asset?.url ?? "" })}
+        />
+      </div>
+      <Toggle checked={settings.enableVideo ?? false} onChange={(enableVideo) => onChange({ enableVideo })} label="تفعيل الفيديو" />
+      <Toggle
+        checked={settings.enableAnimation ?? true}
+        onChange={(enableAnimation) => onChange({ enableAnimation })}
+        label="Animation خفيفة"
+      />
+      <Toggle
+        checked={settings.enableHeroProducts ?? true}
+        onChange={(enableHeroProducts) => onChange({ enableHeroProducts })}
+        label="إظهار 3 منتجات تحت الهيرو"
+      />
       <Field label="Badge text">
         <TextInput value={settings.badgeText} onChange={(badgeText) => onChange({ badgeText })} />
       </Field>
@@ -423,6 +472,7 @@ function HeroSettings({
               { label: "Light", value: "light" },
               { label: "Dark", value: "dark" },
               { label: "Gradient", value: "gradient" },
+              { label: "Glass", value: "glass" },
             ]}
           />
         </Field>
@@ -434,6 +484,29 @@ function HeroSettings({
               { label: "يمين", value: "right" },
               { label: "وسط", value: "center" },
               { label: "يسار", value: "left" },
+            ]}
+          />
+        </Field>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="لون العنوان">
+          <ColorInput value={settings.titleColor ?? "#ffffff"} onChange={(titleColor) => onChange({ titleColor })} />
+        </Field>
+        <Field label="لون الوصف">
+          <ColorInput value={settings.subtitleColor ?? "#cbd5e1"} onChange={(subtitleColor) => onChange({ subtitleColor })} />
+        </Field>
+        <Field label="Accent">
+          <ColorInput value={settings.accentColor ?? "#2563eb"} onChange={(accentColor) => onChange({ accentColor })} />
+        </Field>
+        <Field label="Media position">
+          <SelectInput
+            value={settings.mediaPosition ?? "left"}
+            onChange={(mediaPosition) => onChange({ mediaPosition: mediaPosition as HeroThemeSettings["mediaPosition"] })}
+            options={[
+              { label: "يسار", value: "left" },
+              { label: "يمين", value: "right" },
+              { label: "فوق", value: "top" },
+              { label: "Background", value: "background" },
             ]}
           />
         </Field>
@@ -528,9 +601,13 @@ function CategoriesSettings({
           <Field label="الاسم">
             <TextInput value={category.name} onChange={(name) => updateCategory(index, { name })} />
           </Field>
-          <Field label="الصورة">
-            <TextInput value={category.image} onChange={(image) => updateCategory(index, { image })} dir="ltr" />
-          </Field>
+          <MediaPickerField
+            label="صورة الفئة"
+            value={category.image ? { type: "external", url: category.image, alt: category.name } : null}
+            kind="image"
+            folder="categories"
+            onChange={(asset) => updateCategory(index, { image: asset?.url ?? "" })}
+          />
           <Field label="الرابط">
             <TextInput value={category.link} onChange={(link) => updateCategory(index, { link })} dir="ltr" />
           </Field>
@@ -584,34 +661,12 @@ function FeaturedSettings({
         onChange={(showDiscountBadge) => onChange({ showDiscountBadge })}
         label="إظهار badge ديال التخفيض"
       />
-      <div className="space-y-2">
-        <h4 className="text-xs font-black uppercase tracking-wide text-slate-500">اختيار المنتجات</h4>
-        {products
-          .filter((product) => !product.hidden)
-          .slice(0, 12)
-          .map((product) => (
-            <button
-              type="button"
-              key={product.id}
-              onClick={() => toggleProduct(product.id)}
-              className={`flex w-full items-center gap-3 rounded-2xl border p-2 text-right transition ${
-                selected.has(product.id)
-                  ? "border-slate-950 bg-slate-950 text-white"
-                  : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
-              }`}
-            >
-              <span className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-slate-100">
-                {product.images?.[0] && (
-                  <img src={product.images[0]} alt="" className="h-full w-full object-cover" loading="lazy" />
-                )}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-black">{product.title}</span>
-                <span className="block text-[11px] opacity-70">{product.price} درهم</span>
-              </span>
-            </button>
-          ))}
-      </div>
+      <ProductPickerField
+        label="اختيار المنتجات"
+        value={settings.productIds}
+        products={products}
+        onChange={(productIds) => onChange({ productIds })}
+      />
     </div>
   );
 }
@@ -680,9 +735,13 @@ function StorySettings({
       <Field label="الوصف">
         <TextArea value={settings.description} onChange={(description) => onChange({ description })} rows={5} />
       </Field>
-      <Field label="الصورة">
-        <TextInput value={settings.imageUrl} onChange={(imageUrl) => onChange({ imageUrl })} dir="ltr" />
-      </Field>
+      <MediaPickerField
+        label="الصورة"
+        value={settings.imageUrl ? { type: "external", url: settings.imageUrl, alt: settings.title } : null}
+        kind="image"
+        folder="story"
+        onChange={(asset) => onChange({ imageUrl: asset?.url ?? "" })}
+      />
     </div>
   );
 }

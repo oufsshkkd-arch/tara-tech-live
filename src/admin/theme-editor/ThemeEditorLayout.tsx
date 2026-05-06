@@ -7,6 +7,7 @@ import EditorTopBar from "./EditorTopBar";
 import SectionSettingsPanel from "./SectionSettingsPanel";
 import SectionsTreePanel from "./SectionsTreePanel";
 import StorefrontPreview from "./StorefrontPreview";
+import { heroFeaturedProductsBlockSchema } from "./sectionSchemas";
 import {
   applyThemeConfigToCmsState,
   moveSection,
@@ -58,7 +59,9 @@ function createBlock(type: string, order: number): ThemeEditorBlock {
     type,
     enabled: true,
     order,
-    settings: {},
+    settings: type === heroFeaturedProductsBlockSchema.type
+      ? { ...heroFeaturedProductsBlockSchema.defaultSettings }
+      : {},
   };
 }
 
@@ -75,8 +78,8 @@ export default function ThemeEditorLayout() {
   const [previewPage, setPreviewPage] = useState<PreviewPage>("home");
   const [previewVersion, setPreviewVersion] = useState(0);
   const [status, setStatus] = useState<SaveStatus>("idle");
-  const [selectedSectionId, setSelectedSectionId] = useState<SectionId>("hero");
-  const [expandedSectionId, setExpandedSectionId] = useState<SectionId | null>("hero");
+  const [selectedSectionId, setSelectedSectionId] = useState<SectionId>("hero-main");
+  const [expandedSectionId, setExpandedSectionId] = useState<SectionId | null>("hero-main");
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [addSectionOpen, setAddSectionOpen] = useState(false);
   const [addBlockSectionId, setAddBlockSectionId] = useState<SectionId | null>(null);
@@ -283,6 +286,18 @@ export default function ThemeEditorLayout() {
     if (selectedBlockId === blockId) setSelectedBlockId(null);
   }, [config, markDirty, selectedBlockId]);
 
+  const handleMoveBlock = useCallback((sectionId: SectionId, blockId: string, direction: -1 | 1) => {
+    markDirty(updateSectionBlocks(config, sectionId, (blocks) => {
+      const index = blocks.findIndex((block) => block.id === blockId);
+      const targetIndex = index + direction;
+      if (index < 0 || targetIndex < 0 || targetIndex >= blocks.length) return blocks;
+      const next = [...blocks];
+      const [moved] = next.splice(index, 1);
+      next.splice(targetIndex, 0, moved);
+      return next;
+    }));
+  }, [config, markDirty]);
+
   const handleBlockChange = useCallback((block: ThemeEditorBlock) => {
     if (!selectedSection) return;
     markDirty(updateSectionBlocks(config, selectedSection.id, (blocks) =>
@@ -324,6 +339,7 @@ export default function ThemeEditorLayout() {
             onToggleBlock={handleToggleBlock}
             onDuplicateBlock={handleDuplicateBlock}
             onDeleteBlock={handleDeleteBlock}
+            onMoveBlock={handleMoveBlock}
             onMove={(sectionId, direction) => markDirty(moveSection(config, sectionId, direction))}
             onDragReorder={(activeId, overId) => markDirty(reorderSections(config, activeId, overId))}
           />
@@ -344,6 +360,7 @@ export default function ThemeEditorLayout() {
               theme={config.theme}
               selectedBlock={selectedBlock}
               products={cms.products}
+              collections={cms.categories}
               onThemeUpdate={(patch) => markDirty({ ...config, theme: { ...config.theme, ...patch } })}
               onBlockChange={handleBlockChange}
               onUpdate={(sectionId, patch) =>

@@ -1,7 +1,19 @@
 import { X } from "lucide-react";
+import { heroFeaturedProductsBlockSchema } from "./sectionSchemas";
 import type { SectionId } from "./types";
 
-const blockTypes = ["text", "image", "video", "button", "product", "benefit", "review", "faq_item", "app_embed"];
+const blockTypes = [
+  heroFeaturedProductsBlockSchema.type,
+  "text",
+  "image",
+  "video",
+  "button",
+  "product",
+  "benefit",
+  "review",
+  "faq_item",
+  "app_embed",
+];
 
 export default function AddBlockModal({
   open,

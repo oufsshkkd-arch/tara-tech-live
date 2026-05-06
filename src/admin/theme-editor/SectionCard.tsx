@@ -21,6 +21,7 @@ export default function SectionCard({
   onToggleBlock,
   onDuplicateBlock,
   onDeleteBlock,
+  onMoveBlock,
   onMove,
 }: {
   section: EditorSection;
@@ -38,6 +39,7 @@ export default function SectionCard({
   onToggleBlock: (sectionId: SectionId, blockId: string) => void;
   onDuplicateBlock: (sectionId: SectionId, blockId: string) => void;
   onDeleteBlock: (sectionId: SectionId, blockId: string) => void;
+  onMoveBlock: (sectionId: SectionId, blockId: string, direction: -1 | 1) => void;
   onMove: (sectionId: SectionId, direction: -1 | 1) => void;
 }) {
   const sortable = useSortable({ id: section.id });
@@ -109,6 +111,7 @@ export default function SectionCard({
               onToggle={(blockId) => onToggleBlock(section.id, blockId)}
               onDuplicate={(blockId) => onDuplicateBlock(section.id, blockId)}
               onDelete={(blockId) => onDeleteBlock(section.id, blockId)}
+              onMove={(blockId, direction) => onMoveBlock(section.id, blockId, direction)}
             />
           </div>
 
