@@ -8,11 +8,14 @@ export default function AnnouncementBar() {
   }
 
   const sorted = [...announcementBar.messages].sort((a, b) => a.order - b.order);
+  const bg = announcementBar.backgroundColor || "#FAFAFA";
+  const color = announcementBar.textColor || undefined;
 
   return (
     <div
-      className="absolute top-0 inset-x-0 z-[60] h-[36px] bg-[#FAFAFA] border-b border-black/[0.03] flex items-center overflow-hidden"
+      className="absolute top-0 inset-x-0 z-[60] h-[36px] border-b border-black/[0.03] flex items-center overflow-hidden"
       dir="ltr"
+      style={{ backgroundColor: bg, color }}
     >
       <div
         className="marquee-track"
@@ -23,15 +26,18 @@ export default function AnnouncementBar() {
           <div key={arrayIndex} className="flex items-center shrink-0">
             {sorted.map((msg) => (
               <div key={msg.id} className="flex items-center">
-                <span
+                <a
+                  href={announcementBar.link || undefined}
                   className={`text-[11px] font-medium tracking-wide ${
                     msg.accent
                       ? "text-red font-semibold"
-                      : "text-ink/90"
+                      : announcementBar.textColor
+                        ? ""
+                        : "text-ink/90"
                   }`}
                 >
                   {msg.text}
-                </span>
+                </a>
                 <span className="mx-6 h-[3px] w-[3px] rounded-full bg-ink/15" />
               </div>
             ))}

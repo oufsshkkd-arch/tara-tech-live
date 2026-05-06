@@ -46,6 +46,7 @@ export type FaqItem = {
   question: string;
   answer: string;
   order: number;
+  enabled?: boolean;
 };
 
 export type AnnouncementMessage = {
@@ -59,6 +60,9 @@ export type AnnouncementBarSettings = {
   enabled: boolean;
   messages: AnnouncementMessage[];
   speed: number; // animation duration in seconds
+  link?: string;
+  backgroundColor?: string;
+  textColor?: string;
 };
 
 export type FooterContent = {
@@ -111,9 +115,135 @@ export type SectionTheme = {
   borderColor?: string;     // hex or ""
 };
 
+export type HeroThemeSettings = {
+  title: string;
+  subtitle: string;
+  primaryCtaText: string;
+  primaryCtaLink: string;
+  secondaryCtaText: string;
+  secondaryCtaLink: string;
+  imageUrl: string;
+  mobileImageUrl: string;
+  videoUrl: string;
+  posterUrl: string;
+  badgeText: string;
+  backgroundStyle: "light" | "dark" | "gradient";
+  textAlign: "left" | "center" | "right";
+};
+
+export type AnnouncementThemeSettings = {
+  enabled: boolean;
+  text: string;
+  link: string;
+  backgroundColor: string;
+  textColor: string;
+};
+
+export type CategoryThemeItem = {
+  id: string;
+  name: string;
+  image: string;
+  link: string;
+  enabled: boolean;
+};
+
+export type CategoriesThemeSettings = {
+  title: string;
+  categories: CategoryThemeItem[];
+};
+
+export type FeaturedThemeSettings = {
+  title: string;
+  productIds: string[];
+  layout: "grid" | "carousel";
+  showPrice: boolean;
+  showRating: boolean;
+  showDiscountBadge: boolean;
+};
+
+export type TrustThemeItem = {
+  icon: string;
+  title: string;
+  description: string;
+};
+
+export type TrustThemeSettings = {
+  items: TrustThemeItem[];
+};
+
+export type StoryThemeSettings = {
+  title: string;
+  description: string;
+  imageUrl: string;
+};
+
+export type FaqThemeItem = {
+  id: string;
+  question: string;
+  answer: string;
+  enabled: boolean;
+};
+
+export type FaqThemeSettings = {
+  items: FaqThemeItem[];
+};
+
+export type FooterThemeSettings = {
+  logoText: string;
+  description: string;
+  socialLinks: {
+    instagram: string;
+    tiktok: string;
+    facebook: string;
+  };
+  contactWhatsApp: string;
+  copyrightText: string;
+};
+
+export type ThemeEditorSectionType =
+  | "hero"
+  | "announcementBar"
+  | "categories"
+  | "featured"
+  | "trustStrip"
+  | "story"
+  | "faq"
+  | "footer";
+
+export type ThemeEditorSectionSettingsMap = {
+  hero: HeroThemeSettings;
+  announcementBar: AnnouncementThemeSettings;
+  categories: CategoriesThemeSettings;
+  featured: FeaturedThemeSettings;
+  trustStrip: TrustThemeSettings;
+  story: StoryThemeSettings;
+  faq: FaqThemeSettings;
+  footer: FooterThemeSettings;
+};
+
+export type ThemeEditorSection<T extends ThemeEditorSectionType = ThemeEditorSectionType> = {
+  id: T;
+  type: T;
+  enabled: boolean;
+  order: number;
+  settings: ThemeEditorSectionSettingsMap[T];
+};
+
+export type StorefrontThemeConfig = {
+  sections: ThemeEditorSection[];
+  theme: {
+    direction: "rtl" | "ltr";
+    fontFamily: string;
+    primaryColor: string;
+    radius: "small" | "medium" | "large";
+    stylePreset: "minimal" | "bold" | "editorial";
+  };
+};
+
 export type ThemeSchema = {
   sectionOrder: string[];
   sections: Record<string, Partial<SectionTheme>>;
+  editor?: StorefrontThemeConfig;
 };
 
 export type TrackingStats = {
@@ -128,8 +258,14 @@ export type HeroContent = {
   subheadline: string;
   primaryCta: string;
   secondaryCta: string;
+  primaryCtaLink?: string;
+  secondaryCtaLink?: string;
+  imageUrl?: string;
+  mobileImageUrl?: string;
   trustLine: string;
   urgencyBadge: string;
+  backgroundStyle?: "light" | "dark" | "gradient";
+  textAlign?: "left" | "center" | "right";
   overlayDarkness: number;
   showFloatingCard: boolean;
   floatingCardLines: string[];
@@ -195,6 +331,11 @@ export type FeaturedSectionContent = {
   title: string;
   intro: string;
   enabled: boolean;
+  productIds?: string[];
+  layout?: "grid" | "carousel";
+  showPrice?: boolean;
+  showRating?: boolean;
+  showDiscountBadge?: boolean;
 };
 
 export type FaqSectionContent = {

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { SyntheticEvent } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Truck, Wallet, ShieldCheck } from "lucide-react";
 import { motion, useScroll, useTransform, useMotionTemplate } from "framer-motion";
@@ -11,9 +12,6 @@ const ANIM_VARIANTS: Record<string, AnimVariant> = {
   zoom:      { initial: { opacity: 0, scale: 0.92 }, animate: { opacity: 1, scale: 1 }, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
 };
 import { useCms } from "../cms/store";
-
-const HERO_IMAGE = "/images/jump-starter/product-hero.jpg";
-const FALLBACK_IMAGE = "/images/jump-starter/family-road.jpg";
 
 // Append build timestamp to local paths (/…) so every deploy forces a fresh
 // fetch on mobile. CDN URLs (Unsplash etc.) are left untouched.
@@ -126,6 +124,28 @@ export default function Hero() {
   const isMobile = dims.vw < 768;
   const activeVideoSrc = bust((isMobile && hero.mobileVideoUrl) ? hero.mobileVideoUrl : hero.videoUrl);
   const activeVideoPoster = bust(hero.videoPoster ?? "");
+  const cmsFallbackImage = products.find((product) => product.images?.[0])?.images[0] ?? "";
+  const heroImageSrc = bust(
+    (isMobile && hero.mobileImageUrl) ||
+      hero.imageUrl ||
+      (hero.mediaType === "image" ? hero.videoUrl : "") ||
+      cmsFallbackImage,
+  );
+  const fallbackImageSrc = bust(cmsFallbackImage);
+  const handleImageFallback = (event: SyntheticEvent<HTMLImageElement>) => {
+    if (!fallbackImageSrc) return;
+    const image = event.currentTarget;
+    if (image.src.endsWith(fallbackImageSrc)) return;
+    image.src = fallbackImageSrc;
+  };
+  const whatsappLink = `https://wa.me/${brand.whatsapp.replace(/[^0-9]/g, "")}`;
+  const primaryCtaLink = hero.primaryCtaLink || "/products";
+  const secondaryCtaLink = hero.secondaryCtaLink || whatsappLink;
+  const isExternalLink = (href: string) => /^https?:\/\//i.test(href);
+  const textAlign = hero.textAlign || "right";
+  const heroTextAlignStyle = { textAlign } as const;
+  const ctaAlignClass =
+    textAlign === "center" ? "justify-center" : textAlign === "left" ? "justify-start" : "justify-end";
 
   const overlayMax = hero.overlayDarkness ?? 0.75;
   const overlayMin = Math.max(0, overlayMax - 0.5);
@@ -179,15 +199,19 @@ export default function Hero() {
               />
             </>
           ) : (
-            <img
-              src={bust(hero.videoUrl || HERO_IMAGE)}
-              alt=""
-              fetchPriority="high"
-              loading="eager"
-              decoding="async"
-              onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMAGE; }}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
+            heroImageSrc ? (
+              <img
+                src={heroImageSrc}
+                alt=""
+                fetchPriority="high"
+                loading="eager"
+                decoding="async"
+                onError={handleImageFallback}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-ink via-ink/85 to-red/70" />
+            )
           )}
           <motion.div
             className="absolute inset-0"
@@ -252,7 +276,7 @@ export default function Hero() {
                 src={bust(leftProduct.images[0])}
                 alt={leftProduct.title}
                 loading="lazy"
-                onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMAGE; }}
+                onError={handleImageFallback}
                 className="absolute inset-0 h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/45" />
@@ -310,7 +334,7 @@ export default function Hero() {
                 src={bust(rightProduct.images[0])}
                 alt={rightProduct.title}
                 loading="lazy"
-                onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMAGE; }}
+                onError={handleImageFallback}
                 className="absolute inset-0 h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/55" />
@@ -355,7 +379,7 @@ export default function Hero() {
         >
           <div className="container-x w-full pointer-events-auto">
             <div className="grid lg:grid-cols-12 gap-10 items-center">
-              <div className="lg:col-span-7 max-w-3xl text-white">
+              <div className="lg:col-span-7 max-w-3xl text-white" style={heroTextAlignStyle}>
                 {hero.urgencyBadge && (
                   <div
                     className="mb-6 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium backdrop-blur-md border"
@@ -414,18 +438,30 @@ export default function Hero() {
                   );
                 })()}
 
-                <div className="mt-8 flex flex-wrap items-center gap-3">
-                  <Link
-                    to="/products"
-                    className="inline-flex items-center gap-2 rounded-full bg-ink text-white px-7 py-3.5 text-sm font-medium hover:bg-black transition-colors"
-                  >
-                    {hero.primaryCta}
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
+                <div className={`mt-8 flex flex-wrap items-center gap-3 ${ctaAlignClass}`}>
+                  {isExternalLink(primaryCtaLink) ? (
+                    <a
+                      href={primaryCtaLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full bg-ink text-white px-7 py-3.5 text-sm font-medium hover:bg-black transition-colors"
+                    >
+                      {hero.primaryCta}
+                      <ArrowRight className="h-4 w-4" />
+                    </a>
+                  ) : (
+                    <Link
+                      to={primaryCtaLink}
+                      className="inline-flex items-center gap-2 rounded-full bg-ink text-white px-7 py-3.5 text-sm font-medium hover:bg-black transition-colors"
+                    >
+                      {hero.primaryCta}
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  )}
                   <a
-                    href={`https://wa.me/${brand.whatsapp.replace(/[^0-9]/g, "")}`}
-                    target="_blank"
-                    rel="noreferrer"
+                    href={secondaryCtaLink}
+                    target={isExternalLink(secondaryCtaLink) ? "_blank" : undefined}
+                    rel={isExternalLink(secondaryCtaLink) ? "noreferrer" : undefined}
                     className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/30 text-white px-6 py-3.5 text-sm font-medium hover:bg-white/15 transition-colors"
                   >
                     {hero.secondaryCta}

@@ -68,9 +68,15 @@ export const seed: CmsState = {
     subheadline:
       "فـ Tara Tech كنقدمو ليك منتجات عملية، موثوقة وراقية، كتعاونك فالحياة اليومية وكتخليك تختار براحة وثقة.",
     primaryCta: "اكتشف المنتجات",
+    primaryCtaLink: "/products",
     secondaryCta: "تواصل معنا",
+    secondaryCtaLink: "",
+    imageUrl: "",
+    mobileImageUrl: "",
     trustLine: "الدفع عند الاستلام • تأكيد قبل الإرسال • منتجات مختارة بعناية",
     urgencyBadge: "تكنولوجيا عملية للحياة اليومية",
+    backgroundStyle: "dark",
+    textAlign: "right",
     overlayDarkness: 0.15,
     showFloatingCard: true,
     floatingCardLines: [

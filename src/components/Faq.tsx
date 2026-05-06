@@ -5,8 +5,8 @@ import { useCms } from "../cms/store";
 
 export default function Faq() {
   const { faqSection, faq } = useCms();
-  const [open, setOpen] = useState<string | null>(faq[0]?.id ?? null);
-  const items = [...faq].sort((a, b) => a.order - b.order);
+  const items = [...faq].filter((item) => item.enabled !== false).sort((a, b) => a.order - b.order);
+  const [open, setOpen] = useState<string | null>(items[0]?.id ?? null);
 
   return (
     <section id="faq" className="container-x pt-24 sm:pt-32">

@@ -6,10 +6,13 @@ import ProductCard from "./ProductCard";
 
 export default function FeaturedProducts() {
   const { featuredSection, products } = useCms();
-  const featured = products
-    .filter((p) => p.featured && !p.hidden)
+  const configuredIds = featuredSection.productIds ?? [];
+  const configured = configuredIds
+    .map((id) => products.find((product) => product.id === id && !product.hidden))
+    .filter(Boolean) as typeof products;
+  const featured = (configured.length > 0 ? configured : products.filter((p) => p.featured && !p.hidden))
     .sort((a, b) => a.order - b.order)
-    .slice(0, 4);
+    .slice(0, featuredSection.layout === "carousel" ? 8 : 4);
   if (!featuredSection.enabled || featured.length === 0) return null;
 
   return (
@@ -29,7 +32,13 @@ export default function FeaturedProducts() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div
+        className={
+          featuredSection.layout === "carousel"
+            ? "grid grid-flow-col auto-cols-[260px] gap-5 overflow-x-auto pb-3"
+            : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+        }
+      >
         {featured.map((p, i) => (
           <motion.div
             key={p.id}
@@ -38,7 +47,12 @@ export default function FeaturedProducts() {
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.55, delay: i * 0.05 }}
           >
-            <ProductCard product={p} />
+            <ProductCard
+              product={p}
+              showPrice={featuredSection.showPrice ?? true}
+              showRating={featuredSection.showRating ?? true}
+              showDiscountBadge={featuredSection.showDiscountBadge ?? true}
+            />
           </motion.div>
         ))}
       </div>
