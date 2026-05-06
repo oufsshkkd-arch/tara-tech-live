@@ -135,7 +135,7 @@ export default function GlobalThemeSettings({
   onChange: (patch: Partial<ThemeSettings>) => void;
 }) {
   return (
-    <details className="group rounded-3xl border border-slate-200 bg-white shadow-sm" open>
+    <details className="group rounded-3xl border border-slate-200 bg-white shadow-sm">
       <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3">
         <span className="grid h-9 w-9 place-items-center rounded-2xl bg-blue-50 text-blue-700">
           <Palette className="h-4 w-4" />

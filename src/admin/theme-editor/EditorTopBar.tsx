@@ -1,4 +1,4 @@
-import { ArrowUpRight, Redo2, RefreshCw, RotateCcw, Save, Undo2 } from "lucide-react";
+import { ArrowUpRight, Loader2, Redo2, RefreshCw, RotateCcw, Save, Undo2 } from "lucide-react";
 import DevicePreviewToggle from "./DevicePreviewToggle";
 import SaveStatusBadge from "./SaveStatusBadge";
 import TemplateSelector from "./TemplateSelector";
@@ -124,8 +124,12 @@ export default function EditorTopBar({
               : "cursor-not-allowed bg-slate-100 text-slate-400"
           }`}
         >
-          <Save className="h-4 w-4" />
-          حفظ
+          {saving ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="h-4 w-4" />
+          )}
+          {saving ? "كيحفظ..." : "حفظ"}
         </button>
       </div>
     </header>

@@ -1,4 +1,5 @@
 import Hero from "../components/Hero";
+import HeroRevolut from "../components/HeroRevolut";
 import TrustMarquee from "../components/TrustMarquee";
 import RevolutBenefits from "../components/RevolutBenefits";
 import Categories from "../components/Categories";
@@ -9,6 +10,7 @@ import WhyTara from "../components/WhyTara";
 import Faq from "../components/Faq";
 import FinalCta from "../components/FinalCta";
 import { useCms } from "../cms/store";
+import type { HeroThemeSettings } from "../cms/types";
 
 function Divider() {
   return <div className="section-divider mt-24 sm:mt-32" />;
@@ -17,7 +19,7 @@ function Divider() {
 const DEFAULT_ORDER = ["hero", "categories", "featured", "trustStrip", "story", "why", "faq", "finalCta"];
 
 export default function HomePage() {
-  const { visibility, themeSchema } = useCms();
+  const { visibility, themeSchema, products } = useCms();
   const sectionOrder = themeSchema?.sectionOrder ?? DEFAULT_ORDER;
 
   function renderSection(id: string) {
@@ -37,9 +39,19 @@ export default function HomePage() {
     let content: React.ReactNode = null;
 
     switch (id) {
-      case "hero":
+      case "hero": {
         if (!visibility.hero) return null;
-        content = (
+        const heroRevolutSection = themeSchema?.editor?.sections?.find(
+          (s) => s.type === "hero_revolut" && s.enabled,
+        );
+        content = heroRevolutSection ? (
+          <HeroRevolut
+            settings={heroRevolutSection.settings as HeroThemeSettings}
+            products={products}
+            blocks={heroRevolutSection.blocks ?? []}
+            mode="public"
+          />
+        ) : (
           <>
             <Hero />
             <TrustMarquee />
@@ -47,6 +59,7 @@ export default function HomePage() {
           </>
         );
         break;
+      }
       case "categories":
         if (!visibility.categories) return null;
         content = <Categories />;

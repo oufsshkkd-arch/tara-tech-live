@@ -88,7 +88,46 @@ export const heroFeaturedProductsBlockSchema: BlockSchema = {
   },
 };
 
+export const announcementBarSchema: SectionSchema = {
+  type: "announcementBar",
+  label: "شريط الإعلان",
+  icon: "Megaphone",
+  settingsSchema: [
+    { id: "enabled", label: "مفعّل", type: "toggle" },
+    { id: "text", label: "النص", type: "text" },
+    { id: "link", label: "الرابط", type: "link" },
+    { id: "backgroundColor", label: "لون الخلفية", type: "color" },
+    { id: "textColor", label: "لون النص", type: "color" },
+  ],
+  blocksSchema: [],
+  defaultSettings: {
+    enabled: true,
+    text: "عرض خاص — الدفع عند الاستلام في جميع أنحاء المغرب",
+    link: "",
+    backgroundColor: "#111111",
+    textColor: "#ffffff",
+  },
+  defaultBlocks: [],
+};
+
+export const categoriesSchema: SectionSchema = {
+  type: "categories",
+  label: "الفئات",
+  icon: "LayoutGrid",
+  settingsSchema: [
+    { id: "title", label: "عنوان السكشن", type: "text" },
+  ],
+  blocksSchema: [],
+  defaultSettings: {
+    title: "تسوق حسب الفئة",
+    categories: [],
+  },
+  defaultBlocks: [],
+};
+
 export const SECTION_SCHEMAS: Partial<Record<ThemeEditorSectionType, SectionSchema>> = {
+  announcementBar: announcementBarSchema,
+  categories: categoriesSchema,
   hero_revolut: {
     type: "hero_revolut",
     label: "Hero Revolut",

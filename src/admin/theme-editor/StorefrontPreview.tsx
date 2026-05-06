@@ -13,6 +13,7 @@ import type {
   StoryThemeSettings,
   TrustThemeSettings,
 } from "../../cms/types";
+import HeroRevolut from "../../components/HeroRevolut";
 import { SECTION_META } from "./themeConfig";
 import type { DeviceMode, EditorSection, PreviewPage, ThemeConfig } from "./types";
 
@@ -31,7 +32,6 @@ function EmptyMedia({ label = "Media" }: { label?: string }) {
 }
 
 function SectionShell({
-  section,
   children,
 }: {
   section: EditorSection;
@@ -39,12 +39,6 @@ function SectionShell({
 }) {
   return (
     <section className="border-b border-slate-100 bg-white px-5 py-8 sm:px-8">
-      <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-black text-slate-500">
-        <span className="grid h-5 w-5 place-items-center rounded-full bg-slate-950 text-[10px] text-white">
-          {SECTION_META[section.type].badge}
-        </span>
-        {SECTION_META[section.type].label}
-      </div>
       {children}
     </section>
   );
@@ -116,8 +110,8 @@ export default function StorefrontPreview({
           }}
         >
           <PreviewHeader config={config} previewPage={previewPage} />
-          {previewPage === "product" && <ProductPagePreview products={products} />}
-          {previewPage === "collection" && <CollectionPagePreview products={products} />}
+          {previewPage === "product" && <ProductPagePreview products={products} isMobile={isMobile} />}
+          {previewPage === "collection" && <CollectionPagePreview products={products} isMobile={isMobile} />}
           {previewPage === "cart" && <CartPreview products={products} />}
           {pageSections.map((section) => {
             if (!section.enabled) return null;
@@ -132,19 +126,26 @@ export default function StorefrontPreview({
                 }`}
               >
                 {(section.type === "hero" || section.type === "hero_revolut") && (
-                  <HeroPreview section={section} settings={section.settings as HeroThemeSettings} products={products} isMobile={isMobile} />
+                  <HeroRevolut
+                    settings={section.settings as HeroThemeSettings}
+                    products={products}
+                    blocks={section.blocks ?? []}
+                    mode="preview"
+                    isMobile={isMobile}
+                  />
                 )}
                 {section.type === "announcementBar" && (
                   <AnnouncementPreview section={section} settings={section.settings as AnnouncementThemeSettings} />
                 )}
                 {section.type === "categories" && (
-                  <CategoriesPreview section={section} settings={section.settings as CategoriesThemeSettings} />
+                  <CategoriesPreview section={section} settings={section.settings as CategoriesThemeSettings} isMobile={isMobile} />
                 )}
                 {(section.type === "featured" || section.type === "bestSellers") && (
                   <FeaturedPreview
                     section={section}
                     settings={section.settings as FeaturedThemeSettings}
                     products={products}
+                    isMobile={isMobile}
                   />
                 )}
                 {section.type === "trustStrip" && (
@@ -362,6 +363,7 @@ function HeroPreview({
               key={block.id}
               settings={block.settings as unknown as HeroFeaturedProductsSettings}
               products={products}
+              isMobile={isMobile}
             />
           ))}
     </section>
@@ -371,9 +373,11 @@ function HeroPreview({
 function HeroProductsStrip({
   settings,
   products,
+  isMobile,
 }: {
   settings: HeroFeaturedProductsSettings;
   products: Product[];
+  isMobile: boolean;
 }) {
   const limit = settings.productLimit || 3;
   const selectedProducts =
@@ -392,10 +396,12 @@ function HeroProductsStrip({
     );
   }
 
+  const cols = isMobile ? 1 : visibleProducts.length === 3 ? 3 : 2;
+
   return (
     <div
-      className={`mt-10 grid gap-3 ${visibleProducts.length === 3 ? "md:grid-cols-3" : "md:grid-cols-2"}`}
-      style={{ color: settings.textColor || "inherit" }}
+      className="mt-10 grid gap-3"
+      style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, color: settings.textColor || "inherit" }}
     >
       {visibleProducts.map((product) => (
         <div
@@ -449,13 +455,13 @@ function HeroProductsStrip({
   );
 }
 
-function ProductPagePreview({ products }: { products: Product[] }) {
+function ProductPagePreview({ products, isMobile }: { products: Product[]; isMobile: boolean }) {
   const product = products.find((item) => !item.hidden) ?? products[0];
   if (!product) return null;
 
   return (
     <section className="bg-white px-5 py-8 sm:px-8">
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6" style={{ gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr" }}>
         <div className="aspect-square overflow-hidden rounded-[2rem] bg-slate-100">
           {product.images?.[0] && <img src={product.images[0]} alt="" className="h-full w-full object-cover" />}
         </div>
@@ -475,13 +481,15 @@ function ProductPagePreview({ products }: { products: Product[] }) {
   );
 }
 
-function CollectionPagePreview({ products }: { products: Product[] }) {
+function CollectionPagePreview({ products, isMobile }: { products: Product[]; isMobile: boolean }) {
   const visible = products.filter((item) => !item.hidden).slice(0, 6);
+  const cols = isMobile ? 2 : 3;
+
   return (
     <section className="bg-white px-5 py-8 sm:px-8">
       <h2 className="mb-2 text-4xl font-black">Collection page</h2>
       <p className="mb-6 text-sm text-slate-500">منتجات مختارة بنظام الدفع عند الاستلام.</p>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+      <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
         {visible.map((product) => (
           <div key={product.id} className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
             <div className="aspect-square bg-slate-100">
@@ -552,28 +560,31 @@ function AnnouncementPreview({
 function CategoriesPreview({
   section,
   settings,
+  isMobile,
 }: {
   section: EditorSection;
   settings: CategoriesThemeSettings;
+  isMobile: boolean;
 }) {
+  const enabled = settings.categories.filter((category) => category.enabled);
+  const cols = isMobile ? 2 : Math.min(4, Math.max(2, enabled.length));
+
   return (
     <SectionShell section={section}>
       <h3 className="mb-6 text-3xl font-black">{settings.title}</h3>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        {settings.categories
-          .filter((category) => category.enabled)
-          .map((category) => (
-            <div key={category.id} className="overflow-hidden rounded-3xl border border-slate-100 bg-slate-50">
-              <div className="aspect-[4/5] bg-slate-100">
-                {category.image ? (
-                  <img src={category.image} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  <EmptyMedia label={category.name} />
-                )}
-              </div>
-              <div className="p-3 text-sm font-black">{category.name}</div>
+      <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+        {enabled.map((category) => (
+          <div key={category.id} className="overflow-hidden rounded-3xl border border-slate-100 bg-slate-50">
+            <div className="aspect-[4/5] bg-slate-100">
+              {category.image ? (
+                <img src={category.image} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <EmptyMedia label={category.name} />
+              )}
             </div>
-          ))}
+            <div className="truncate p-3 text-sm font-black">{category.name}</div>
+          </div>
+        ))}
       </div>
     </SectionShell>
   );
@@ -583,22 +594,26 @@ function FeaturedPreview({
   section,
   settings,
   products,
+  isMobile,
 }: {
   section: EditorSection;
   settings: FeaturedThemeSettings;
   products: Product[];
+  isMobile: boolean;
 }) {
   const selected = products.filter((product) => settings.productIds.includes(product.id) && !product.hidden);
+  const cols = isMobile ? 2 : 4;
 
   return (
     <SectionShell section={section}>
       <h3 className="mb-6 text-3xl font-black">{settings.title}</h3>
       <div
-        className={`grid gap-3 ${
+        className={settings.layout === "carousel" ? "grid grid-flow-col gap-3 overflow-hidden" : "grid gap-3"}
+        style={
           settings.layout === "carousel"
-            ? "grid-flow-col auto-cols-[220px] overflow-hidden"
-            : "grid-cols-2 md:grid-cols-4"
-        }`}
+            ? { gridAutoColumns: "220px" }
+            : { gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }
+        }
       >
         {selected.map((product) => (
           <div key={product.id} className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
