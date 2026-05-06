@@ -69,6 +69,7 @@ export const heroFeaturedProductsBlockSchema: BlockSchema = {
       { label: "Glass", value: "glass" },
       { label: "Premium", value: "premium" },
       { label: "Compact", value: "compact" },
+      { label: "Revolut", value: "revolut" },
     ] },
   ],
   defaultSettings: {

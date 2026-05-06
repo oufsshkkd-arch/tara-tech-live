@@ -40,6 +40,51 @@ function MiniProductCard({
   ctaText?: string;
 }) {
   const image = product.images[0] ?? "";
+
+  // ── Revolut portrait style ──────────────────────────────────────────────
+  if (cardStyle === "revolut") {
+    const inner = (
+      <div className="relative overflow-hidden rounded-[28px]" style={{ width: 180, height: 280 }}>
+        {image ? (
+          <img src={image} alt={product.title} loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 bg-slate-800" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        {show.showBadge && product.badge && (
+          <span className="absolute top-3 right-3 rounded-full bg-white/20 backdrop-blur-sm px-2 py-0.5 text-[10px] font-black text-white border border-white/20">
+            {product.badge}
+          </span>
+        )}
+        <div className="absolute bottom-3 inset-x-3 rounded-[18px] bg-white/15 backdrop-blur-xl border border-white/25 p-3">
+          {show.showTitle && (
+            <p className="text-white/60 text-[10px] leading-snug line-clamp-1" dir="auto">
+              {product.title}
+            </p>
+          )}
+          {show.showPrice && (
+            <div className="flex items-baseline gap-1 mt-0.5">
+              <span className="text-white text-base font-black">{product.price}</span>
+              <span className="text-white/60 text-[10px]">درهم</span>
+              {show.showOldPrice && product.compareAtPrice && (
+                <span className="text-white/40 text-[9px] line-through mr-1">{product.compareAtPrice}</span>
+              )}
+            </div>
+          )}
+          {show.showCTA && (
+            <div className="mt-2 rounded-full bg-white text-slate-950 text-[10px] font-black text-center py-1.5">
+              {ctaText || "اشتري الآن"}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+    if (mode === "preview") return <div className="cursor-default">{inner}</div>;
+    return <Link to={`/products/${product.slug}`} className="block hover:scale-[1.02] transition-transform duration-300">{inner}</Link>;
+  }
+
+  // ── Other card styles ───────────────────────────────────────────────────
   const isPremium = cardStyle === "premium";
   const isGlass = cardStyle === "glass";
 
@@ -58,12 +103,8 @@ function MiniProductCard({
     <div className={`rounded-[18px] overflow-hidden ${bg} flex flex-col`}>
       {show.showImage && image && (
         <div className="relative h-32 overflow-hidden">
-          <img
-            src={image}
-            alt={product.title}
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover"
-          />
+          <img src={image} alt={product.title} loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover" />
           {show.showBadge && product.badge && (
             <span className="absolute top-2 right-2 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-black text-white">
               {product.badge}
@@ -85,10 +126,8 @@ function MiniProductCard({
             )}
           </div>
         )}
-            {show.showCTA && (
-          <span
-            className={`mt-auto inline-block rounded-full px-3 py-1 text-[10px] font-bold text-center ${ctaBg}`}
-          >
+        {show.showCTA && (
+          <span className={`mt-auto inline-block rounded-full px-3 py-1 text-[10px] font-bold text-center ${ctaBg}`}>
             {ctaText || "اشتري الآن"}
           </span>
         )}
@@ -96,9 +135,7 @@ function MiniProductCard({
     </div>
   );
 
-  if (mode === "preview") {
-    return <div className="cursor-default">{inner}</div>;
-  }
+  if (mode === "preview") return <div className="cursor-default">{inner}</div>;
   return (
     <Link to={`/products/${product.slug}`} className="block hover:opacity-90 transition-opacity">
       {inner}
@@ -292,6 +329,29 @@ export default function HeroRevolut({
   const isTopLayout = mediaPosition === "top";
   const minH = isMobile ? "auto" : "560px";
 
+  // Resolved product list for bg layout (same logic as HeroProductsStrip)
+  const bgProducts = (() => {
+    if (!productsBlock) return [] as Product[];
+    const s = productsBlock.settings as Partial<HeroFeaturedProductsSettings>;
+    const { selectionMode = "manual", selectedProductIds = [], productLimit = 3 } = s;
+    let list: Product[] = [];
+    if (selectionMode === "manual" && selectedProductIds.length) {
+      list = selectedProductIds.map((id) => products.find((p) => p.id === id)).filter(Boolean) as Product[];
+    }
+    if (!list.length) list = products.filter((p) => p.featured && !p.hidden).slice(0, productLimit);
+    if (!list.length) list = products.slice(0, productLimit);
+    return list;
+  })();
+  const bgShowFlags = productsBlock ? (productsBlock.settings as Partial<HeroFeaturedProductsSettings>) : {};
+  const bgShow = {
+    showImage: bgShowFlags.showImage ?? true,
+    showTitle: bgShowFlags.showTitle ?? true,
+    showPrice: bgShowFlags.showPrice ?? true,
+    showOldPrice: bgShowFlags.showOldPrice ?? true,
+    showBadge: bgShowFlags.showBadge ?? true,
+    showCTA: bgShowFlags.showCTA ?? true,
+  };
+
   const hasMedia = resolvedVideo || resolvedImage;
 
   const mediaEl = hasMedia ? (
@@ -392,14 +452,17 @@ export default function HeroRevolut({
     </div>
   );
 
-  // Full-bleed background layout
+  // Full-bleed background layout — Revolut two-column
   if (isBgLayout) {
+    const bgMinH = isMobile ? 420 : 600;
+    const ROTATIONS = ["-2deg", "1deg", "-1deg"];
     return (
       <section
-        className={`relative w-full overflow-hidden ${bgClass}`}
-        style={{ minHeight: isMobile ? 420 : 560 }}
+        className="relative w-full overflow-hidden bg-slate-950"
+        style={{ minHeight: bgMinH }}
         dir="rtl"
       >
+        {/* Background media */}
         {enableVideo && resolvedVideo ? (
           <HeroVideo src={resolvedVideo} poster={resolvedPoster} />
         ) : resolvedImage ? (
@@ -411,18 +474,49 @@ export default function HeroRevolut({
             className="absolute inset-0 h-full w-full object-cover"
           />
         ) : null}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/40 to-slate-950/10" />
-        {!isLight && (
+        {/* Right-heavy gradient: text on right side (RTL) is readable */}
+        <div className="absolute inset-0 bg-gradient-to-l from-slate-950/85 via-slate-950/50 to-slate-950/10" />
+        {/* Subtle purple glow top-right */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-25"
+          style={{
+            background:
+              "radial-gradient(ellipse 70% 40% at 70% 0%, rgba(99,102,241,0.5), transparent)",
+          }}
+        />
+        {/* Two-column overlay */}
+        <div
+          className="relative z-10 flex items-center px-6 py-14 sm:px-10"
+          style={{ minHeight: bgMinH }}
+        >
           <div
-            className="pointer-events-none absolute inset-0 opacity-25"
+            className="mx-auto grid w-full items-center gap-10"
             style={{
-              background:
-                "radial-gradient(ellipse 70% 40% at 50% 0%, rgba(99,102,241,0.5), transparent)",
+              gridTemplateColumns: isMobile ? "1fr" : "1fr auto",
+              maxWidth: 1200,
             }}
-          />
-        )}
-        <div className="relative z-10 flex h-full flex-col justify-end px-6 py-14 sm:px-10">
-          {textBlock}
+          >
+            {/* Text column */}
+            <div className="flex flex-col gap-5">{textBlock}</div>
+            {/* Portrait glass cards column — desktop only */}
+            {!isMobile && enableHeroProducts && bgProducts.length > 0 && (
+              <div className="flex flex-col gap-4 items-center">
+                {bgProducts.slice(0, 3).map((p, i) => (
+                  <div
+                    key={p.id}
+                    style={{ transform: `rotate(${ROTATIONS[i] ?? "0deg"})` }}
+                  >
+                    <MiniProductCard
+                      product={p}
+                      cardStyle="revolut"
+                      show={bgShow}
+                      mode={mode}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </section>
     );

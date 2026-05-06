@@ -159,7 +159,7 @@ export type HeroFeaturedProductsSettings = {
   showRating: boolean;
   showBadge: boolean;
   showCTA: boolean;
-  cardStyle: "minimal" | "glass" | "premium" | "compact";
+  cardStyle: "minimal" | "glass" | "premium" | "compact" | "revolut";
   revealOnScroll: boolean;
   spacing?: number;
   background?: string;
