@@ -14,6 +14,7 @@ import type {
 } from "../../cms/types";
 import Faq from "../../components/Faq";
 import HeroRevolut from "../../components/HeroRevolut";
+import StorefrontRenderer from "./StorefrontRenderer";
 import { SECTION_META } from "./themeConfig";
 import type { DeviceMode, EditorSection, PreviewPage, ThemeConfig } from "./types";
 
@@ -109,11 +110,18 @@ export default function StorefrontPreview({
             boxShadow: shadow,
           }}
         >
-          <PreviewHeader config={config} previewPage={previewPage} />
+          {previewPage === "home" && (
+            <StorefrontRenderer
+              sections={pageSections}
+              mode="preview"
+              isMobile={isMobile}
+            />
+          )}
+          {previewPage !== "home" && <PreviewHeader config={config} previewPage={previewPage} />}
           {previewPage === "product" && <ProductPagePreview products={products} isMobile={isMobile} />}
           {previewPage === "collection" && <CollectionPagePreview products={products} isMobile={isMobile} />}
           {previewPage === "cart" && <CartPreview products={products} />}
-          {pageSections.map((section) => {
+          {previewPage !== "home" && pageSections.map((section) => {
             if (!section.enabled) return null;
             const selected = selectedSectionId === section.id;
             return (

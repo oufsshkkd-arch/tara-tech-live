@@ -7,7 +7,13 @@ import { useCart } from "../store/cart";
 
 import AnnouncementBar from "./AnnouncementBar";
 
-export default function Header() {
+export default function Header({
+  showAnnouncement = true,
+  fixed = true,
+}: {
+  showAnnouncement?: boolean;
+  fixed?: boolean;
+} = {}) {
   const { brand, nav } = useCms();
   const { count, openCart } = useCart();
   const [scrolled, setScrolled] = useState(false);
@@ -36,10 +42,10 @@ export default function Header() {
 
   return (
     <>
-      <AnnouncementBar />
+      {showAnnouncement && <AnnouncementBar />}
       <header
-        className={`fixed inset-x-0 z-50 transition-all duration-500 ${
-          scrolled ? "top-0" : "top-[36px]"
+        className={`${fixed ? "fixed inset-x-0" : "relative w-full"} z-50 transition-all duration-500 ${
+          fixed ? (scrolled ? "top-0" : "top-[36px]") : "top-0"
         } ${
           overPhoto
             ? "bg-transparent border-b border-transparent"

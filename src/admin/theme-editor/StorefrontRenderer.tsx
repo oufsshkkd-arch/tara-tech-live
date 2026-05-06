@@ -3,12 +3,20 @@ import Categories from "../../components/Categories";
 import FeaturedProducts from "../../components/FeaturedProducts";
 import FinalCta from "../../components/FinalCta";
 import Footer from "../../components/Footer";
+import Header from "../../components/Header";
 import WhyTara from "../../components/WhyTara";
 import Faq from "../../components/Faq";
 import HeroRevolut from "../../components/HeroRevolut";
+import RevolutBenefits from "../../components/RevolutBenefits";
 import Story from "../../components/Story";
+import TrustMarquee from "../../components/TrustMarquee";
 import { useCms } from "../../cms/store";
-import type { HeroThemeSettings } from "../../cms/types";
+import type {
+  AnnouncementThemeSettings,
+  FinalCtaThemeSettings,
+  HeroThemeSettings,
+  RevolutBenefitsThemeSettings,
+} from "../../cms/types";
 import type { EditorSection } from "./types";
 
 export default function StorefrontRenderer({
@@ -28,6 +36,8 @@ export default function StorefrontRenderer({
         .filter((s) => s.enabled)
         .map((section) => {
           switch (section.type) {
+            case "header":
+              return <Header key={section.id} showAnnouncement={false} fixed={mode === "public"} />;
             case "hero":
             case "hero_revolut":
               return (
@@ -40,8 +50,39 @@ export default function StorefrontRenderer({
                   isMobile={isMobile}
                 />
               );
+            case "trustMarquee":
+              return <TrustMarquee key={section.id} />;
+            case "revolutBenefits":
+              return (
+                <RevolutBenefits
+                  key={section.id}
+                  settings={section.settings as RevolutBenefitsThemeSettings}
+                />
+              );
             case "announcementBar":
-              return <AnnouncementBar key={section.id} announcementBar={cms.announcementBar} />;
+              {
+                const settings = section.settings as AnnouncementThemeSettings;
+                return (
+                  <AnnouncementBar
+                    key={section.id}
+                    announcementBar={{
+                      enabled: section.enabled && settings.enabled,
+                      link: settings.link,
+                      backgroundColor: settings.backgroundColor,
+                      textColor: settings.textColor,
+                      speed: cms.announcementBar.speed || 40,
+                      messages: [
+                        {
+                          id: `${section.id}-message`,
+                          text: settings.text,
+                          accent: false,
+                          order: 1,
+                        },
+                      ],
+                    }}
+                  />
+                );
+              }
             case "categories":
               return (
                 <Categories
@@ -66,7 +107,12 @@ export default function StorefrontRenderer({
             case "whyTara":
               return <WhyTara key={section.id} why={cms.why} />;
             case "finalCta":
-              return <FinalCta key={section.id} finalCta={cms.finalCta} />;
+              return (
+                <FinalCta
+                  key={section.id}
+                  settings={section.settings as FinalCtaThemeSettings}
+                />
+              );
             case "footer":
               return (
                 <Footer

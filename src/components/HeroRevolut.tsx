@@ -1,6 +1,9 @@
 import { ArrowLeft, Sparkles, Star } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useAnalytics } from "../hooks/useAnalytics";
+import HeroFeaturedProducts from "./HeroFeaturedProducts";
+import { resolveProducts } from "../cms/themeRuntime";
 import type {
   HeroFeaturedProductsSettings,
   HeroThemeSettings,
@@ -155,58 +158,13 @@ function HeroProductsStrip({
   mode: Mode;
 }) {
   const s = block.settings as Partial<HeroFeaturedProductsSettings>;
-  const {
-    selectionMode = "manual",
-    selectedProductIds = [],
-    productLimit = 3,
-    cardStyle = "premium",
-    showImage = true,
-    showTitle = true,
-    showPrice = true,
-    showOldPrice = true,
-    showBadge = true,
-    showCTA = true,
-  } = s;
-
-  let display: Product[] = [];
-  if (selectionMode === "manual" && selectedProductIds.length) {
-    display = selectedProductIds
-      .map((id) => products.find((p) => p.id === id))
-      .filter(Boolean) as Product[];
-  }
-  if (!display.length) {
-    display = products.filter((p) => p.featured && !p.hidden).slice(0, productLimit);
-  }
-  if (!display.length) {
-    display = products.slice(0, productLimit);
-  }
-
-  if (!display.length) {
-    return (
-      <div className="mt-8 rounded-[2rem] border border-dashed border-white/20 bg-white/5 p-5 text-center text-xs font-black text-white/50">
-        اختار منتجات من Theme Editor باش يبان Hero Products Strip
-      </div>
-    );
-  }
-
-  const cols = isMobile ? 1 : display.length === 3 ? 3 : 2;
-
   return (
-    <div
-      className="mt-8 grid gap-3"
-      style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
-    >
-      {display.map((product) => (
-        <MiniProductCard
-          key={product.id}
-          product={product}
-          cardStyle={cardStyle}
-          mode={mode}
-          show={{ showImage, showTitle, showPrice, showOldPrice, showBadge, showCTA }}
-          ctaText={(s as Record<string, unknown>).ctaText as string | undefined}
-        />
-      ))}
-    </div>
+    <HeroFeaturedProducts
+      products={products}
+      settings={s as Partial<HeroFeaturedProductsSettings> & { ctaText?: string }}
+      isMobile={isMobile}
+      mode={mode}
+    />
   );
 }
 
@@ -270,6 +228,7 @@ export default function HeroRevolut({
   mode?: Mode;
   isMobile?: boolean;
 }) {
+  const reduceMotion = useReducedMotion();
   const {
     title = "",
     subtitle = "",
@@ -292,6 +251,7 @@ export default function HeroRevolut({
     posterUrl = "",
     enableVideo = false,
     enableHeroProducts = false,
+    enableAnimation = true,
   } = settings;
 
   const resolvedImage =
@@ -316,7 +276,7 @@ export default function HeroRevolut({
   const resolvedSubtitleColor =
     isLight && subtitleColor === "#cbd5e1" ? "#475569" : (subtitleColor || (isLight ? "#64748b" : "rgba(255,255,255,0.75)"));
 
-  const titlePx = isMobile ? (titleFontSize?.mobile ?? 30) : (titleFontSize?.desktop ?? 54);
+  const titlePx = isMobile ? (titleFontSize?.mobile ?? 38) : (titleFontSize?.desktop ?? 82);
   const subtitlePx = isMobile ? (subtitleFontSize?.mobile ?? 15) : (subtitleFontSize?.desktop ?? 18);
 
   const textAlignClass =
@@ -327,20 +287,13 @@ export default function HeroRevolut({
   const productsBlock = blocks.find((b) => b.type === "featured_products_strip" && b.enabled);
   const isBgLayout = mediaPosition === "background";
   const isTopLayout = mediaPosition === "top";
-  const minH = isMobile ? "auto" : "560px";
+  const minH = isMobile ? "auto" : `${settings.sectionHeight ?? 720}px`;
 
   // Resolved product list for bg layout (same logic as HeroProductsStrip)
   const bgProducts = (() => {
     if (!productsBlock) return [] as Product[];
     const s = productsBlock.settings as Partial<HeroFeaturedProductsSettings>;
-    const { selectionMode = "manual", selectedProductIds = [], productLimit = 3 } = s;
-    let list: Product[] = [];
-    if (selectionMode === "manual" && selectedProductIds.length) {
-      list = selectedProductIds.map((id) => products.find((p) => p.id === id)).filter(Boolean) as Product[];
-    }
-    if (!list.length) list = products.filter((p) => p.featured && !p.hidden).slice(0, productLimit);
-    if (!list.length) list = products.slice(0, productLimit);
-    return list;
+    return resolveProducts(products, s);
   })();
   const bgShowFlags = productsBlock ? (productsBlock.settings as Partial<HeroFeaturedProductsSettings>) : {};
   const bgShow = {
@@ -355,13 +308,17 @@ export default function HeroRevolut({
   const hasMedia = resolvedVideo || resolvedImage;
 
   const mediaEl = hasMedia ? (
-    <div
-      className="relative overflow-hidden"
+    <motion.div
+      className="relative overflow-hidden shadow-[0_30px_100px_rgba(15,23,42,0.28)]"
       style={{
         borderRadius: 28,
         minHeight: isMobile ? 220 : 380,
         height: isBgLayout ? "100%" : undefined,
       }}
+      initial={enableAnimation && !reduceMotion ? { opacity: 0, y: 32, scale: 0.96 } : false}
+      whileInView={enableAnimation && !reduceMotion ? { opacity: 1, y: 0, scale: 1 } : undefined}
+      viewport={{ once: true, amount: 0.25 }}
+      transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
     >
       {enableVideo && resolvedVideo ? (
         <HeroVideo src={resolvedVideo} poster={resolvedPoster} />
@@ -374,21 +331,24 @@ export default function HeroRevolut({
           className="absolute inset-0 h-full w-full object-cover"
         />
       ) : null}
-    </div>
+    </motion.div>
   ) : null;
 
   const textBlock = (
-    <div
-      className={`flex flex-col gap-4 ${textAlignClass}`}
-      style={{ overflowWrap: "break-word", wordBreak: "break-word" }}
+    <motion.div
+      className={`flex min-w-0 flex-col gap-4 ${textAlignClass}`}
+      style={{ overflowWrap: "anywhere", wordBreak: "normal" }}
+      initial={enableAnimation && !reduceMotion ? { opacity: 0, y: 26 } : false}
+      animate={enableAnimation && !reduceMotion ? { opacity: 1, y: 0 } : undefined}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
     >
       {badgeText && (
         <span
-          className={`inline-flex items-center gap-1.5 self-start rounded-full px-3 py-1 text-xs font-bold ${
+          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
             isLight
               ? "bg-slate-100 border border-slate-200 text-slate-700"
               : "bg-white/15 border border-white/20 text-white"
-          }`}
+          } ${textAlign === "center" ? "self-center" : textAlign === "left" ? "self-start" : "self-end"}`}
         >
           <Sparkles className="h-3 w-3" />
           {badgeText}
@@ -396,14 +356,16 @@ export default function HeroRevolut({
       )}
 
       <h1
-        dir="auto"
-        className="font-black leading-tight tracking-tight"
+        dir="rtl"
+        className="font-black"
         style={{
-          fontSize: titlePx,
+          fontSize: `clamp(38px, 12vw, ${titlePx}px)`,
           color: resolvedTitleColor,
-          lineHeight: 1.15,
-          letterSpacing: "-0.025em",
-          maxWidth: "90%",
+          lineHeight: isMobile ? 1.02 : 0.96,
+          letterSpacing: 0,
+          maxWidth: "100%",
+          overflowWrap: "anywhere",
+          wordBreak: "normal",
         }}
       >
         {title || "عنوان الهيرو"}
@@ -412,7 +374,7 @@ export default function HeroRevolut({
       {subtitle && (
         <p
           dir="auto"
-          style={{ fontSize: subtitlePx, color: resolvedSubtitleColor, lineHeight: 1.65, maxWidth: "85%" }}
+          style={{ fontSize: subtitlePx, color: resolvedSubtitleColor, lineHeight: 1.65, maxWidth: isMobile ? "100%" : "620px" }}
         >
           {subtitle}
         </p>
@@ -449,7 +411,7 @@ export default function HeroRevolut({
           mode={mode}
         />
       )}
-    </div>
+    </motion.div>
   );
 
   // Full-bleed background layout — Revolut two-column
@@ -486,14 +448,14 @@ export default function HeroRevolut({
         />
         {/* Two-column overlay */}
         <div
-          className="relative z-10 flex items-center px-6 py-14 sm:px-10"
+          className="relative z-10 flex items-center px-5 py-12 sm:px-10"
           style={{ minHeight: bgMinH }}
         >
           <div
             className="mx-auto grid w-full items-center gap-10"
             style={{
               gridTemplateColumns: isMobile ? "1fr" : "1fr auto",
-              maxWidth: 1200,
+              maxWidth: 1180,
             }}
           >
             {/* Text column */}
@@ -502,8 +464,12 @@ export default function HeroRevolut({
             {!isMobile && enableHeroProducts && bgProducts.length > 0 && (
               <div className="flex flex-col gap-4 items-center">
                 {bgProducts.slice(0, 3).map((p, i) => (
-                  <div
+                  <motion.div
                     key={p.id}
+                    initial={enableAnimation && !reduceMotion ? { opacity: 0, y: 38, rotate: 0 } : false}
+                    whileInView={enableAnimation && !reduceMotion ? { opacity: 1, y: 0, rotate: ROTATIONS[i] ?? "0deg" } : undefined}
+                    viewport={{ once: true, amount: 0.25 }}
+                    transition={{ delay: i * 0.12, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
                     style={{ transform: `rotate(${ROTATIONS[i] ?? "0deg"})` }}
                   >
                     <MiniProductCard
@@ -512,7 +478,7 @@ export default function HeroRevolut({
                       show={bgShow}
                       mode={mode}
                     />
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             )}

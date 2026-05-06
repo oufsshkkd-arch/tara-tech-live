@@ -1,6 +1,8 @@
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCms } from "../cms/store";
+import ScrollReveal from "./ScrollReveal";
+import type { RevolutBenefitsThemeSettings } from "../cms/types";
 
 const DEFAULT_CARDS = [
   {
@@ -29,26 +31,30 @@ const DEFAULT_CARDS = [
   },
 ];
 
-export default function RevolutBenefits() {
+export default function RevolutBenefits({
+  settings: settingsProp,
+}: {
+  settings?: RevolutBenefitsThemeSettings;
+} = {}) {
   const cms = useCms();
   const themeEditor = cms.themeSchema?.editor;
   const section = themeEditor?.sections?.find((s) => s.type === "revolutBenefits");
-  const settings = section?.settings as { cards?: typeof DEFAULT_CARDS } | undefined;
+  const settings = settingsProp ?? (section?.settings as { cards?: typeof DEFAULT_CARDS } | undefined);
   const cards = settings?.cards?.length ? settings.cards : DEFAULT_CARDS;
 
   return (
-    <section className="py-20 md:py-28">
+    <section className="bg-slate-50 py-20 md:py-28">
       <div className="container-x">
         <div className="grid md:grid-cols-2 gap-6 md:gap-8">
-          {cards.map((card) => {
+          {cards.map((card, index) => {
             const isDark = card.theme === "dark";
             return (
+              <ScrollReveal key={card.id} delay={index * 0.1}>
               <div
-                key={card.id}
-                className={`relative overflow-hidden rounded-[32px] border shadow-sm min-h-[420px] md:min-h-[480px] p-8 md:p-12 group transition-all duration-300 ${
+                className={`relative overflow-hidden rounded-[32px] border shadow-sm min-h-[420px] md:min-h-[520px] p-8 md:p-12 group transition-all duration-300 ${
                   isDark
-                    ? "bg-ink border-ink hover:shadow-lift"
-                    : "bg-white border-line hover:shadow-md"
+                    ? "bg-slate-950 border-slate-950 hover:shadow-lift"
+                    : "bg-white border-slate-200 hover:shadow-md"
                 }`}
               >
                 {isDark && (
@@ -74,7 +80,7 @@ export default function RevolutBenefits() {
                     {card.title}
                   </h3>
                   <p
-                    className={`text-sm md:text-base leading-relaxed mb-8 ${
+                    className={`text-sm md:text-base leading-relaxed mb-8 max-w-sm ${
                       isDark ? "text-white/70" : "text-body"
                     }`}
                     dir="rtl"
@@ -110,6 +116,7 @@ export default function RevolutBenefits() {
                   </div>
                 </div>
               </div>
+              </ScrollReveal>
             );
           })}
         </div>

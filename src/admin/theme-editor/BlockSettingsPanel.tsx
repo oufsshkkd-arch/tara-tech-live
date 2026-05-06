@@ -139,6 +139,7 @@ export default function BlockSettingsPanel({
             value={heroSettings.cardStyle}
             onChange={(cardStyle) => updateSettings({ cardStyle })}
             options={[
+              { label: "Revolut", value: "revolut" },
               { label: "Premium", value: "premium" },
               { label: "Glass", value: "glass" },
               { label: "Minimal", value: "minimal" },
