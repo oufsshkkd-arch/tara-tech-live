@@ -248,8 +248,7 @@ function ScrollTransformHero({
   const subtitleOp = useTransform(scrollYProgress, [0.14, 0.38], [1, 0]);
   const badgeOp    = useTransform(scrollYProgress, [0.08, 0.26], [1, 0]);
   const ctaOp      = useTransform(scrollYProgress, [0.32, 0.52], [1, 0.3]);
-  // ── background slow-zoom ───────────────────────────────────────────────────
-  const bgScale    = useTransform(scrollYProgress, [0, 1], [1, 1 + 0.07 * iv]);
+  // background zoom removed — avoids compositing a full-viewport layer on scroll
   // ── phase 2 (0.40-0.78): cards stagger in from below ─────────────────────
   const c1o = useTransform(scrollYProgress, [0.40, 0.57], [0, 1]);
   const c1y = useTransform(scrollYProgress, [0.40, 0.57], [90, 0]);
@@ -322,10 +321,7 @@ function ScrollTransformHero({
 
   // ── shared background element ───────────────────────────────────────────────
   const BgLayer = (
-    <motion.div
-      className="absolute inset-0 will-change-transform"
-      style={isStatic ? undefined : { scale: bgScale }}
-    >
+    <div className="absolute inset-0">
       {enableVideo && resolvedVideo ? (
         <HeroVideo src={resolvedVideo} poster={resolvedPoster} />
       ) : resolvedImage ? (
@@ -334,7 +330,7 @@ function ScrollTransformHero({
       ) : (
         <div className="absolute inset-0 bg-slate-950" />
       )}
-    </motion.div>
+    </div>
   );
 
   const Overlays = (
@@ -601,10 +597,10 @@ export default function HeroRevolut({
         dir="rtl"
         className="font-black"
         style={{
-          fontSize: `clamp(38px, 12vw, ${titlePx}px)`,
+          fontSize: isMobile ? `clamp(22px, 6.5vw, 32px)` : `clamp(36px, 5vw, ${titlePx}px)`,
           color: resolvedTitleColor,
-          lineHeight: isMobile ? 1.02 : 0.96,
-          letterSpacing: 0,
+          lineHeight: isMobile ? 1.15 : 1.05,
+          letterSpacing: "-0.01em",
           maxWidth: "100%",
           overflowWrap: "anywhere",
           wordBreak: "normal",

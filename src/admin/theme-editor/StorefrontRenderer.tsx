@@ -1,15 +1,21 @@
+import { lazy, Suspense } from "react";
+
+// ── Above-fold: eager imports (must be ready on first paint) ────────────────
 import AnnouncementBar from "../../components/AnnouncementBar";
-import Categories from "../../components/Categories";
-import FeaturedProducts from "../../components/FeaturedProducts";
-import FinalCta from "../../components/FinalCta";
-import Footer from "../../components/Footer";
-import Header from "../../components/Header";
-import WhyTara from "../../components/WhyTara";
-import Faq from "../../components/Faq";
 import HeroRevolut from "../../components/HeroRevolut";
-import RevolutBenefits from "../../components/RevolutBenefits";
-import Story from "../../components/Story";
-import TrustMarquee from "../../components/TrustMarquee";
+import Header from "../../components/Header";
+
+// ── Below-fold: lazy imports (split into separate chunks) ───────────────────
+const Categories      = lazy(() => import("../../components/Categories"));
+const FeaturedProducts = lazy(() => import("../../components/FeaturedProducts"));
+const Story           = lazy(() => import("../../components/Story"));
+const Faq             = lazy(() => import("../../components/Faq"));
+const WhyTara         = lazy(() => import("../../components/WhyTara"));
+const FinalCta        = lazy(() => import("../../components/FinalCta"));
+const Footer          = lazy(() => import("../../components/Footer"));
+const RevolutBenefits = lazy(() => import("../../components/RevolutBenefits"));
+const TrustMarquee    = lazy(() => import("../../components/TrustMarquee"));
+
 import { useCms } from "../../cms/store";
 import type {
   AnnouncementThemeSettings,
@@ -18,6 +24,11 @@ import type {
   RevolutBenefitsThemeSettings,
 } from "../../cms/types";
 import type { EditorSection } from "./types";
+
+// Minimal height fallback prevents layout shift while lazy chunk loads
+function SectionShell({ minH = 80 }: { minH?: number }) {
+  return <div style={{ minHeight: minH }} aria-hidden />;
+}
 
 export default function StorefrontRenderer({
   sections,
@@ -38,6 +49,7 @@ export default function StorefrontRenderer({
           switch (section.type) {
             case "header":
               return <Header key={section.id} showAnnouncement={false} fixed={mode === "public"} />;
+
             case "hero":
             case "hero_revolut":
               return (
@@ -50,78 +62,88 @@ export default function StorefrontRenderer({
                   isMobile={isMobile}
                 />
               );
+
+            case "announcementBar": {
+              const s = section.settings as AnnouncementThemeSettings;
+              return (
+                <AnnouncementBar
+                  key={section.id}
+                  announcementBar={{
+                    enabled: section.enabled && s.enabled,
+                    link: s.link,
+                    backgroundColor: s.backgroundColor,
+                    textColor: s.textColor,
+                    speed: cms.announcementBar.speed || 40,
+                    messages: [{ id: `${section.id}-msg`, text: s.text, accent: false, order: 1 }],
+                  }}
+                />
+              );
+            }
+
             case "trustMarquee":
-              return <TrustMarquee key={section.id} />;
+              return (
+                <Suspense key={section.id} fallback={<SectionShell minH={64} />}>
+                  <TrustMarquee />
+                </Suspense>
+              );
+
             case "revolutBenefits":
               return (
-                <RevolutBenefits
-                  key={section.id}
-                  settings={section.settings as RevolutBenefitsThemeSettings}
-                />
+                <Suspense key={section.id} fallback={<SectionShell minH={300} />}>
+                  <RevolutBenefits settings={section.settings as RevolutBenefitsThemeSettings} />
+                </Suspense>
               );
-            case "announcementBar":
-              {
-                const settings = section.settings as AnnouncementThemeSettings;
-                return (
-                  <AnnouncementBar
-                    key={section.id}
-                    announcementBar={{
-                      enabled: section.enabled && settings.enabled,
-                      link: settings.link,
-                      backgroundColor: settings.backgroundColor,
-                      textColor: settings.textColor,
-                      speed: cms.announcementBar.speed || 40,
-                      messages: [
-                        {
-                          id: `${section.id}-message`,
-                          text: settings.text,
-                          accent: false,
-                          order: 1,
-                        },
-                      ],
-                    }}
-                  />
-                );
-              }
+
             case "categories":
               return (
-                <Categories
-                  key={section.id}
-                  categorySection={cms.categorySection}
-                  categories={cms.categories}
-                />
+                <Suspense key={section.id} fallback={<SectionShell minH={280} />}>
+                  <Categories categorySection={cms.categorySection} categories={cms.categories} />
+                </Suspense>
               );
+
             case "featured":
             case "bestSellers":
               return (
-                <FeaturedProducts
-                  key={section.id}
-                  featuredSection={cms.featuredSection}
-                  products={cms.products}
-                />
+                <Suspense key={section.id} fallback={<SectionShell minH={320} />}>
+                  <FeaturedProducts featuredSection={cms.featuredSection} products={cms.products} />
+                </Suspense>
               );
+
             case "story":
-              return <Story key={section.id} story={cms.story} />;
+              return (
+                <Suspense key={section.id} fallback={<SectionShell minH={300} />}>
+                  <Story story={cms.story} />
+                </Suspense>
+              );
+
             case "faq":
-              return <Faq key={section.id} faqSection={cms.faqSection} faq={cms.faq} />;
+              return (
+                <Suspense key={section.id} fallback={<SectionShell minH={300} />}>
+                  <Faq faqSection={cms.faqSection} faq={cms.faq} />
+                </Suspense>
+              );
+
             case "whyTara":
-              return <WhyTara key={section.id} why={cms.why} />;
+              return (
+                <Suspense key={section.id} fallback={<SectionShell minH={300} />}>
+                  <WhyTara why={cms.why} />
+                </Suspense>
+              );
+
             case "finalCta":
               return (
-                <FinalCta
-                  key={section.id}
-                  settings={section.settings as FinalCtaThemeSettings}
-                />
+                <Suspense key={section.id} fallback={<SectionShell minH={220} />}>
+                  <FinalCta settings={section.settings as FinalCtaThemeSettings} />
+                </Suspense>
               );
+
             case "footer":
               return (
-                <Footer
-                  key={section.id}
-                  brand={cms.brand}
-                  nav={cms.nav}
-                  footer={cms.footer}
-                />
+                <Suspense key={section.id} fallback={<SectionShell minH={200} />}>
+                  <Footer brand={cms.brand} nav={cms.nav} footer={cms.footer} />
+                </Suspense>
               );
+
             default:
               return null;
           }
