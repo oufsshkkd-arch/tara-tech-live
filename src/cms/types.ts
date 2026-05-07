@@ -198,6 +198,9 @@ export type HeroThemeSettings = {
   enableAnimation?: boolean;
   enableHeroProducts?: boolean;
   starRatingText?: string;
+  enableScrollTransform?: boolean;
+  stickyScrollLength?: number;
+  animationIntensity?: "subtle" | "medium" | "strong";
 };
 
 export type AnnouncementThemeSettings = {

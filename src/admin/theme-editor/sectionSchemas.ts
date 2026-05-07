@@ -222,6 +222,13 @@ export const SECTION_SCHEMAS: Partial<Record<ThemeEditorSectionType, SectionSche
       { id: "textAlign", label: "محاذاة النص", type: "alignment" },
       { id: "media", label: "Media", type: "media_picker" },
       { id: "enableHeroProducts", label: "3 Products strip", type: "toggle" },
+      { id: "enableScrollTransform", label: "Scroll Transform Animation", type: "toggle" },
+      { id: "stickyScrollLength", label: "Scroll Length", type: "range", min: 1.5, max: 3.5, step: 0.1 },
+      { id: "animationIntensity", label: "Animation Intensity", type: "select", options: [
+        { label: "Subtle", value: "subtle" },
+        { label: "Medium", value: "medium" },
+        { label: "Strong", value: "strong" },
+      ] },
     ],
     blocksSchema: [heroFeaturedProductsBlockSchema],
     defaultSettings: {},
