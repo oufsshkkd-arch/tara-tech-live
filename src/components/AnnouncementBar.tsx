@@ -9,9 +9,9 @@ export default function AnnouncementBar({
   const cms = useCms();
   const announcementBar = announcementBarProp ?? cms.announcementBar;
 
-  if (!announcementBar || !announcementBar.enabled || !announcementBar.messages?.length) {
-    return null;
-  }
+  // Hard kill-switch — first check, no other logic runs if disabled
+  if (!announcementBar?.enabled) return null;
+  if (!announcementBar.messages?.length) return null;
 
   const sorted = [...announcementBar.messages].sort((a, b) => a.order - b.order);
   const bg = announcementBar.backgroundColor || "#FAFAFA";

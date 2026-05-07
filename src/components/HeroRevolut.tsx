@@ -180,17 +180,20 @@ function CtaButton({
   href,
   variant,
   mode,
+  fullWidth = false,
 }: {
   text: string;
   href: string;
   variant: "primary" | "secondary";
   mode: Mode;
+  fullWidth?: boolean;
 }) {
   const { trackHeroCtaClick } = useAnalytics();
+  const display = fullWidth ? "flex w-full justify-center" : "inline-flex";
   const cls =
     variant === "primary"
-      ? "inline-flex items-center gap-2 rounded-full bg-white text-slate-950 px-6 py-3 text-sm font-black shadow-lg hover:bg-slate-100 transition-colors"
-      : "inline-flex items-center gap-2 rounded-full border border-white/30 text-white px-6 py-3 text-sm font-bold hover:bg-white/10 transition-colors";
+      ? `${display} items-center gap-2 rounded-full bg-white text-slate-950 px-6 py-3 text-sm font-black shadow-lg hover:bg-slate-100 transition-colors`
+      : `${display} items-center gap-2 rounded-full border border-white/30 text-white px-6 py-3 text-sm font-bold hover:bg-white/10 transition-colors`;
 
   const inner = (
     <>
@@ -377,9 +380,10 @@ function ScrollTransformHero({
   );
 
   const titleStyle = {
-    fontSize: isMobile ? "clamp(22px, 7vw, 30px)" : `clamp(46px, 7vw, ${titlePx}px)`,
+    // text-3xl mobile (30px) / clamped 46-? desktop (md:text-6xl-ish). leading-tight on mobile = 1.25
+    fontSize: isMobile ? "30px" : `clamp(46px, 7vw, ${titlePx}px)`,
     color: resolvedTitleColor,
-    lineHeight: isMobile ? 1.18 : 1.0,
+    lineHeight: isMobile ? 1.25 : 1.0,
     letterSpacing: isMobile ? "-0.01em" : 0,
     overflowWrap: "anywhere" as const,
     maxWidth: "100%",
@@ -388,23 +392,37 @@ function ScrollTransformHero({
   // ── static render: preview / mobile / prefers-reduced-motion ──────────────
   if (isStatic) {
     return (
-      <section className="relative overflow-hidden bg-slate-950" style={{ minHeight: isMobile ? 520 : 640 }} dir="rtl">
+      <section className="relative overflow-hidden bg-slate-950" style={{ minHeight: isMobile ? 580 : 640 }} dir="rtl">
         {BgLayer}{Overlays}
-        <div className="relative z-10 flex flex-col justify-between px-5 pt-14 pb-10 sm:px-12 sm:pt-20 sm:pb-12"
-          style={{ minHeight: isMobile ? 520 : 640 }}>
-          <div className={`flex flex-col gap-4 ${textAlignClass}`}>
+        <div className="relative z-10 flex flex-col justify-between px-5 pt-[120px] pb-10 sm:px-12 sm:pt-20 sm:pb-12"
+          style={{ minHeight: isMobile ? 580 : 640 }}>
+          {/* Mobile: centered + stacked + airy gap. Desktop: keep RTL right-align + tighter gap. */}
+          <div className={`flex flex-col ${
+            isMobile
+              ? "items-center text-center gap-y-6"
+              : `gap-4 ${textAlignClass}`
+          }`}>
             {badgeText && (
-              <span className={`inline-flex items-center gap-1.5 ${badgeAlign} rounded-full border border-white/20 bg-white/15 px-3 py-1 text-xs font-bold text-white`}>
+              <span className={`inline-flex items-center gap-1.5 ${
+                isMobile ? "self-center" : badgeAlign
+              } rounded-full border border-white/20 bg-white/15 px-3 py-1 text-xs font-bold text-white`}>
                 <Sparkles className="h-3 w-3" />{badgeText}
               </span>
             )}
-            <h1 dir="rtl" className="font-black" style={titleStyle}>{title || "عنوان الهيرو"}</h1>
-            {subtitle && <p dir="auto" className="max-w-lg text-[16px] leading-relaxed" style={{ color: resolvedSubtitleColor }}>{subtitle}</p>}
-            <div className={`flex flex-wrap items-center gap-3 ${ctaJustify}`}>
-              {primaryCtaText  && <CtaButton text={primaryCtaText}  href={primaryCtaLink}  variant="primary"   mode={mode} />}
-              {secondaryCtaText && <CtaButton text={secondaryCtaText} href={secondaryCtaLink} variant="secondary" mode={mode} />}
+            <h1 dir="rtl" className="font-black leading-tight" style={titleStyle}>{title || "عنوان الهيرو"}</h1>
+            {subtitle && (
+              <p dir="auto" className={`text-[16px] leading-relaxed ${isMobile ? "max-w-xs" : "max-w-lg"}`} style={{ color: resolvedSubtitleColor }}>
+                {subtitle}
+              </p>
+            )}
+            {/* CTAs — mobile stacks vertically, full-width; desktop wraps horizontally */}
+            <div className={`flex gap-3 ${
+              isMobile ? "flex-col w-full" : `flex-wrap items-center ${ctaJustify}`
+            }`}>
+              {primaryCtaText  && <CtaButton text={primaryCtaText}  href={primaryCtaLink}  variant="primary"   mode={mode} fullWidth={isMobile} />}
+              {secondaryCtaText && <CtaButton text={secondaryCtaText} href={secondaryCtaLink} variant="secondary" mode={mode} fullWidth={isMobile} />}
             </div>
-            <div className={`flex items-center gap-2 ${ctaJustify}`}>
+            <div className={`flex items-center gap-2 ${isMobile ? "justify-center" : ctaJustify}`}>
               <div className="flex">{[0,1,2,3,4].map(i => <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />)}</div>
               <span className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>{starRatingText}</span>
             </div>
