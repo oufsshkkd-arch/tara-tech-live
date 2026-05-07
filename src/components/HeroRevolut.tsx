@@ -17,18 +17,22 @@ import type {
 type Mode = "public" | "preview";
 
 function HeroVideo({ src, poster }: { src: string; poster?: string }) {
+  if (!src) return null;
   return (
-    <video
-      muted
-      autoPlay
-      loop
-      playsInline
-      preload="auto"
-      poster={poster}
-      className="absolute inset-0 h-full w-full object-cover"
-    >
-      {src && <source src={src} type="video/mp4" />}
-    </video>
+    // Dark skeleton shell — instant paint while video buffers
+    <div className="absolute inset-0 bg-slate-950">
+      <video
+        muted
+        autoPlay
+        loop
+        playsInline
+        preload="metadata"
+        poster={poster}
+        className="absolute inset-0 h-full w-full object-cover"
+      >
+        <source src={src} type="video/mp4" />
+      </video>
+    </div>
   );
 }
 
@@ -373,10 +377,10 @@ function ScrollTransformHero({
   );
 
   const titleStyle = {
-    fontSize: isMobile ? `clamp(34px, 11vw, ${titlePx}px)` : `clamp(46px, 7vw, ${titlePx}px)`,
+    fontSize: isMobile ? "clamp(22px, 7vw, 30px)" : `clamp(46px, 7vw, ${titlePx}px)`,
     color: resolvedTitleColor,
-    lineHeight: isMobile ? 1.02 : 0.96,
-    letterSpacing: 0,
+    lineHeight: isMobile ? 1.18 : 1.0,
+    letterSpacing: isMobile ? "-0.01em" : 0,
     overflowWrap: "anywhere" as const,
     maxWidth: "100%",
   };
@@ -386,7 +390,7 @@ function ScrollTransformHero({
     return (
       <section className="relative overflow-hidden bg-slate-950" style={{ minHeight: isMobile ? 520 : 640 }} dir="rtl">
         {BgLayer}{Overlays}
-        <div className="relative z-10 flex flex-col justify-between px-5 py-10 sm:px-12"
+        <div className="relative z-10 flex flex-col justify-between px-5 pt-14 pb-10 sm:px-12 sm:pt-20 sm:pb-12"
           style={{ minHeight: isMobile ? 520 : 640 }}>
           <div className={`flex flex-col gap-4 ${textAlignClass}`}>
             {badgeText && (
@@ -410,7 +414,7 @@ function ScrollTransformHero({
               image={bgImageMedia}
               video={videoMedia}
               poster={posterMedia}
-              enableVideo={enableVideo}
+              enableVideo={false}
               alt={title}
               className="h-full rounded-[32px] border border-white/20 bg-white/10 shadow-[0_34px_110px_rgba(2,6,23,0.38)] backdrop-blur"
             />
@@ -453,7 +457,7 @@ function ScrollTransformHero({
             image={bgImageMedia}
             video={videoMedia}
             poster={posterMedia}
-            enableVideo={enableVideo}
+            enableVideo={false}
             alt={title}
             className="h-full rounded-[32px] border border-white/20 bg-white/10 shadow-[0_34px_110px_rgba(2,6,23,0.45)] backdrop-blur"
             parallax={false}

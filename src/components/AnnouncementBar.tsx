@@ -9,7 +9,7 @@ export default function AnnouncementBar({
   const cms = useCms();
   const announcementBar = announcementBarProp ?? cms.announcementBar;
 
-  if (!announcementBar.enabled || announcementBar.messages.length === 0) {
+  if (!announcementBar || !announcementBar.enabled || !announcementBar.messages?.length) {
     return null;
   }
 
