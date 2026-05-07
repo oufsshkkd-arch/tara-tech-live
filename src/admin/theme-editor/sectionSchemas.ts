@@ -224,6 +224,9 @@ export const SECTION_SCHEMAS: Partial<Record<ThemeEditorSectionType, SectionSche
       { id: "enableHeroProducts", label: "3 Products strip", type: "toggle" },
       { id: "enableScrollTransform", label: "Scroll Transform Animation", type: "toggle" },
       { id: "stickyScrollLength", label: "Scroll Length", type: "range", min: 1.5, max: 3.5, step: 0.1 },
+      { id: "titleScaleOnScroll", label: "Title Scale On Scroll", type: "range", min: 0.65, max: 1, step: 0.01 },
+      { id: "mediaScaleOnScroll", label: "Media Scale On Scroll", type: "range", min: 0.65, max: 1.1, step: 0.01 },
+      { id: "revealProductsOnScroll", label: "Reveal Products On Scroll", type: "toggle" },
       { id: "animationIntensity", label: "Animation Intensity", type: "select", options: [
         { label: "Subtle", value: "subtle" },
         { label: "Medium", value: "medium" },
@@ -231,7 +234,14 @@ export const SECTION_SCHEMAS: Partial<Record<ThemeEditorSectionType, SectionSche
       ] },
     ],
     blocksSchema: [heroFeaturedProductsBlockSchema],
-    defaultSettings: {},
+    defaultSettings: {
+      enableScrollTransform: true,
+      stickyScrollLength: 2.2,
+      animationIntensity: "medium",
+      titleScaleOnScroll: 0.78,
+      mediaScaleOnScroll: 0.84,
+      revealProductsOnScroll: true,
+    },
     defaultBlocks: [{ type: "featured_products_strip", settings: heroFeaturedProductsBlockSchema.defaultSettings }],
   },
 };

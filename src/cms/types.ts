@@ -201,6 +201,9 @@ export type HeroThemeSettings = {
   enableScrollTransform?: boolean;
   stickyScrollLength?: number;
   animationIntensity?: "subtle" | "medium" | "strong";
+  titleScaleOnScroll?: number;
+  mediaScaleOnScroll?: number;
+  revealProductsOnScroll?: boolean;
 };
 
 export type AnnouncementThemeSettings = {

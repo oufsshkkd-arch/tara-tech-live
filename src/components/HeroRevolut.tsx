@@ -4,6 +4,8 @@ import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion
 import { Link } from "react-router-dom";
 import { useAnalytics } from "../hooks/useAnalytics";
 import HeroFeaturedProducts from "./HeroFeaturedProducts";
+import MediaRenderer from "./MediaRenderer";
+import ProductCardPremium from "./ProductCardPremium";
 import { resolveProducts } from "../cms/themeRuntime";
 import type {
   HeroFeaturedProductsSettings,
@@ -232,7 +234,7 @@ function ScrollTransformHero({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
-  const isStatic = !!(prefersReducedMotion || mode === "preview" || isMobile);
+  const isStatic = !!prefersReducedMotion;
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -241,25 +243,46 @@ function ScrollTransformHero({
 
   const intensityMap = { subtle: 0.6, medium: 1.0, strong: 1.4 } as const;
   const iv = intensityMap[settings.animationIntensity ?? "medium"] ?? 1.0;
+  const targetTitleScale = settings.titleScaleOnScroll ?? Math.max(0.72, 1 - 0.24 * iv);
+  const targetMediaScale = settings.mediaScaleOnScroll ?? Math.max(0.74, 1 - 0.18 * iv);
+  const revealProducts = settings.revealProductsOnScroll ?? true;
 
   // ── phase 1 (0.18-0.48): title scales + lifts, subtitle/badge fade ────────
-  const titleScale = useTransform(scrollYProgress, [0.18, 0.48], [1, Math.max(0.72, 1 - 0.24 * iv)]);
-  const titleY     = useTransform(scrollYProgress, [0.18, 0.48], [0, -58 * iv]);
+  const titleScale = useTransform(scrollYProgress, [0.18, 0.48], [1, targetTitleScale]);
+  const titleY     = useTransform(scrollYProgress, [0.18, 0.48], [0, isMobile ? -28 * iv : -58 * iv]);
   const subtitleOp = useTransform(scrollYProgress, [0.14, 0.38], [1, 0]);
   const badgeOp    = useTransform(scrollYProgress, [0.08, 0.26], [1, 0]);
   const ctaOp      = useTransform(scrollYProgress, [0.32, 0.52], [1, 0.3]);
-  // background zoom removed — avoids compositing a full-viewport layer on scroll
-  // ── phase 2 (0.40-0.78): cards stagger in from below ─────────────────────
-  const c1o = useTransform(scrollYProgress, [0.40, 0.57], [0, 1]);
-  const c1y = useTransform(scrollYProgress, [0.40, 0.57], [90, 0]);
-  const c2o = useTransform(scrollYProgress, [0.52, 0.67], [0, 1]);
-  const c2y = useTransform(scrollYProgress, [0.52, 0.67], [90, 0]);
-  const c3o = useTransform(scrollYProgress, [0.62, 0.77], [0, 1]);
-  const c3y = useTransform(scrollYProgress, [0.62, 0.77], [90, 0]);
+
+  // ── phase 2 (0.30-0.68): product/media visual travels and settles ────────
+  const mediaScale = useTransform(scrollYProgress, [0.12, 0.68], [1.05, targetMediaScale]);
+  const mediaX = useTransform(
+    scrollYProgress,
+    [0.18, 0.68],
+    isMobile ? [0, 0] : [-60 * iv, 0],
+  );
+  const mediaY = useTransform(
+    scrollYProgress,
+    [0.18, 0.68],
+    isMobile ? [14, -44 * iv] : [0, -18 * iv],
+  );
+  const mediaRotate = useTransform(scrollYProgress, [0.18, 0.68], [isMobile ? 0 : -2, 0]);
+  const bgTone = useTransform(scrollYProgress, [0, 1], [0.92, 0.76]);
+
+  // ── phase 3 (0.40-0.78): cards stagger in from below ─────────────────────
+  const c1o = useTransform(scrollYProgress, [0.40, 0.57], [revealProducts ? 0 : 1, 1]);
+  const c1y = useTransform(scrollYProgress, [0.40, 0.57], [revealProducts ? 90 : 0, 0]);
+  const c1s = useTransform(scrollYProgress, [0.40, 0.57], [revealProducts ? 0.94 : 1, 1]);
+  const c2o = useTransform(scrollYProgress, [0.52, 0.67], [revealProducts ? 0 : 1, 1]);
+  const c2y = useTransform(scrollYProgress, [0.52, 0.67], [revealProducts ? 90 : 0, 0]);
+  const c2s = useTransform(scrollYProgress, [0.52, 0.67], [revealProducts ? 0.94 : 1, 1]);
+  const c3o = useTransform(scrollYProgress, [0.62, 0.77], [revealProducts ? 0 : 1, 1]);
+  const c3y = useTransform(scrollYProgress, [0.62, 0.77], [revealProducts ? 90 : 0, 0]);
+  const c3s = useTransform(scrollYProgress, [0.62, 0.77], [revealProducts ? 0.94 : 1, 1]);
   const cardAnims = [
-    { opacity: c1o, y: c1y },
-    { opacity: c2o, y: c2y },
-    { opacity: c3o, y: c3y },
+    { opacity: c1o, y: c1y, scale: c1s },
+    { opacity: c2o, y: c2y, scale: c2s },
+    { opacity: c3o, y: c3y, scale: c3s },
   ];
 
   const {
@@ -311,6 +334,7 @@ function ScrollTransformHero({
     showTitle:    ps.showTitle    ?? true,
     showPrice:    ps.showPrice    ?? true,
     showOldPrice: ps.showOldPrice ?? true,
+    showRating:   ps.showRating   ?? true,
     showBadge:    ps.showBadge    ?? true,
     showCTA:      ps.showCTA      ?? true,
   };
@@ -320,8 +344,15 @@ function ScrollTransformHero({
   const badgeAlign     = textAlign === "center" ? "self-center"    : textAlign === "left" ? "self-start"    : "self-end";
 
   // ── shared background element ───────────────────────────────────────────────
+  const bgImageMedia =
+    (isMobile && (media?.mobileImage || media?.image)) ||
+    media?.image ||
+    (resolvedImage ? { type: "external" as const, url: resolvedImage, alt: title } : null);
+  const videoMedia = resolvedVideo ? { type: "external" as const, url: resolvedVideo, alt: title, mimeType: "video/mp4" } : null;
+  const posterMedia = resolvedPoster ? { type: "external" as const, url: resolvedPoster, alt: `${title} poster` } : null;
+
   const BgLayer = (
-    <div className="absolute inset-0">
+    <motion.div className="absolute inset-0" style={{ opacity: bgTone }}>
       {enableVideo && resolvedVideo ? (
         <HeroVideo src={resolvedVideo} poster={resolvedPoster} />
       ) : resolvedImage ? (
@@ -330,7 +361,7 @@ function ScrollTransformHero({
       ) : (
         <div className="absolute inset-0 bg-slate-950" />
       )}
-    </div>
+    </motion.div>
   );
 
   const Overlays = (
@@ -342,11 +373,12 @@ function ScrollTransformHero({
   );
 
   const titleStyle = {
-    fontSize: `clamp(28px, 8vw, ${titlePx}px)`,
+    fontSize: isMobile ? `clamp(34px, 11vw, ${titlePx}px)` : `clamp(46px, 7vw, ${titlePx}px)`,
     color: resolvedTitleColor,
-    lineHeight: 1.05,
-    letterSpacing: "-0.025em",
+    lineHeight: isMobile ? 1.02 : 0.96,
+    letterSpacing: 0,
     overflowWrap: "anywhere" as const,
+    maxWidth: "100%",
   };
 
   // ── static render: preview / mobile / prefers-reduced-motion ──────────────
@@ -354,7 +386,7 @@ function ScrollTransformHero({
     return (
       <section className="relative overflow-hidden bg-slate-950" style={{ minHeight: isMobile ? 520 : 640 }} dir="rtl">
         {BgLayer}{Overlays}
-        <div className="relative z-10 flex flex-col justify-between px-6 py-12 sm:px-12"
+        <div className="relative z-10 flex flex-col justify-between px-5 py-10 sm:px-12"
           style={{ minHeight: isMobile ? 520 : 640 }}>
           <div className={`flex flex-col gap-4 ${textAlignClass}`}>
             {badgeText && (
@@ -373,10 +405,28 @@ function ScrollTransformHero({
               <span className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>{starRatingText}</span>
             </div>
           </div>
+          <div className="pointer-events-none absolute inset-x-5 bottom-[29%] mx-auto h-[210px] max-w-[520px] sm:bottom-[24%] sm:h-[320px]">
+            <MediaRenderer
+              image={bgImageMedia}
+              video={videoMedia}
+              poster={posterMedia}
+              enableVideo={enableVideo}
+              alt={title}
+              className="h-full rounded-[32px] border border-white/20 bg-white/10 shadow-[0_34px_110px_rgba(2,6,23,0.38)] backdrop-blur"
+            />
+          </div>
           {enableHeroProducts && resolvedProds.length > 0 && (
-            <div className={`flex gap-3 sm:gap-4 pb-4 overflow-x-auto ${ctaJustify}`}>
+            <div className={`relative z-10 flex gap-3 overflow-x-auto pb-2 sm:gap-4 ${ctaJustify}`}>
               {resolvedProds.slice(0, 3).map(p => (
-                <MiniProductCard key={p.id} product={p} cardStyle="revolut" show={showFlags} mode={mode} />
+                <div key={p.id} className="w-[210px] shrink-0 sm:w-[250px]">
+                  <ProductCardPremium
+                    product={p}
+                    cardStyle={ps.cardStyle ?? "premium"}
+                    show={showFlags}
+                    mode={mode}
+                    ctaText={(ps as { ctaText?: string }).ctaText}
+                  />
+                </div>
               ))}
             </div>
           )}
@@ -387,14 +437,34 @@ function ScrollTransformHero({
 
   // ── animated render ────────────────────────────────────────────────────────
   return (
-    <section ref={containerRef} className="relative" style={{ height: `${stickyScrollLength * 100}vh` }} dir="rtl">
-      <div className="sticky top-0 h-screen overflow-hidden">
+    <section
+      ref={containerRef}
+      className="relative"
+      style={{ height: `${(isMobile ? Math.min(stickyScrollLength, 1.9) : stickyScrollLength) * 100}vh` }}
+      dir="rtl"
+    >
+      <div className="sticky top-0 h-screen overflow-hidden supports-[height:100svh]:h-[100svh]">
         {BgLayer}{Overlays}
-        <div className="relative z-10 flex h-full flex-col justify-between px-6 py-12 sm:px-12">
+        <motion.div
+          className="pointer-events-none absolute inset-x-5 top-[36%] z-[2] mx-auto h-[220px] max-w-[560px] sm:left-auto sm:right-[52%] sm:top-[22%] sm:h-[430px] sm:w-[40vw] sm:max-w-[520px]"
+          style={{ x: mediaX, y: mediaY, scale: mediaScale, rotate: mediaRotate }}
+        >
+          <MediaRenderer
+            image={bgImageMedia}
+            video={videoMedia}
+            poster={posterMedia}
+            enableVideo={enableVideo}
+            alt={title}
+            className="h-full rounded-[32px] border border-white/20 bg-white/10 shadow-[0_34px_110px_rgba(2,6,23,0.45)] backdrop-blur"
+            parallax={false}
+          />
+        </motion.div>
+
+        <div className="relative z-10 flex h-full flex-col justify-between px-5 py-10 sm:px-12 sm:py-12">
 
           {/* ── Text block ── */}
           <motion.div
-            className={`flex flex-col gap-4 ${textAlignClass}`}
+            className={`relative z-10 flex max-w-[720px] flex-col gap-4 ${textAlignClass}`}
             style={{
               scale: titleScale,
               y: titleY,
@@ -426,10 +496,20 @@ function ScrollTransformHero({
 
           {/* ── Cards: stagger reveal from bottom ── */}
           {enableHeroProducts && resolvedProds.length > 0 && (
-            <div className={`flex gap-3 sm:gap-5 pb-8 ${ctaJustify}`}>
+            <div className={`relative z-20 flex gap-3 overflow-x-auto pb-2 sm:gap-5 sm:pb-6 ${ctaJustify}`}>
               {resolvedProds.slice(0, 3).map((p, i) => (
-                <motion.div key={p.id} style={cardAnims[Math.min(i, 2)]}>
-                  <MiniProductCard product={p} cardStyle="revolut" show={showFlags} mode={mode} />
+                <motion.div
+                  key={p.id}
+                  className="w-[210px] shrink-0 sm:w-[250px] lg:w-[280px]"
+                  style={cardAnims[Math.min(i, 2)]}
+                >
+                  <ProductCardPremium
+                    product={p}
+                    cardStyle={ps.cardStyle ?? "premium"}
+                    show={showFlags}
+                    mode={mode}
+                    ctaText={(ps as { ctaText?: string }).ctaText}
+                  />
                 </motion.div>
               ))}
             </div>

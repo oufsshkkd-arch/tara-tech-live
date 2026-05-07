@@ -498,6 +498,67 @@ function HeroSettings({
         onChange={(enableHeroProducts) => onChange({ enableHeroProducts })}
         label="إظهار 3 منتجات تحت الهيرو"
       />
+      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 space-y-3">
+        <Toggle
+          checked={settings.enableScrollTransform ?? true}
+          onChange={(enableScrollTransform) => onChange({ enableScrollTransform })}
+          label="Pinned scroll-transform hero"
+        />
+        <Toggle
+          checked={settings.revealProductsOnScroll ?? true}
+          onChange={(revealProductsOnScroll) => onChange({ revealProductsOnScroll })}
+          label="Reveal products مع السكرول"
+        />
+        <Field label="Scroll length" hint="180vh حتى 240vh كيخلي الهيرو pinned مدة أطول">
+          <input
+            type="range"
+            min={1.5}
+            max={3.5}
+            step={0.1}
+            value={settings.stickyScrollLength ?? 2.2}
+            onChange={(event) => onChange({ stickyScrollLength: Number(event.target.value) })}
+            className="w-full accent-slate-950"
+          />
+          <div className="text-[11px] font-black text-slate-500">{settings.stickyScrollLength ?? 2.2}x viewport</div>
+        </Field>
+        <Field label="Title scale">
+          <input
+            type="range"
+            min={0.65}
+            max={1}
+            step={0.01}
+            value={settings.titleScaleOnScroll ?? 0.78}
+            onChange={(event) => onChange({ titleScaleOnScroll: Number(event.target.value) })}
+            className="w-full accent-slate-950"
+          />
+          <div className="text-[11px] font-black text-slate-500">{settings.titleScaleOnScroll ?? 0.78}</div>
+        </Field>
+        <Field label="Media scale">
+          <input
+            type="range"
+            min={0.65}
+            max={1.1}
+            step={0.01}
+            value={settings.mediaScaleOnScroll ?? 0.84}
+            onChange={(event) => onChange({ mediaScaleOnScroll: Number(event.target.value) })}
+            className="w-full accent-slate-950"
+          />
+          <div className="text-[11px] font-black text-slate-500">{settings.mediaScaleOnScroll ?? 0.84}</div>
+        </Field>
+        <Field label="Animation intensity">
+          <SelectInput
+            value={settings.animationIntensity ?? "medium"}
+            onChange={(animationIntensity) =>
+              onChange({ animationIntensity: animationIntensity as HeroThemeSettings["animationIntensity"] })
+            }
+            options={[
+              { label: "Subtle", value: "subtle" },
+              { label: "Medium", value: "medium" },
+              { label: "Strong", value: "strong" },
+            ]}
+          />
+        </Field>
+      </div>
       <Field label="Badge text">
         <TextInput value={settings.badgeText} onChange={(badgeText) => onChange({ badgeText })} />
       </Field>
