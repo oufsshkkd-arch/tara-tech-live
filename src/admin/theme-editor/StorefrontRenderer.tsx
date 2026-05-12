@@ -40,6 +40,7 @@ export default function StorefrontRenderer({
   mode?: "public" | "preview";
 }) {
   const cms = useCms();
+  let heroRendered = false;
 
   return (
     <>
@@ -52,6 +53,8 @@ export default function StorefrontRenderer({
 
             case "hero":
             case "hero_revolut":
+              if (heroRendered) return null;
+              heroRendered = true;
               return (
                 <HeroRevolut
                   key={section.id}
