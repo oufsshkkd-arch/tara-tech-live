@@ -52,6 +52,7 @@ export const seed: CmsState = {
     brandLine: "Tara Tech — تكنولوجيا عملية، مختارة بعناية.",
     logoTagline: "Tech & Style",
     clarityId: "wkekl1zk1c",
+    tiktokPixelId: "D81INH3C77U1Q23A93SG",
   },
   nav: {
     labels: {

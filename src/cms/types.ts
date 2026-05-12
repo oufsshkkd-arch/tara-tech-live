@@ -102,6 +102,7 @@ export type BrandSettings = {
   seo: { title: string; description: string };
   brandLine: string;
   clarityId?: string;
+  tiktokPixelId?: string;
 };
 
 export type SectionTheme = {
