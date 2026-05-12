@@ -55,7 +55,11 @@ export default function ThankYouPage() {
           time:         data.time         || "",
         });
         new Image().src = `${WEBHOOK_URL}?${params.toString()}`;
-        trackOrderSuccess(data.product_name || "unknown");
+        // TikTok Pixel: CompletePayment fires here (order successfully sent)
+        trackOrderSuccess(data.product_name || "unknown", {
+          contentName: data.product_name,
+          value: parseFloat(data.price || "0") * parseInt(data.quantity || "1", 10),
+        });
 
         // Save to Supabase orders table for admin dashboard
         saveOrder({

@@ -8,6 +8,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useCms } from "../cms/store";
 import { useCart } from "../store/cart";
+import { useAnalytics } from "../hooks/useAnalytics";
 import ProductCard from "../components/ProductCard";
 import OrderFormModal from "../components/OrderFormModal";
 import { COPY, GENERIC_COPY } from "../cms/defaultProductCopy";
@@ -42,6 +43,7 @@ export default function ProductPage() {
   const { slug } = useParams();
   const { products, categories, brand } = useCms();
   const { addItem, openCart } = useCart();
+  const { trackPageView } = useAnalytics();
   const product = products.find((r) => r.slug === slug && !r.hidden);
 
   const [activeImg, setActiveImg] = useState(0);
@@ -50,6 +52,16 @@ export default function ProductPage() {
   const [showSticky, setShowSticky] = useState(false);
 
   useEffect(() => { setActiveImg(0); }, [slug]);
+
+  // TikTok Pixel: ViewContent — fires once per product slug
+  useEffect(() => {
+    if (!product) return;
+    trackPageView({
+      contentId: product.slug || product.id,
+      contentName: product.title,
+      value: product.price,
+    });
+  }, [product?.slug, product?.id, product?.price, product?.title, trackPageView]);
 
   useEffect(() => {
     const handler = () => setShowSticky(window.scrollY > 600);

@@ -54,7 +54,11 @@ export default function OrderFormModal({ open, onClose, productName = "Jump Star
   function onFirstFocus() {
     if (hasStarted.current) return;
     hasStarted.current = true;
-    trackFormStart();
+    // TikTok Pixel: AddToCart fires here (start of COD funnel)
+    trackFormStart({
+      contentName: productName,
+      value: productPrice,
+    });
   }
 
   useEffect(() => {
