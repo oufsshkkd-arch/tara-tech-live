@@ -56,12 +56,31 @@ export default function ThankYouPage() {
         });
         new Image().src = `${WEBHOOK_URL}?${params.toString()}`;
 
-        // Compute value once for both DB write + TikTok Pixel
+        // Compute order value once for both pixel + DB write
         const priceNum = parseFloat(data.price || "0") || 0;
         const qtyNum   = parseInt(data.quantity || "1", 10) || 1;
         const totalValue = priceNum * qtyNum;
 
-        // CompletePayment must only fire after Supabase confirms the write.
+        // ── TikTok Pixel: CompletePayment ─────────────────────────────────────
+        // Fire immediately on thank-you page reach. The Google Sheet webhook
+        // above is the source-of-truth order record; the Supabase write below
+        // is a parallel admin-dashboard task that must NOT gate the pixel.
+        // (If Supabase fails silently, we'd still want the conversion counted.)
+        try {
+          trackOrderSuccess(data.product_name || "unknown", {
+            contentName: data.product_name,
+            value: totalValue,
+          });
+          // Debug-friendly log so Pixel Helper troubleshooting is easy
+          console.info(
+            "[ttq] CompletePayment fired",
+            { value: totalValue, currency: "MAD", content_name: data.product_name }
+          );
+        } catch (err) {
+          console.error("[ttq] CompletePayment threw", err);
+        }
+
+        // Persist to Supabase orders table for admin dashboard (background)
         saveOrder({
           id: Date.now().toString(),
           date: data.date || "",
@@ -74,18 +93,10 @@ export default function ThankYouPage() {
           quantity: qtyNum,
           status: "جديد",
           source: data.source || "direct",
-        })
-          .then(() => {
-            // TikTok Pixel: CompletePayment — fires only on confirmed Supabase write
-            trackOrderSuccess(data.product_name || "unknown", {
-              contentName: data.product_name,
-              value: totalValue,
-            });
-          })
-          .catch((err) => {
-            // Supabase failed → do NOT fire CompletePayment (avoids inflated conversions)
-            console.error("[order] Supabase save failed — CompletePayment skipped", err);
-          });
+        }).catch((err) => {
+          // Pixel already fired — log so admin can debug Supabase issue separately
+          console.error("[order] Supabase save failed (pixel already fired)", err);
+        });
       }
     } catch { /* ignore */ }
   }, []);

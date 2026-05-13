@@ -27,13 +27,23 @@ function fire(event: string, key?: string, value?: string) {
   } catch { /* ignore if Clarity not loaded */ }
 }
 
-// TikTok Pixel safe-fire — no-ops if ttq isn't loaded yet
+// TikTok Pixel safe-fire. The IIFE in index.html creates ttq.track as a
+// queue-stub immediately, so calling it before the SDK finishes loading
+// just enqueues the event. We log every fire to make Pixel-Helper
+// debugging easy from DevTools.
 function tt(event: string, params?: Record<string, unknown>) {
   try {
-    if (typeof window !== "undefined" && typeof window.ttq?.track === "function") {
+    if (typeof window === "undefined") return;
+    if (typeof window.ttq?.track === "function") {
       window.ttq.track(event, params);
+      // Debug breadcrumb (visible in DevTools console)
+      try { console.debug(`[ttq] track ${event}`, params); } catch { /* ignore */ }
+    } else {
+      console.warn(`[ttq] not loaded — skipped ${event}`, params);
     }
-  } catch { /* ignore */ }
+  } catch (err) {
+    console.error(`[ttq] threw on ${event}`, err);
+  }
 }
 
 function pixelPayload(p?: ProductPixelData) {
