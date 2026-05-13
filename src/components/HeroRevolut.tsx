@@ -15,8 +15,11 @@ import type {
 type Mode = "public" | "preview";
 
 function HeroVideo({ src, poster }: { src: string; poster?: string }) {
+  if (!src) return null;
   return (
     <video
+      key={src}
+      src={src}
       muted
       autoPlay
       loop
@@ -24,9 +27,7 @@ function HeroVideo({ src, poster }: { src: string; poster?: string }) {
       preload="auto"
       poster={poster}
       className="absolute inset-0 h-full w-full object-cover"
-    >
-      {src && <source src={src} type="video/mp4" />}
-    </video>
+    />
   );
 }
 
@@ -232,7 +233,7 @@ function ScrollTransformHero({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
-  const isStatic = !!(prefersReducedMotion || mode === "preview" || isMobile);
+  const isStatic = !!(prefersReducedMotion || mode === "preview");
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
