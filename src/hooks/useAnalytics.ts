@@ -7,6 +7,7 @@ declare global {
     ttq?: {
       track: (event: string, params?: Record<string, unknown>) => void;
       page: () => void;
+      identify?: (params: Record<string, string>) => void;
       [key: string]: unknown;
     };
   }
@@ -16,9 +17,37 @@ export type ProductPixelData = {
   contentId?: string | number;
   contentName?: string;
   value?: number;
+  // Advanced Matching — raw values, hashed (SHA-256) before sending
+  phone?: string;
+  email?: string;
 };
 
 const CURRENCY = "MAD";
+
+// ── SHA-256 helper (Web Crypto) — used for TikTok Advanced Matching ─────────
+async function sha256Hex(input: string): Promise<string> {
+  if (!input || typeof crypto === "undefined" || !crypto.subtle) return "";
+  const buf = new TextEncoder().encode(input);
+  const hash = await crypto.subtle.digest("SHA-256", buf);
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+// E.164 normalization — Moroccan numbers default to +212
+function normalizePhone(raw: string): string {
+  if (!raw) return "";
+  const digits = raw.replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("00212")) return `+${digits.slice(2)}`;
+  if (digits.startsWith("212")) return `+${digits}`;
+  if (digits.startsWith("0")) return `+212${digits.slice(1)}`;
+  return `+${digits}`;
+}
+
+function normalizeEmail(raw: string): string {
+  return (raw || "").trim().toLowerCase();
+}
 
 function fire(event: string, key?: string, value?: string) {
   try {
@@ -57,6 +86,50 @@ function pixelPayload(p?: ProductPixelData) {
   };
 }
 
+// Async variant: same as pixelPayload + hashed phone_number/email for
+// TikTok Advanced Matching. Used by CompletePayment (purchase event).
+async function pixelPayloadWithIdentity(p: ProductPixelData): Promise<Record<string, unknown>> {
+  const base: Record<string, unknown> = {
+    content_type: "product",
+    content_id: p.contentId != null ? String(p.contentId) : undefined,
+    content_name: p.contentName,
+    value: p.value,
+    currency: CURRENCY,
+  };
+  if (p.phone) {
+    const norm = normalizePhone(p.phone);
+    if (norm) base.phone_number = await sha256Hex(norm);
+  }
+  if (p.email) {
+    const norm = normalizeEmail(p.email);
+    if (norm) base.email = await sha256Hex(norm);
+  }
+  return base;
+}
+
+// Set TikTok user identifiers BEFORE the track call (best-practice Advanced
+// Matching). All identifiers SHA-256 hashed client-side.
+async function ttIdentify(phone?: string, email?: string) {
+  if (!phone && !email) return;
+  if (typeof window === "undefined" || typeof window.ttq?.identify !== "function") return;
+  try {
+    const id: Record<string, string> = {};
+    if (phone) {
+      const np = normalizePhone(phone);
+      if (np) id.phone_number = await sha256Hex(np);
+    }
+    if (email) {
+      const ne = normalizeEmail(email);
+      if (ne) id.email = await sha256Hex(ne);
+    }
+    if (Object.keys(id).length === 0) return;
+    window.ttq.identify(id);
+    try { console.debug("[ttq] identify", id); } catch { /* ignore */ }
+  } catch (err) {
+    console.error("[ttq] identify threw", err);
+  }
+}
+
 export function useAnalytics() {
   const incrementStat = useCms((s) => s.incrementStat);
 
@@ -78,11 +151,18 @@ export function useAnalytics() {
   }, []);
 
   // Funnel step 3: CompletePayment — order successfully sent
+  // Async: hashes phone/email for Advanced Matching, then identifies + tracks.
+  // Caller does NOT need to await (fire-and-forget is fine).
   const trackOrderSuccess = useCallback(
-    (productName: string, product?: ProductPixelData) => {
+    async (productName: string, product?: ProductPixelData) => {
       fire("order_success", "product", productName);
-      tt("CompletePayment", pixelPayload({ contentName: productName, ...product }));
       incrementStat("formSubmissions");
+      const merged: ProductPixelData = { contentName: productName, ...product };
+      // 1. Identify (advanced matching) BEFORE the event
+      await ttIdentify(merged.phone, merged.email);
+      // 2. Build payload with hashed identifiers + dispatch track
+      const payload = await pixelPayloadWithIdentity(merged);
+      tt("CompletePayment", payload);
     },
     [incrementStat]
   );

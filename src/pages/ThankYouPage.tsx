@@ -11,10 +11,13 @@ const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbytXQjDr40xi-zH-qkk
 interface Order {
   full_name: string;
   phone: string;
+  email?: string;
   city: string;
   quantity: string;
   price: string;
   product_name: string;
+  product_slug?: string;
+  product_id?: string;
   note?: string;
   status?: string;
   date?: string;
@@ -65,20 +68,22 @@ export default function ThankYouPage() {
         // Fire immediately on thank-you page reach. The Google Sheet webhook
         // above is the source-of-truth order record; the Supabase write below
         // is a parallel admin-dashboard task that must NOT gate the pixel.
-        // (If Supabase fails silently, we'd still want the conversion counted.)
-        try {
-          trackOrderSuccess(data.product_name || "unknown", {
-            contentName: data.product_name,
-            value: totalValue,
-          });
-          // Debug-friendly log so Pixel Helper troubleshooting is easy
-          console.info(
-            "[ttq] CompletePayment fired",
-            { value: totalValue, currency: "MAD", content_name: data.product_name }
-          );
-        } catch (err) {
-          console.error("[ttq] CompletePayment threw", err);
-        }
+        // content_id (slug) + Advanced Matching (hashed phone/email) included.
+        const contentId = data.product_slug || data.product_id || data.product_name;
+        trackOrderSuccess(data.product_name || "unknown", {
+          contentId,
+          contentName: data.product_name,
+          value: totalValue,
+          phone: data.phone,
+          email: data.email,
+        }).catch((err) => console.error("[ttq] CompletePayment threw", err));
+        console.info("[ttq] CompletePayment dispatched", {
+          content_id: contentId,
+          value: totalValue,
+          currency: "MAD",
+          has_phone: !!data.phone,
+          has_email: !!data.email,
+        });
 
         // Persist to Supabase orders table for admin dashboard (background)
         saveOrder({

@@ -647,7 +647,7 @@ export default function ProductPage() {
         )}
       </AnimatePresence>
 
-      <OrderFormModal open={showForm} onClose={() => setShowForm(false)} productName={p.title} productPrice={p.price} productImage={p.images[0]} />
+      <OrderFormModal open={showForm} onClose={() => setShowForm(false)} productName={p.title} productPrice={p.price} productImage={p.images[0]} productSlug={p.slug} productId={p.id} />
     </div>
   );
 }

@@ -18,6 +18,8 @@ interface Props {
   productName?: string;
   productPrice?: number;
   productImage?: string;
+  productSlug?: string;
+  productId?: string;
 }
 
 interface FormState {
@@ -39,7 +41,15 @@ function isValidPhone(phone: string) {
   return /^(\+212|00212|0)(6|7)\d{8}$/.test(cleaned);
 }
 
-export default function OrderFormModal({ open, onClose, productName = "Jump Starter + Air Pump", productPrice = 699, productImage = "/images/jump-starter/product-hero.jpg" }: Props) {
+export default function OrderFormModal({
+  open,
+  onClose,
+  productName = "Jump Starter + Air Pump",
+  productPrice = 699,
+  productImage = "/images/jump-starter/product-hero.jpg",
+  productSlug = "",
+  productId = "",
+}: Props) {
   const navigate = useNavigate();
   const { trackFormStart, trackFormAbandon } = useAnalytics();
   const hasStarted = useRef(false);
@@ -103,6 +113,8 @@ export default function OrderFormModal({ open, onClose, productName = "Jump Star
       date: now.toLocaleDateString("fr-MA"),
       time: now.toLocaleTimeString("fr-MA"),
       product_name: productName,
+      product_slug: productSlug || "",
+      product_id:   productId   || "",
       price: String(productPrice),
       full_name: form.full_name.trim(),
       phone: form.phone.trim(),

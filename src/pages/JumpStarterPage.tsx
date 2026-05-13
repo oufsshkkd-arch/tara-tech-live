@@ -825,7 +825,7 @@ export default function JumpStarterPage() {
         </div>
       </div>
 
-      <OrderFormModal open={showForm} onClose={() => setShowForm(false)} />
+      <OrderFormModal open={showForm} onClose={() => setShowForm(false)} productSlug="jump-starter-air-pump" productId="jump-starter-air-pump" />
     </div>
   );
 }
