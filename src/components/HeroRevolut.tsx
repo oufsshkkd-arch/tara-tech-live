@@ -329,10 +329,11 @@ function ScrollTransformHero({
   const resolvedPoster = media?.poster?.url || posterUrl || resolvedImage;
 
   const isLight = backgroundStyle === "light";
+  // Force text to be white/light on dark backgrounds for readability, especially on mobile.
   const resolvedTitleColor =
-    isLight && titleColor === "#ffffff" ? "#0f172a" : (titleColor || (isLight ? "#0f172a" : "#ffffff"));
+    isLight ? (titleColor || "#0f172a") : "#ffffff";
   const resolvedSubtitleColor =
-    isLight && subtitleColor === "#cbd5e1" ? "#475569" : (subtitleColor || (isLight ? "#64748b" : "rgba(255,255,255,0.75)"));
+    isLight ? (subtitleColor || "#475569") : "rgba(255,255,255,0.85)";
   const titlePx = isMobile
     ? (titleFontSize?.mobile ?? 34)
     : (titleFontSize?.desktop ?? 68);
@@ -604,11 +605,10 @@ export default function HeroRevolut({
     glass: "bg-slate-950",
   }[backgroundStyle];
 
-  const baseTextColor = isLight ? "#0f172a" : "#ffffff";
   const resolvedTitleColor =
-    isLight && titleColor === "#ffffff" ? "#0f172a" : (titleColor || baseTextColor);
+    isLight ? (titleColor || "#0f172a") : "#ffffff";
   const resolvedSubtitleColor =
-    isLight && subtitleColor === "#cbd5e1" ? "#475569" : (subtitleColor || (isLight ? "#64748b" : "rgba(255,255,255,0.75)"));
+    isLight ? (subtitleColor || "#475569") : "rgba(255,255,255,0.85)";
 
   const titlePx = isMobile ? (titleFontSize?.mobile ?? 38) : (titleFontSize?.desktop ?? 82);
   const subtitlePx = isMobile ? (subtitleFontSize?.mobile ?? 15) : (subtitleFontSize?.desktop ?? 18);
@@ -643,7 +643,7 @@ export default function HeroRevolut({
 
   const mediaEl = hasMedia ? (
     <motion.div
-      className="relative overflow-hidden shadow-[0_30px_100px_rgba(15,23,42,0.28)]"
+      className="hidden md:block relative overflow-hidden shadow-[0_30px_100px_rgba(15,23,42,0.28)]"
       style={{
         borderRadius: 28,
         minHeight: isMobile ? 220 : 380,
