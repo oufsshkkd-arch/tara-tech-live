@@ -487,13 +487,13 @@ export default function HeroRevolut({
     subtitleFontSize,
     titleColor,
     subtitleColor,
-    mediaPosition = "right",
+    mediaPosition = "background",
     media,
     imageUrl = "",
     videoUrl = "",
     posterUrl = "",
     enableVideo = false,
-    enableHeroProducts = false,
+    enableHeroProducts = true,
     enableAnimation = true,
   } = settings;
 
@@ -656,10 +656,11 @@ export default function HeroRevolut({
     </motion.div>
   );
 
-  // Full-bleed background layout — Revolut two-column
+  // Full-bleed background layout — Revolut two-column with 3 portrait cards
   if (isBgLayout) {
-    const bgMinH = isMobile ? 420 : 600;
-    const ROTATIONS = ["-2deg", "1deg", "-1deg"];
+    const bgMinH = isMobile ? 580 : 720;
+    // Subtle Y-offset stagger gives the row a premium "fanned" feel
+    const Y_OFFSETS = [12, -8, 12];
     return (
       <section
         className="relative w-full overflow-hidden bg-slate-950"
@@ -678,9 +679,9 @@ export default function HeroRevolut({
             className="absolute inset-0 h-full w-full object-cover"
           />
         ) : null}
-        {/* Right-heavy gradient: text on right side (RTL) is readable */}
-        <div className="absolute inset-0 bg-gradient-to-l from-slate-950/85 via-slate-950/50 to-slate-950/10" />
-        {/* Subtle purple glow top-right */}
+        {/* Left-heavy gradient (RTL): text on right stays readable, image visible on left */}
+        <div className="absolute inset-0 bg-gradient-to-l from-slate-950/85 via-slate-950/55 to-slate-950/15" />
+        {/* Subtle purple glow */}
         <div
           className="pointer-events-none absolute inset-0 opacity-25"
           style={{
@@ -688,31 +689,39 @@ export default function HeroRevolut({
               "radial-gradient(ellipse 70% 40% at 70% 0%, rgba(99,102,241,0.5), transparent)",
           }}
         />
-        {/* Two-column overlay */}
+        {/* Content overlay */}
         <div
-          className="relative z-10 flex items-center px-5 py-12 sm:px-10"
+          className="relative z-10 flex items-center px-5 py-14 sm:px-10 sm:py-16"
           style={{ minHeight: bgMinH }}
         >
           <div
-            className="mx-auto grid w-full items-center gap-10"
+            className="mx-auto grid w-full items-center gap-8 lg:gap-12"
             style={{
               gridTemplateColumns: isMobile ? "1fr" : "1fr auto",
-              maxWidth: 1180,
+              maxWidth: 1240,
             }}
           >
             {/* Text column */}
             <div className="flex flex-col gap-5">{textBlock}</div>
-            {/* Portrait glass cards column — desktop only */}
-            {!isMobile && enableHeroProducts && bgProducts.length > 0 && (
-              <div className="flex flex-col gap-4 items-center">
+
+            {/* 3 portrait glass cards — horizontal row (always visible, mobile-scrollable) */}
+            {enableHeroProducts && bgProducts.length > 0 && (
+              <div
+                className={`flex gap-3 sm:gap-4 ${
+                  isMobile
+                    ? "overflow-x-auto pb-2 snap-x snap-mandatory -mx-5 px-5"
+                    : "items-center"
+                }`}
+              >
                 {bgProducts.slice(0, 3).map((p, i) => (
                   <motion.div
                     key={p.id}
-                    initial={enableAnimation && !reduceMotion ? { opacity: 0, y: 38, rotate: 0 } : false}
-                    whileInView={enableAnimation && !reduceMotion ? { opacity: 1, y: 0, rotate: ROTATIONS[i] ?? "0deg" } : undefined}
+                    className={isMobile ? "shrink-0 snap-center" : "shrink-0"}
+                    initial={enableAnimation && !reduceMotion ? { opacity: 0, y: 38 } : false}
+                    whileInView={enableAnimation && !reduceMotion ? { opacity: 1, y: isMobile ? 0 : (Y_OFFSETS[i] ?? 0) } : undefined}
                     viewport={{ once: true, amount: 0.25 }}
-                    transition={{ delay: i * 0.12, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-                    style={{ transform: `rotate(${ROTATIONS[i] ?? "0deg"})` }}
+                    transition={{ delay: i * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                    style={isMobile ? undefined : { transform: `translateY(${Y_OFFSETS[i] ?? 0}px)` }}
                   >
                     <MiniProductCard
                       product={p}
