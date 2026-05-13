@@ -81,5 +81,6 @@ export async function loadOrders(): Promise<unknown[]> {
 
 export async function saveOrder(order: Record<string, unknown>): Promise<void> {
   const id = String(order.id ?? crypto.randomUUID());
-  await supabase.from("orders").upsert({ id, data: order });
+  const { error } = await supabase.from("orders").upsert({ id, data: order });
+  if (error) throw error;
 }
