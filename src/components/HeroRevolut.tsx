@@ -4,8 +4,6 @@ import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion
 import { Link } from "react-router-dom";
 import { useAnalytics } from "../hooks/useAnalytics";
 import HeroFeaturedProducts from "./HeroFeaturedProducts";
-import MediaRenderer from "./MediaRenderer";
-import ProductCardPremium from "./ProductCardPremium";
 import { resolveProducts } from "../cms/themeRuntime";
 import type {
   HeroFeaturedProductsSettings,
@@ -17,22 +15,18 @@ import type {
 type Mode = "public" | "preview";
 
 function HeroVideo({ src, poster }: { src: string; poster?: string }) {
-  if (!src) return null;
   return (
-    // Dark skeleton shell — instant paint while video buffers
-    <div className="absolute inset-0 bg-slate-950">
-      <video
-        muted
-        autoPlay
-        loop
-        playsInline
-        preload="metadata"
-        poster={poster}
-        className="absolute inset-0 h-full w-full object-cover"
-      >
-        <source src={src} type="video/mp4" />
-      </video>
-    </div>
+    <video
+      muted
+      autoPlay
+      loop
+      playsInline
+      preload="auto"
+      poster={poster}
+      className="absolute inset-0 h-full w-full object-cover"
+    >
+      {src && <source src={src} type="video/mp4" />}
+    </video>
   );
 }
 
@@ -180,20 +174,17 @@ function CtaButton({
   href,
   variant,
   mode,
-  fullWidth = false,
 }: {
   text: string;
   href: string;
   variant: "primary" | "secondary";
   mode: Mode;
-  fullWidth?: boolean;
 }) {
   const { trackHeroCtaClick } = useAnalytics();
-  const display = fullWidth ? "flex w-full justify-center" : "inline-flex";
   const cls =
     variant === "primary"
-      ? `${display} items-center gap-2 rounded-full bg-white text-slate-950 px-6 py-3 text-sm font-black shadow-lg hover:bg-slate-100 transition-colors`
-      : `${display} items-center gap-2 rounded-full border border-white/30 text-white px-6 py-3 text-sm font-bold hover:bg-white/10 transition-colors`;
+      ? "inline-flex items-center gap-2 rounded-full bg-white text-slate-950 px-6 py-3 text-sm font-black shadow-lg hover:bg-slate-100 transition-colors"
+      : "inline-flex items-center gap-2 rounded-full border border-white/30 text-white px-6 py-3 text-sm font-bold hover:bg-white/10 transition-colors";
 
   const inner = (
     <>
@@ -241,7 +232,7 @@ function ScrollTransformHero({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
-  const isStatic = !!prefersReducedMotion;
+  const isStatic = !!(prefersReducedMotion || mode === "preview" || isMobile);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -250,53 +241,26 @@ function ScrollTransformHero({
 
   const intensityMap = { subtle: 0.6, medium: 1.0, strong: 1.4 } as const;
   const iv = intensityMap[settings.animationIntensity ?? "medium"] ?? 1.0;
-  const targetTitleScale = settings.titleScaleOnScroll ?? Math.max(0.72, 1 - 0.24 * iv);
-  const targetMediaScale = settings.mediaScaleOnScroll ?? Math.max(0.74, 1 - 0.18 * iv);
-  const revealProducts = settings.revealProductsOnScroll ?? true;
 
-  // ── Text fades out quickly as we scroll down ────────
-  const heroTextOpacity = useTransform(scrollYProgress, [0, 0.28], [1, 0]);
-  const titleY          = useTransform(scrollYProgress, [0, 0.28], [0, -50]);
-  const subtitleOp      = useTransform(scrollYProgress, [0, 0.28], [1, 0]);
-  const badgeOp         = useTransform(scrollYProgress, [0, 0.28], [1, 0]);
-  const ctaOp           = useTransform(scrollYProgress, [0, 0.28], [1, 0]);
-
-  // ── phase 2 (0.30-0.68): product/media visual travels and settles ────────
-  const mediaScale = useTransform(scrollYProgress, [0.12, 0.68], [1.05, targetMediaScale]);
-  const mediaX = useTransform(
-    scrollYProgress,
-    [0.18, 0.68],
-    isMobile ? [0, 0] : [-60 * iv, 0],
-  );
-  const mediaY = useTransform(
-    scrollYProgress,
-    [0.18, 0.68],
-    isMobile ? [14, -44 * iv] : [0, -18 * iv],
-  );
-  const mediaRotate = useTransform(scrollYProgress, [0.18, 0.68], [isMobile ? 0 : -2, 0]);
-  const bgTone = useTransform(scrollYProgress, [0, 1], [0.92, 0.76]);
-
-  // ── phase 3: products rise from bottom and fade in ─────────────────────
-  // Start from y: 220px, opacity: 0 and move up
-  const productsY = useTransform(scrollYProgress, [0.15, 0.55], [220, 0]);
-  const productsOpacity = useTransform(scrollYProgress, [0.18, 0.45], [0, 1]);
-
-  const c1o = productsOpacity;
-  const c1y = productsY;
-  const c1s = useTransform(scrollYProgress, [0.18, 0.45], [0.96, 1]);
-  
-  const c2o = productsOpacity;
-  const c2y = productsY;
-  const c2s = useTransform(scrollYProgress, [0.18, 0.45], [0.96, 1]);
-  
-  const c3o = productsOpacity;
-  const c3y = productsY;
-  const c3s = useTransform(scrollYProgress, [0.18, 0.45], [0.96, 1]);
-  
+  // ── phase 1 (0.18-0.48): title scales + lifts, subtitle/badge fade ────────
+  const titleScale = useTransform(scrollYProgress, [0.18, 0.48], [1, Math.max(0.72, 1 - 0.24 * iv)]);
+  const titleY     = useTransform(scrollYProgress, [0.18, 0.48], [0, -58 * iv]);
+  const subtitleOp = useTransform(scrollYProgress, [0.14, 0.38], [1, 0]);
+  const badgeOp    = useTransform(scrollYProgress, [0.08, 0.26], [1, 0]);
+  const ctaOp      = useTransform(scrollYProgress, [0.32, 0.52], [1, 0.3]);
+  // ── background slow-zoom ───────────────────────────────────────────────────
+  const bgScale    = useTransform(scrollYProgress, [0, 1], [1, 1 + 0.07 * iv]);
+  // ── phase 2 (0.40-0.78): cards stagger in from below ─────────────────────
+  const c1o = useTransform(scrollYProgress, [0.40, 0.57], [0, 1]);
+  const c1y = useTransform(scrollYProgress, [0.40, 0.57], [90, 0]);
+  const c2o = useTransform(scrollYProgress, [0.52, 0.67], [0, 1]);
+  const c2y = useTransform(scrollYProgress, [0.52, 0.67], [90, 0]);
+  const c3o = useTransform(scrollYProgress, [0.62, 0.77], [0, 1]);
+  const c3y = useTransform(scrollYProgress, [0.62, 0.77], [90, 0]);
   const cardAnims = [
-    { opacity: c1o, y: c1y, scale: c1s },
-    { opacity: c2o, y: c2y, scale: c2s },
-    { opacity: c3o, y: c3y, scale: c3s },
+    { opacity: c1o, y: c1y },
+    { opacity: c2o, y: c2y },
+    { opacity: c3o, y: c3y },
   ];
 
   const {
@@ -329,7 +293,6 @@ function ScrollTransformHero({
   const resolvedPoster = media?.poster?.url || posterUrl || resolvedImage;
 
   const isLight = backgroundStyle === "light";
-  // Force text to be white/light on dark backgrounds for readability, especially on mobile.
   const resolvedTitleColor =
     isLight ? (titleColor || "#0f172a") : "#ffffff";
   const resolvedSubtitleColor =
@@ -349,7 +312,6 @@ function ScrollTransformHero({
     showTitle:    ps.showTitle    ?? true,
     showPrice:    ps.showPrice    ?? true,
     showOldPrice: ps.showOldPrice ?? true,
-    showRating:   ps.showRating   ?? true,
     showBadge:    ps.showBadge    ?? true,
     showCTA:      ps.showCTA      ?? true,
   };
@@ -359,15 +321,11 @@ function ScrollTransformHero({
   const badgeAlign     = textAlign === "center" ? "self-center"    : textAlign === "left" ? "self-start"    : "self-end";
 
   // ── shared background element ───────────────────────────────────────────────
-  const bgImageMedia =
-    (isMobile && (media?.mobileImage || media?.image)) ||
-    media?.image ||
-    (resolvedImage ? { type: "external" as const, url: resolvedImage, alt: title } : null);
-  const videoMedia = resolvedVideo ? { type: "external" as const, url: resolvedVideo, alt: title, mimeType: "video/mp4" } : null;
-  const posterMedia = resolvedPoster ? { type: "external" as const, url: resolvedPoster, alt: `${title} poster` } : null;
-
   const BgLayer = (
-    <motion.div className="absolute inset-0" style={{ opacity: bgTone }}>
+    <motion.div
+      className="absolute inset-0 will-change-transform"
+      style={isStatic ? undefined : { scale: bgScale }}
+    >
       {enableVideo && resolvedVideo ? (
         <HeroVideo src={resolvedVideo} poster={resolvedPoster} />
       ) : resolvedImage ? (
@@ -388,69 +346,41 @@ function ScrollTransformHero({
   );
 
   const titleStyle = {
+    fontSize: `clamp(28px, 8vw, ${titlePx}px)`,
     color: resolvedTitleColor,
+    lineHeight: 1.05,
+    letterSpacing: "-0.025em",
+    overflowWrap: "anywhere" as const,
   };
 
   // ── static render: preview / mobile / prefers-reduced-motion ──────────────
   if (isStatic) {
     return (
-      <section className="relative overflow-hidden bg-slate-950" style={{ minHeight: isMobile ? 580 : 640 }} dir="rtl">
+      <section className="relative overflow-hidden bg-slate-950" style={{ minHeight: isMobile ? 520 : 640 }} dir="rtl">
         {BgLayer}{Overlays}
-        <div className="relative z-10 flex flex-col justify-between px-5 pt-[calc(var(--header-height,72px)+48px)] pb-10 sm:px-12 sm:pt-20 sm:pb-12"
-          style={{ minHeight: isMobile ? 580 : 640 }}>
-          {/* Mobile: centered + stacked + airy gap. Desktop: keep RTL right-align + tighter gap. */}
-          <div className={`flex flex-col mx-auto w-full ${
-            isMobile
-              ? "max-w-[480px] items-center text-center gap-y-6"
-              : `max-w-[720px] gap-4 ${textAlignClass}`
-          }`}>
+        <div className="relative z-10 flex flex-col justify-between px-6 py-12 sm:px-12"
+          style={{ minHeight: isMobile ? 520 : 640 }}>
+          <div className={`flex flex-col gap-4 ${textAlignClass}`}>
             {badgeText && (
-              <span className={`inline-flex items-center gap-1.5 ${
-                isMobile ? "self-center" : badgeAlign
-              } rounded-full border border-white/20 bg-white/15 px-3 py-1 text-xs font-bold text-white`}>
+              <span className={`inline-flex items-center gap-1.5 ${badgeAlign} rounded-full border border-white/20 bg-white/15 px-3 py-1 text-xs font-bold text-white`}>
                 <Sparkles className="h-3 w-3" />{badgeText}
               </span>
             )}
-            <h1 dir="rtl" className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl leading-tight font-bold" style={titleStyle}>{title || "عنوان الهيرو"}</h1>
-            {subtitle && (
-              <p dir="auto" className={`text-[16px] leading-relaxed ${isMobile ? "max-w-xs" : "max-w-lg"}`} style={{ color: resolvedSubtitleColor }}>
-                {subtitle}
-              </p>
-            )}
-            {/* CTAs — mobile stacks vertically, full-width; desktop wraps horizontally */}
-            <div className={`mt-8 flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:w-auto ${
-              isMobile ? "items-center" : ctaJustify
-            }`}>
-              {primaryCtaText  && <div className="w-full max-w-[320px] sm:w-auto"><CtaButton text={primaryCtaText}  href={primaryCtaLink}  variant="primary"   mode={mode} fullWidth={isMobile} /></div>}
-              {secondaryCtaText && <div className="w-full max-w-[320px] sm:w-auto"><CtaButton text={secondaryCtaText} href={secondaryCtaLink} variant="secondary" mode={mode} fullWidth={isMobile} /></div>}
+            <h1 dir="rtl" className="font-black" style={titleStyle}>{title || "عنوان الهيرو"}</h1>
+            {subtitle && <p dir="auto" className="max-w-lg text-[16px] leading-relaxed" style={{ color: resolvedSubtitleColor }}>{subtitle}</p>}
+            <div className={`flex flex-wrap items-center gap-3 ${ctaJustify}`}>
+              {primaryCtaText  && <CtaButton text={primaryCtaText}  href={primaryCtaLink}  variant="primary"   mode={mode} />}
+              {secondaryCtaText && <CtaButton text={secondaryCtaText} href={secondaryCtaLink} variant="secondary" mode={mode} />}
             </div>
-            <div className={`mt-4 flex items-center gap-2 ${isMobile ? "justify-center" : ctaJustify}`}>
+            <div className={`flex items-center gap-2 ${ctaJustify}`}>
               <div className="flex">{[0,1,2,3,4].map(i => <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />)}</div>
               <span className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>{starRatingText}</span>
             </div>
           </div>
-          <div className="hidden md:block pointer-events-none absolute inset-x-5 bottom-[29%] mx-auto h-[210px] max-w-[520px] sm:bottom-[24%] sm:h-[320px]">
-            <MediaRenderer
-              image={bgImageMedia}
-              video={videoMedia}
-              poster={posterMedia}
-              enableVideo={false}
-              alt={title}
-              className="h-full rounded-[32px] border border-white/20 bg-white/10 shadow-[0_34px_110px_rgba(2,6,23,0.38)] backdrop-blur"
-            />
-          </div>
           {enableHeroProducts && resolvedProds.length > 0 && (
-            <div className={`relative z-10 flex gap-3 overflow-x-auto pb-2 sm:gap-4 ${ctaJustify}`}>
+            <div className={`flex gap-3 sm:gap-4 pb-4 overflow-x-auto ${ctaJustify}`}>
               {resolvedProds.slice(0, 3).map(p => (
-                <div key={p.id} className="w-[210px] shrink-0 sm:w-[250px]">
-                  <ProductCardPremium
-                    product={p}
-                    cardStyle={ps.cardStyle ?? "premium"}
-                    show={showFlags}
-                    mode={mode}
-                    ctaText={(ps as { ctaText?: string }).ctaText}
-                  />
-                </div>
+                <MiniProductCard key={p.id} product={p} cardStyle="revolut" show={showFlags} mode={mode} />
               ))}
             </div>
           )}
@@ -461,72 +391,49 @@ function ScrollTransformHero({
 
   // ── animated render ────────────────────────────────────────────────────────
   return (
-    <section
-      ref={containerRef}
-      className="relative min-h-[135vh] md:min-h-[210vh]"
-      dir="rtl"
-    >
-      <div className="sticky top-0 h-[100svh] overflow-hidden">
+    <section ref={containerRef} className="relative" style={{ height: `${stickyScrollLength * 100}vh` }} dir="rtl">
+      <div className="sticky top-0 h-screen overflow-hidden">
         {BgLayer}{Overlays}
-        <motion.div
-          className="hidden md:block pointer-events-none absolute inset-x-5 sm:left-auto sm:right-[52%] sm:top-[22%] z-[2] mx-auto h-[430px] w-[40vw] max-w-[520px]"
-          style={{ x: mediaX, y: mediaY, scale: mediaScale, rotate: mediaRotate }}
-        >
-          <MediaRenderer
-            image={bgImageMedia}
-            video={videoMedia}
-            poster={posterMedia}
-            enableVideo={false}
-            alt={title}
-            className="h-full rounded-[32px] border border-white/20 bg-white/10 shadow-[0_34px_110px_rgba(2,6,23,0.45)] backdrop-blur"
-            parallax={false}
-          />
-        </motion.div>
-
-        <div className="relative z-10 flex h-full flex-col justify-between px-5 pb-10 pt-[calc(var(--header-height,72px)+48px)] sm:px-12">
+        <div className="relative z-10 flex h-full flex-col justify-between px-6 py-12 sm:px-12">
 
           {/* ── Text block ── */}
           <motion.div
-            className={`relative z-10 flex w-full flex-col gap-5 ${textAlignClass} mx-auto ${isMobile ? "max-w-[480px] items-center text-center" : "max-w-[720px]"}`}
+            className={`flex flex-col gap-4 ${textAlignClass}`}
             style={{
-              opacity: heroTextOpacity,
+              scale: titleScale,
               y: titleY,
+              transformOrigin: textAlign === "center" ? "top center" : textAlign === "left" ? "top left" : "top right",
             }}
           >
             {badgeText && (
-              <span className={`inline-flex items-center gap-1.5 ${isMobile ? "self-center" : badgeAlign} rounded-full border border-white/20 bg-white/15 px-3 py-1 text-xs font-bold text-white`}>
+              <motion.span style={{ opacity: badgeOp }}
+                className={`inline-flex items-center gap-1.5 ${badgeAlign} rounded-full border border-white/20 bg-white/15 px-3 py-1 text-xs font-bold text-white`}>
                 <Sparkles className="h-3 w-3" />{badgeText}
-              </span>
+              </motion.span>
             )}
-            <h1 dir="rtl" className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl leading-tight font-bold" style={titleStyle}>{title || "عنوان الهيرو"}</h1>
+            <h1 dir="rtl" className="font-black" style={titleStyle}>{title || "عنوان الهيرو"}</h1>
             {subtitle && (
-              <p dir="auto" style={{ color: resolvedSubtitleColor }}
-                className="text-[16px] leading-relaxed max-w-lg">
+              <motion.p dir="auto" style={{ opacity: subtitleOp, color: resolvedSubtitleColor }}
+                className="max-w-lg text-[16px] leading-relaxed">
                 {subtitle}
-              </p>
+              </motion.p>
             )}
-            <div className={`mt-8 flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:w-auto ${isMobile ? "items-center" : ctaJustify}`}>
-              {primaryCtaText   && <div className="w-full max-w-[320px] sm:w-auto"><CtaButton text={primaryCtaText}   href={primaryCtaLink}   variant="primary"   mode={mode} fullWidth={isMobile} /></div>}
-              {secondaryCtaText && <div className="w-full max-w-[320px] sm:w-auto"><CtaButton text={secondaryCtaText} href={secondaryCtaLink} variant="secondary" mode={mode} fullWidth={isMobile} /></div>}
+            <motion.div style={{ opacity: ctaOp }} className={`flex flex-wrap items-center gap-3 ${ctaJustify}`}>
+              {primaryCtaText   && <CtaButton text={primaryCtaText}   href={primaryCtaLink}   variant="primary"   mode={mode} />}
+              {secondaryCtaText && <CtaButton text={secondaryCtaText} href={secondaryCtaLink} variant="secondary" mode={mode} />}
+            </motion.div>
+            <div className={`flex items-center gap-2 ${ctaJustify}`}>
+              <div className="flex">{[0,1,2,3,4].map(i => <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />)}</div>
+              <span className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>{starRatingText}</span>
             </div>
           </motion.div>
 
           {/* ── Cards: stagger reveal from bottom ── */}
           {enableHeroProducts && resolvedProds.length > 0 && (
-            <div className={`relative z-20 flex gap-3 overflow-x-auto pb-2 sm:gap-5 sm:pb-6 ${ctaJustify}`}>
+            <div className={`flex gap-3 sm:gap-5 pb-8 ${ctaJustify}`}>
               {resolvedProds.slice(0, 3).map((p, i) => (
-                <motion.div
-                  key={p.id}
-                  className="w-[210px] shrink-0 sm:w-[250px] lg:w-[280px]"
-                  style={cardAnims[Math.min(i, 2)]}
-                >
-                  <ProductCardPremium
-                    product={p}
-                    cardStyle={ps.cardStyle ?? "premium"}
-                    show={showFlags}
-                    mode={mode}
-                    ctaText={(ps as { ctaText?: string }).ctaText}
-                  />
+                <motion.div key={p.id} style={cardAnims[Math.min(i, 2)]}>
+                  <MiniProductCard product={p} cardStyle="revolut" show={showFlags} mode={mode} />
                 </motion.div>
               ))}
             </div>
@@ -643,7 +550,7 @@ export default function HeroRevolut({
 
   const mediaEl = hasMedia ? (
     <motion.div
-      className="hidden md:block relative overflow-hidden shadow-[0_30px_100px_rgba(15,23,42,0.28)]"
+      className="relative overflow-hidden shadow-[0_30px_100px_rgba(15,23,42,0.28)]"
       style={{
         borderRadius: 28,
         minHeight: isMobile ? 220 : 380,
@@ -693,10 +600,10 @@ export default function HeroRevolut({
         dir="rtl"
         className="font-black"
         style={{
-          fontSize: isMobile ? `clamp(22px, 6.5vw, 32px)` : `clamp(36px, 5vw, ${titlePx}px)`,
+          fontSize: `clamp(38px, 12vw, ${titlePx}px)`,
           color: resolvedTitleColor,
-          lineHeight: isMobile ? 1.15 : 1.05,
-          letterSpacing: "-0.01em",
+          lineHeight: isMobile ? 1.02 : 0.96,
+          letterSpacing: 0,
           maxWidth: "100%",
           overflowWrap: "anywhere",
           wordBreak: "normal",
