@@ -9,6 +9,7 @@ import StoryPage from "./pages/StoryPage";
 import FaqPage from "./pages/FaqPage";
 import ProductsPage from "./pages/ProductsPage";
 import JumpStarterPage from "./pages/JumpStarterPage";
+import BathroomOrganizerPage from "./pages/BathroomOrganizerPage";
 import ThankYouPage from "./pages/ThankYouPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import AdminLogin from "./admin/AdminLogin";
@@ -94,6 +95,7 @@ export default function App() {
             <Route path="/categories/:slug" element={<CategoryPage />} />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/products/jump-starter-air-pump" element={<JumpStarterPage />} />
+            <Route path="/products/bathroom-organizer" element={<BathroomOrganizerPage />} />
             <Route path="/products/:slug" element={<ProductPage />} />
             <Route path="/notre-histoire" element={<StoryPage />} />
             <Route path="/faq" element={<FaqPage />} />
