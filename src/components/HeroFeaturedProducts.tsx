@@ -25,7 +25,6 @@ export default function HeroFeaturedProducts({
     cardStyle = "premium",
   } = settings;
   const display = resolveProducts(products, settings);
-  const cols = isMobile ? 1 : display.length === 3 ? 3 : 2;
 
   if (!display.length) {
     return (
@@ -34,6 +33,31 @@ export default function HeroFeaturedProducts({
       </div>
     );
   }
+
+  if (isMobile) {
+    return (
+      <div className="mt-8 -mx-4 px-4">
+        <div className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 scrollbar-hide"
+          style={{ WebkitOverflowScrolling: "touch" }}>
+          {display.map((product, index) => (
+            <div key={product.id} className="snap-start shrink-0" style={{ width: "75vw", maxWidth: 280 }}>
+              <ScrollReveal delay={index * 0.08} y={36}>
+                <ProductCardPremium
+                  product={product}
+                  cardStyle={cardStyle}
+                  mode={mode}
+                  show={{ showImage, showTitle, showPrice, showOldPrice, showRating, showBadge, showCTA }}
+                  ctaText={settings.ctaText}
+                />
+              </ScrollReveal>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const cols = display.length === 3 ? 3 : 2;
 
   return (
     <div

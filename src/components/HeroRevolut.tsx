@@ -251,17 +251,20 @@ function ScrollTransformHero({
   const ctaOp      = useTransform(scrollYProgress, [0.32, 0.52], [1, 0.3]);
   // ── background slow-zoom ───────────────────────────────────────────────────
   const bgScale    = useTransform(scrollYProgress, [0, 1], [1, 1 + 0.07 * iv]);
-  // ── phase 2 (0.40-0.78): cards stagger in from below ─────────────────────
-  const c1o = useTransform(scrollYProgress, [0.40, 0.57], [0, 1]);
-  const c1y = useTransform(scrollYProgress, [0.40, 0.57], [90, 0]);
-  const c2o = useTransform(scrollYProgress, [0.52, 0.67], [0, 1]);
-  const c2y = useTransform(scrollYProgress, [0.52, 0.67], [90, 0]);
-  const c3o = useTransform(scrollYProgress, [0.62, 0.77], [0, 1]);
-  const c3y = useTransform(scrollYProgress, [0.62, 0.77], [90, 0]);
+  // ── phase 2 (0.40-0.87): cards stagger in from below (supports up to 4) ──
+  const c1o = useTransform(scrollYProgress, [0.40, 0.55], [0, 1]);
+  const c1y = useTransform(scrollYProgress, [0.40, 0.55], [90, 0]);
+  const c2o = useTransform(scrollYProgress, [0.50, 0.65], [0, 1]);
+  const c2y = useTransform(scrollYProgress, [0.50, 0.65], [90, 0]);
+  const c3o = useTransform(scrollYProgress, [0.60, 0.75], [0, 1]);
+  const c3y = useTransform(scrollYProgress, [0.60, 0.75], [90, 0]);
+  const c4o = useTransform(scrollYProgress, [0.70, 0.85], [0, 1]);
+  const c4y = useTransform(scrollYProgress, [0.70, 0.85], [90, 0]);
   const cardAnims = [
     { opacity: c1o, y: c1y },
     { opacity: c2o, y: c2y },
     { opacity: c3o, y: c3y },
+    { opacity: c4o, y: c4y },
   ];
 
   const {
@@ -379,9 +382,12 @@ function ScrollTransformHero({
             </div>
           </div>
           {enableHeroProducts && resolvedProds.length > 0 && (
-            <div className={`flex gap-3 sm:gap-4 pb-4 overflow-x-auto ${ctaJustify}`}>
-              {resolvedProds.slice(0, 3).map(p => (
-                <MiniProductCard key={p.id} product={p} cardStyle="revolut" show={showFlags} mode={mode} />
+            <div className={`flex gap-3 sm:gap-4 pb-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide ${ctaJustify}`}
+              style={{ WebkitOverflowScrolling: "touch" }}>
+              {resolvedProds.slice(0, 4).map(p => (
+                <div key={p.id} className="snap-start shrink-0">
+                  <MiniProductCard product={p} cardStyle="revolut" show={showFlags} mode={mode} />
+                </div>
               ))}
             </div>
           )}
@@ -431,9 +437,10 @@ function ScrollTransformHero({
 
           {/* ── Cards: stagger reveal from bottom ── */}
           {enableHeroProducts && resolvedProds.length > 0 && (
-            <div className={`flex gap-3 sm:gap-5 pb-8 ${ctaJustify}`}>
-              {resolvedProds.slice(0, 3).map((p, i) => (
-                <motion.div key={p.id} style={cardAnims[Math.min(i, 2)]}>
+            <div className={`flex gap-3 sm:gap-5 pb-8 overflow-x-auto snap-x snap-mandatory scrollbar-hide ${ctaJustify}`}
+              style={{ WebkitOverflowScrolling: "touch" }}>
+              {resolvedProds.slice(0, 4).map((p, i) => (
+                <motion.div key={p.id} className="snap-start shrink-0" style={cardAnims[Math.min(i, 3)]}>
                   <MiniProductCard product={p} cardStyle="revolut" show={showFlags} mode={mode} />
                 </motion.div>
               ))}
