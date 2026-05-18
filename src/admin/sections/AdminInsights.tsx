@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCms } from "../../cms/store";
+import { fetchInsights, type InsightsTotals } from "../../lib/db";
 import { PageHeader, Section, Field } from "../ui";
-import { ExternalLink, RotateCcw, Eye, MessageCircle, ClipboardList, CheckCircle2, ShieldCheck, Info, Activity } from "lucide-react";
+import { ExternalLink, RotateCcw, RefreshCw, Eye, MessageCircle, ClipboardList, CheckCircle2, ShieldCheck, Info, Activity, Database, AlertTriangle } from "lucide-react";
 
 const TIKTOK_PINK = "#EE1D52";
 
@@ -79,7 +80,33 @@ export default function AdminInsights() {
   const [saved, setSaved] = useState(false);
   const [tiktokSaved, setTiktokSaved] = useState(false);
 
-  const { whatsappClicks, formStarts, formSubmissions, pageViews } = trackingStats;
+  // ── Real-time insights from Supabase (orders table + track_events) ────────
+  const [insights, setInsights] = useState<InsightsTotals | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshedAt, setRefreshedAt] = useState<Date | null>(null);
+
+  async function loadInsights() {
+    setLoading(true);
+    try {
+      const data = await fetchInsights();
+      setInsights(data);
+      setRefreshedAt(new Date());
+    } catch (err) {
+      console.error("[insights] load failed", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadInsights();
+  }, []);
+
+  // Authoritative values: Supabase if available, fallback to local session counters
+  const pageViews       = insights?.pageViews       ?? trackingStats.pageViews;
+  const formStarts      = insights?.formStarts      ?? trackingStats.formStarts;
+  const formSubmissions = insights?.formSubmissions ?? trackingStats.formSubmissions;
+  const whatsappClicks  = insights?.whatsappClicks  ?? trackingStats.whatsappClicks;
 
   function saveClarityId() {
     setBrand({ clarityId: clarityInput.trim() || undefined });
@@ -263,17 +290,58 @@ export default function AdminInsights() {
       {/* Stats grid */}
       <Section
         title="إحصائيات التحويل"
-        description="أرقام محلية مخزنة فالمتصفح — تتحدث في الوقت الفعلي. الـ TT badge كيوريك أنا الحدث متزامن مع TikTok Pixel."
+        description="أرقام حقيقية مستخرجة من قاعدة البيانات — كتجمع من orders + track_events فـ Supabase."
         actions={
-          <button
-            onClick={handleReset}
-            className="flex items-center gap-1.5 rounded-xl border border-line px-3 py-2 text-xs text-body hover:text-red hover:border-red/30 transition-colors"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            Reset
-          </button>
+          <div className="flex items-center gap-2">
+            {refreshedAt && (
+              <span className="text-[10px] text-body/50 hidden sm:inline">
+                آخر تحديث: {refreshedAt.toLocaleTimeString("fr-MA")}
+              </span>
+            )}
+            <button
+              onClick={loadInsights}
+              disabled={loading}
+              className="flex items-center gap-1.5 rounded-xl border border-line px-3 py-2 text-xs text-body hover:text-ink hover:border-ink/30 transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+              Refresh
+            </button>
+            <button
+              onClick={handleReset}
+              className="flex items-center gap-1.5 rounded-xl border border-line px-3 py-2 text-xs text-body hover:text-red hover:border-red/30 transition-colors"
+              title="تصفية الإحصائيات المحلية فالمتصفح فقط — ما كيمسحش من Supabase"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Reset local
+            </button>
+          </div>
         }
       >
+        {/* Source indicator */}
+        {insights && (
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-green-50 border border-green-200 px-3 py-1 text-[11px] font-medium text-green-700">
+            <Database className="h-3 w-3" />
+            <span>
+              Source: Supabase {insights.tableExists ? "(orders + track_events)" : "(orders only)"}
+            </span>
+          </div>
+        )}
+
+        {/* Missing-table warning */}
+        {insights && !insights.tableExists && (
+          <div className="mb-4 flex items-start gap-3 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
+            <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+            <div className="text-sm text-amber-700 space-y-1">
+              <p className="font-semibold">جدول <code className="font-mono text-xs">track_events</code> ماكاينش فـ Supabase</p>
+              <p className="text-xs leading-relaxed">
+                طلبات مؤكدة كتخدم من <code className="font-mono text-[10px]">orders</code> table مباشرة. باش تفعل counters ديال
+                مشاهدات الصفحات / نماذج بدأت / نقرات WhatsApp، نفذ SQL migration اللي فـ commit message
+                ديال هاد التعديل (<code className="font-mono text-[10px]">git log -p</code>) فـ Supabase SQL Editor.
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard icon={Eye} label="مشاهدات الصفحات" value={pageViews} color="bg-blue-50 text-blue-600" tiktokSynced tiktokEvent="PageView / ViewContent" />
           <StatCard icon={MessageCircle} label="نقرات WhatsApp" value={whatsappClicks} color="bg-green-50 text-green-600" />

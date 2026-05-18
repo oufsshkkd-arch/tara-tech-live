@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { useCms } from "../cms/store";
+import { logEvent } from "../lib/db";
 
 declare global {
   interface Window {
@@ -136,6 +137,7 @@ export function useAnalytics() {
   const trackWhatsAppClick = useCallback(() => {
     fire("wa_click");
     tt("ClickButton", { button_text: "whatsapp" });
+    void logEvent("wa_click");
     incrementStat("whatsappClicks");
   }, [incrementStat]);
 
@@ -143,6 +145,11 @@ export function useAnalytics() {
   const trackFormStart = useCallback((product?: ProductPixelData) => {
     fire("form_start");
     tt("AddToCart", pixelPayload(product));
+    void logEvent("form_start", {
+      content_id: product?.contentId ?? null,
+      content_name: product?.contentName ?? null,
+      value: product?.value ?? null,
+    });
     incrementStat("formStarts");
   }, [incrementStat]);
 
@@ -174,6 +181,10 @@ export function useAnalytics() {
       if (product?.contentId) {
         tt("ViewContent", pixelPayload(product));
       }
+      void logEvent("page_view", {
+        path: typeof window !== "undefined" ? window.location.pathname : null,
+        content_id: product?.contentId ?? null,
+      });
       incrementStat("pageViews");
     },
     [incrementStat]

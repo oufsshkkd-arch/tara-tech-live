@@ -84,3 +84,77 @@ export async function saveOrder(order: Record<string, unknown>): Promise<void> {
   const { error } = await supabase.from("orders").upsert({ id, data: order });
   if (error) throw error;
 }
+
+/* ── Analytics events (server-side counters) ────────────────────── */
+
+// Fire-and-forget: never blocks the UX, swallows errors silently.
+// Requires the `track_events` table to exist in Supabase. If missing,
+// the insert fails and is ignored — funnel counts simply stay at 0.
+export async function logEvent(
+  event: string,
+  metadata: Record<string, unknown> = {},
+): Promise<void> {
+  try {
+    await supabase.from("track_events").insert({ event, metadata });
+  } catch {
+    /* ignore — analytics must never break the app */
+  }
+}
+
+export type InsightsTotals = {
+  pageViews: number;
+  formStarts: number;
+  formSubmissions: number;   // total order rows in Supabase
+  whatsappClicks: number;
+  ordersConfirmed: number;   // status === "مؤكد" or similar successful state
+  tableExists: boolean;      // false if `track_events` is missing → guidance UI
+};
+
+async function countEvents(event: string): Promise<{ count: number; exists: boolean }> {
+  const { count, error } = await supabase
+    .from("track_events")
+    .select("id", { count: "exact", head: true })
+    .eq("event", event);
+  if (error) {
+    // Most common: relation "track_events" does not exist
+    return { count: 0, exists: false };
+  }
+  return { count: count ?? 0, exists: true };
+}
+
+async function countOrders(): Promise<{ total: number; confirmed: number }> {
+  try {
+    // Pull data column to inspect status; orders table is typically small
+    const { data, error } = await supabase.from("orders").select("data");
+    if (error) throw error;
+    const rows = data ?? [];
+    let confirmed = 0;
+    for (const r of rows) {
+      const status = (r as { data?: { status?: string } }).data?.status;
+      // Successful = any non-cancelled state. Adjust here if you want strict "مؤكد" only.
+      if (status && status !== "ملغي") confirmed++;
+    }
+    return { total: rows.length, confirmed };
+  } catch {
+    return { total: 0, confirmed: 0 };
+  }
+}
+
+export async function fetchInsights(): Promise<InsightsTotals> {
+  const [pv, fs, wc, orders] = await Promise.all([
+    countEvents("page_view"),
+    countEvents("form_start"),
+    countEvents("wa_click"),
+    countOrders(),
+  ]);
+  // If any track_events query reports the table missing, surface that to UI
+  const tableExists = pv.exists && fs.exists && wc.exists;
+  return {
+    pageViews:       pv.count,
+    formStarts:      fs.count,
+    whatsappClicks:  wc.count,
+    formSubmissions: orders.total,
+    ordersConfirmed: orders.confirmed,
+    tableExists,
+  };
+}
