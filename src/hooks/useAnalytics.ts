@@ -11,6 +11,11 @@ declare global {
       identify?: (params: Record<string, string>) => void;
       [key: string]: unknown;
     };
+    fbq?: (
+      action: "track" | "trackCustom" | "init" | "consent",
+      event: string,
+      params?: Record<string, unknown>,
+    ) => void;
   }
 }
 
@@ -66,7 +71,6 @@ function tt(event: string, params?: Record<string, unknown>) {
     if (typeof window === "undefined") return;
     if (typeof window.ttq?.track === "function") {
       window.ttq.track(event, params);
-      // Debug breadcrumb (visible in DevTools console)
       try { console.debug(`[ttq] track ${event}`, params); } catch { /* ignore */ }
     } else {
       console.warn(`[ttq] not loaded — skipped ${event}`, params);
@@ -74,6 +78,34 @@ function tt(event: string, params?: Record<string, unknown>) {
   } catch (err) {
     console.error(`[ttq] threw on ${event}`, err);
   }
+}
+
+// Facebook Pixel safe-fire (mirrors tt() — the fbevents.js IIFE also
+// installs fbq as a queue-stub immediately, so calls before SDK load
+// are enqueued and processed once it arrives).
+function fb(event: string, params?: Record<string, unknown>) {
+  try {
+    if (typeof window === "undefined") return;
+    if (typeof window.fbq === "function") {
+      window.fbq("track", event, params);
+      try { console.debug(`[fbq] track ${event}`, params); } catch { /* ignore */ }
+    } else {
+      console.warn(`[fbq] not loaded — skipped ${event}`, params);
+    }
+  } catch (err) {
+    console.error(`[fbq] threw on ${event}`, err);
+  }
+}
+
+// Build the Facebook Pixel payload from our shared ProductPixelData shape.
+function fbProductPayload(p: ProductPixelData): Record<string, unknown> {
+  return {
+    content_type: "product",
+    content_ids: p.contentId != null ? [String(p.contentId)] : [],
+    content_name: p.contentName,
+    value: p.value,
+    currency: CURRENCY,
+  };
 }
 
 function pixelPayload(p?: ProductPixelData) {
@@ -137,6 +169,7 @@ export function useAnalytics() {
   const trackWhatsAppClick = useCallback(() => {
     fire("wa_click");
     tt("ClickButton", { button_text: "whatsapp" });
+    fb("Contact", { source: "whatsapp" });
     void logEvent("wa_click");
     incrementStat("whatsappClicks");
   }, [incrementStat]);
@@ -145,6 +178,7 @@ export function useAnalytics() {
   const trackFormStart = useCallback((product?: ProductPixelData) => {
     fire("form_start");
     tt("AddToCart", pixelPayload(product));
+    fb("AddToCart", product ? fbProductPayload(product) : undefined);
     void logEvent("form_start", {
       content_id: product?.contentId ?? null,
       content_name: product?.contentName ?? null,
@@ -157,19 +191,21 @@ export function useAnalytics() {
     fire("form_abandon");
   }, []);
 
-  // Funnel step 3: CompletePayment — order successfully sent
-  // Async: hashes phone/email for Advanced Matching, then identifies + tracks.
-  // Caller does NOT need to await (fire-and-forget is fine).
+  // Funnel step 3: Purchase — order successfully sent (TikTok CompletePayment
+  // + Facebook Purchase). Async: hashes phone/email for TikTok Advanced
+  // Matching, then identifies + tracks. Caller does NOT need to await.
   const trackOrderSuccess = useCallback(
     async (productName: string, product?: ProductPixelData) => {
       fire("order_success", "product", productName);
       incrementStat("formSubmissions");
       const merged: ProductPixelData = { contentName: productName, ...product };
-      // 1. Identify (advanced matching) BEFORE the event
+      // 1. TikTok identify (advanced matching) BEFORE the event
       await ttIdentify(merged.phone, merged.email);
-      // 2. Build payload with hashed identifiers + dispatch track
-      const payload = await pixelPayloadWithIdentity(merged);
-      tt("CompletePayment", payload);
+      // 2. TikTok CompletePayment with hashed identifiers in payload
+      const ttPayload = await pixelPayloadWithIdentity(merged);
+      tt("CompletePayment", ttPayload);
+      // 3. Facebook Purchase — fires in parallel with same conversion data
+      fb("Purchase", fbProductPayload(merged));
     },
     [incrementStat]
   );
@@ -180,6 +216,7 @@ export function useAnalytics() {
       fire("page_view");
       if (product?.contentId) {
         tt("ViewContent", pixelPayload(product));
+        fb("ViewContent", fbProductPayload(product));
       }
       void logEvent("page_view", {
         path: typeof window !== "undefined" ? window.location.pathname : null,

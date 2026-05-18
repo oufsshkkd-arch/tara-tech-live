@@ -53,6 +53,7 @@ export const seed: CmsState = {
     logoTagline: "Tech & Style",
     clarityId: "wkekl1zk1c",
     tiktokPixelId: "D81INH3C77U1Q23A93SG",
+    facebookPixelId: "4325181661059444",
   },
   nav: {
     labels: {

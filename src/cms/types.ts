@@ -103,6 +103,7 @@ export type BrandSettings = {
   brandLine: string;
   clarityId?: string;
   tiktokPixelId?: string;
+  facebookPixelId?: string;
 };
 
 export type SectionTheme = {

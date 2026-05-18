@@ -63,29 +63,13 @@ export default function ThankYouPage() {
         const priceNum = parseFloat(data.price || "0") || 0;
         const qtyNum   = parseInt(data.quantity || "1", 10) || 1;
         const totalValue = priceNum * qtyNum;
-
-        // ── TikTok Pixel: CompletePayment ─────────────────────────────────────
-        // Fire immediately on thank-you page reach. The Google Sheet webhook
-        // above is the source-of-truth order record; the Supabase write below
-        // is a parallel admin-dashboard task that must NOT gate the pixel.
-        // content_id (slug) + Advanced Matching (hashed phone/email) included.
         const contentId = data.product_slug || data.product_id || data.product_name;
-        trackOrderSuccess(data.product_name || "unknown", {
-          contentId,
-          contentName: data.product_name,
-          value: totalValue,
-          phone: data.phone,
-          email: data.email,
-        }).catch((err) => console.error("[ttq] CompletePayment threw", err));
-        console.info("[ttq] CompletePayment dispatched", {
-          content_id: contentId,
-          value: totalValue,
-          currency: "MAD",
-          has_phone: !!data.phone,
-          has_email: !!data.email,
-        });
 
-        // Persist to Supabase orders table for admin dashboard (background)
+        // ── Persist + fire conversion pixels ─────────────────────────────────
+        // Purchase events (TikTok CompletePayment + Facebook Purchase) only
+        // fire inside saveOrder().then() so a Supabase outage cannot inflate
+        // ad-platform conversions. The Google Sheet webhook above is the
+        // independent order-of-record (fire-and-forget).
         saveOrder({
           id: Date.now().toString(),
           date: data.date || "",
@@ -98,10 +82,29 @@ export default function ThankYouPage() {
           quantity: qtyNum,
           status: "جديد",
           source: data.source || "direct",
-        }).catch((err) => {
-          // Pixel already fired — log so admin can debug Supabase issue separately
-          console.error("[order] Supabase save failed (pixel already fired)", err);
-        });
+        })
+          .then(() => {
+            trackOrderSuccess(data.product_name || "unknown", {
+              contentId,
+              contentName: data.product_name,
+              value: totalValue,
+              phone: data.phone,
+              email: data.email,
+            }).catch((err) => console.error("[pixels] dispatch threw", err));
+            console.info("[pixels] Purchase dispatched after Supabase save", {
+              content_id: contentId,
+              value: totalValue,
+              currency: "MAD",
+              has_phone: !!data.phone,
+              has_email: !!data.email,
+            });
+          })
+          .catch((err) => {
+            // Supabase write failed → intentionally NOT firing pixels (avoids
+            // inflated conversion counts). Order is still captured in the
+            // Google Sheet via the webhook above.
+            console.error("[order] Supabase save failed — pixels skipped", err);
+          });
       }
     } catch { /* ignore */ }
   }, []);
