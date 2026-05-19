@@ -31,20 +31,17 @@ export type ProductPixelData = {
 const CURRENCY = "MAD";
 
 /**
- * Facebook Test Events code — TEMPORARY validation flag.
+ * Facebook Test Events code — leave EMPTY in production.
  *
- * When set to a non-empty string, every fbq.track() call below appends
- * `test_event_code` to the params, routing events into Events Manager →
- * Test Events for live debugging.
+ * Setting this to a non-empty string (e.g. "TEST90159") routes all
+ * pixel events into Events Manager → Test Events instead of counting
+ * them as real conversions. Use only for funnel validation.
  *
- * REMOVE (set to "") before relying on production conversion data —
- * pixel events with test_event_code are treated as test events, not real
- * conversions. The base PageView in index.html has its own copy that
- * also needs to be removed at the same time.
- *
- * Code source: business.facebook.com/events_manager → Pixel → Test events
+ * The base PageView in index.html must match this setting — if you
+ * re-enable testing, also restore the { test_event_code } 2nd arg on
+ * the fbq('track', 'PageView', ...) call there.
  */
-const FB_TEST_EVENT_CODE = "TEST90159";
+const FB_TEST_EVENT_CODE = "";
 
 // ── SHA-256 helper (Web Crypto) — used for TikTok Advanced Matching ─────────
 async function sha256Hex(input: string): Promise<string> {
