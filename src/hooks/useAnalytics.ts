@@ -30,6 +30,22 @@ export type ProductPixelData = {
 
 const CURRENCY = "MAD";
 
+/**
+ * Facebook Test Events code — TEMPORARY validation flag.
+ *
+ * When set to a non-empty string, every fbq.track() call below appends
+ * `test_event_code` to the params, routing events into Events Manager →
+ * Test Events for live debugging.
+ *
+ * REMOVE (set to "") before relying on production conversion data —
+ * pixel events with test_event_code are treated as test events, not real
+ * conversions. The base PageView in index.html has its own copy that
+ * also needs to be removed at the same time.
+ *
+ * Code source: business.facebook.com/events_manager → Pixel → Test events
+ */
+const FB_TEST_EVENT_CODE = "TEST90159";
+
 // ── SHA-256 helper (Web Crypto) — used for TikTok Advanced Matching ─────────
 async function sha256Hex(input: string): Promise<string> {
   if (!input || typeof crypto === "undefined" || !crypto.subtle) return "";
@@ -87,8 +103,12 @@ function fb(event: string, params?: Record<string, unknown>) {
   try {
     if (typeof window === "undefined") return;
     if (typeof window.fbq === "function") {
-      window.fbq("track", event, params);
-      try { console.debug(`[fbq] track ${event}`, params); } catch { /* ignore */ }
+      // Inject test_event_code when the temporary validation flag is set
+      const finalParams = FB_TEST_EVENT_CODE
+        ? { ...(params ?? {}), test_event_code: FB_TEST_EVENT_CODE }
+        : params;
+      window.fbq("track", event, finalParams);
+      try { console.debug(`[fbq] track ${event}`, finalParams); } catch { /* ignore */ }
     } else {
       console.warn(`[fbq] not loaded — skipped ${event}`, params);
     }
