@@ -6,6 +6,7 @@ import { ExternalLink, RotateCcw, RefreshCw, Eye, MessageCircle, ClipboardList, 
 
 const TIKTOK_PINK = "#EE1D52";
 const META_BLUE   = "#1877F2";
+const GOOGLE_BLUE = "#4285F4";
 
 // TikTok mini-mark — used as a small chip on synced stat cards
 function TiktokMark({ size = 12 }: { size?: number }) {
@@ -25,6 +26,15 @@ function MetaMark({ size = 12 }: { size?: number }) {
   );
 }
 
+// Google "G" mini-mark — pairs with TT + FB on triple-tracked cards
+function GoogleMark({ size = 12 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden fill="currentColor">
+      <path d="M21.35 11.1H12.18V13.83H18.69C18.36 17.64 15.19 19.27 12.19 19.27C8.36 19.27 5 16.25 5 12C5 7.9 8.2 4.73 12.2 4.73C15.29 4.73 17.1 6.7 17.1 6.7L19 4.72C19 4.72 16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12C2.03 17.05 6.16 22 12.25 22C17.6 22 21.5 18.33 21.5 12.91C21.5 11.76 21.35 11.1 21.35 11.1Z" />
+    </svg>
+  );
+}
+
 function StatCard({
   icon: Icon,
   label,
@@ -34,6 +44,8 @@ function StatCard({
   tiktokEvent,
   fbSynced = false,
   fbEvent,
+  googleSynced = false,
+  googleEvent,
 }: {
   icon: React.ElementType;
   label: string;
@@ -43,10 +55,12 @@ function StatCard({
   tiktokEvent?: string;
   fbSynced?: boolean;
   fbEvent?: string;
+  googleSynced?: boolean;
+  googleEvent?: string;
 }) {
   return (
     <div className="card relative p-5 flex items-center gap-4">
-      {(tiktokSynced || fbSynced) && (
+      {(tiktokSynced || fbSynced || googleSynced) && (
         <div className="absolute top-2 left-2 flex items-center gap-1">
           {tiktokSynced && (
             <span
@@ -66,6 +80,16 @@ function StatCard({
             >
               <MetaMark size={9} />
               FB
+            </span>
+          )}
+          {googleSynced && (
+            <span
+              className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[9px] font-bold leading-none text-white"
+              style={{ backgroundColor: GOOGLE_BLUE }}
+              title={`Google: ${googleEvent}`}
+            >
+              <GoogleMark size={9} />
+              G
             </span>
           )}
         </div>
@@ -458,10 +482,10 @@ export default function AdminInsights() {
         )}
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard icon={Eye} label="مشاهدات الصفحات" value={pageViews} color="bg-blue-50 text-blue-600" tiktokSynced tiktokEvent="ViewContent" fbSynced fbEvent="ViewContent" />
-          <StatCard icon={MessageCircle} label="نقرات WhatsApp" value={whatsappClicks} color="bg-green-50 text-green-600" tiktokSynced tiktokEvent="ClickButton" fbSynced fbEvent="Contact" />
-          <StatCard icon={ClipboardList} label="نماذج بدأت" value={formStarts} color="bg-amber-50 text-amber-600" tiktokSynced tiktokEvent="AddToCart" fbSynced fbEvent="AddToCart" />
-          <StatCard icon={CheckCircle2} label="طلبات مؤكدة" value={formSubmissions} color="bg-ink/8 text-ink" tiktokSynced tiktokEvent="CompletePayment" fbSynced fbEvent="Purchase" />
+          <StatCard icon={Eye} label="مشاهدات الصفحات" value={pageViews} color="bg-blue-50 text-blue-600" tiktokSynced tiktokEvent="ViewContent" fbSynced fbEvent="ViewContent" googleSynced googleEvent="page_view" />
+          <StatCard icon={MessageCircle} label="نقرات WhatsApp" value={whatsappClicks} color="bg-green-50 text-green-600" tiktokSynced tiktokEvent="ClickButton" fbSynced fbEvent="Contact" googleSynced googleEvent="contact" />
+          <StatCard icon={ClipboardList} label="نماذج بدأت" value={formStarts} color="bg-amber-50 text-amber-600" tiktokSynced tiktokEvent="AddToCart" fbSynced fbEvent="AddToCart" googleSynced googleEvent="begin_checkout" />
+          <StatCard icon={CheckCircle2} label="طلبات مؤكدة" value={formSubmissions} color="bg-ink/8 text-ink" tiktokSynced tiktokEvent="CompletePayment" fbSynced fbEvent="Purchase" googleSynced googleEvent="purchase" />
         </div>
       </Section>
 

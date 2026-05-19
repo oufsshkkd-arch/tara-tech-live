@@ -64,14 +64,15 @@ export default function ThankYouPage() {
         const qtyNum   = parseInt(data.quantity || "1", 10) || 1;
         const totalValue = priceNum * qtyNum;
         const contentId = data.product_slug || data.product_id || data.product_name;
+        const orderId   = Date.now().toString();
 
         // ── Persist + fire conversion pixels ─────────────────────────────────
-        // Purchase events (TikTok CompletePayment + Facebook Purchase) only
-        // fire inside saveOrder().then() so a Supabase outage cannot inflate
-        // ad-platform conversions. The Google Sheet webhook above is the
-        // independent order-of-record (fire-and-forget).
+        // Purchase events (TikTok CompletePayment + Facebook Purchase + GA4
+        // purchase via GTM dataLayer) only fire inside saveOrder().then() so
+        // a Supabase outage cannot inflate ad-platform conversions. The
+        // Google Sheet webhook above is the independent order-of-record.
         saveOrder({
-          id: Date.now().toString(),
+          id: orderId,
           date: data.date || "",
           time: data.time || "",
           full_name: data.full_name || "",
@@ -90,8 +91,10 @@ export default function ThankYouPage() {
               value: totalValue,
               phone: data.phone,
               email: data.email,
+              orderId,
             }).catch((err) => console.error("[pixels] dispatch threw", err));
             console.info("[pixels] Purchase dispatched after Supabase save", {
+              transaction_id: orderId,
               content_id: contentId,
               value: totalValue,
               currency: "MAD",

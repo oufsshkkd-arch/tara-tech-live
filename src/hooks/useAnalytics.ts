@@ -16,6 +16,7 @@ declare global {
       event: string,
       params?: Record<string, unknown>,
     ) => void;
+    dataLayer?: Record<string, unknown>[];
   }
 }
 
@@ -26,6 +27,8 @@ export type ProductPixelData = {
   // Advanced Matching — raw values, hashed (SHA-256) before sending
   phone?: string;
   email?: string;
+  // GA4 ecommerce transaction id (purchase only)
+  orderId?: string;
 };
 
 const CURRENCY = "MAD";
@@ -125,6 +128,37 @@ function fbProductPayload(p: ProductPixelData): Record<string, unknown> {
   };
 }
 
+// GTM dataLayer push — safe-fire, mirrors tt() / fb() pattern.
+// GTM-KV3FNM3N container is loaded in index.html; the IIFE there creates
+// window.dataLayer immediately, so pushes before tags hydrate are queued.
+function gtm(payload: Record<string, unknown>) {
+  try {
+    if (typeof window === "undefined") return;
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push(payload);
+    try { console.debug("[gtm] push", payload); } catch { /* ignore */ }
+  } catch (err) {
+    console.error("[gtm] push threw", err);
+  }
+}
+
+// GA4 ecommerce convention: clear ecommerce before each push so prior
+// item data doesn't bleed into the next event.
+function gtmEcommerce(event: string, ecommerce: Record<string, unknown>) {
+  gtm({ ecommerce: null });
+  gtm({ event, ecommerce });
+}
+
+// Build a single GA4 item from our shared ProductPixelData shape.
+function gtmItem(p: ProductPixelData): Record<string, unknown> {
+  return {
+    item_id: p.contentId != null ? String(p.contentId) : undefined,
+    item_name: p.contentName,
+    price: p.value,
+    quantity: 1,
+  };
+}
+
 function pixelPayload(p?: ProductPixelData) {
   if (!p) return undefined;
   return {
@@ -196,6 +230,15 @@ export function useAnalytics() {
     fire("form_start");
     tt("AddToCart", pixelPayload(product));
     fb("AddToCart", product ? fbProductPayload(product) : undefined);
+    if (product) {
+      gtmEcommerce("add_to_cart", {
+        currency: CURRENCY,
+        value: product.value,
+        items: [gtmItem(product)],
+      });
+    } else {
+      gtm({ event: "add_to_cart" });
+    }
     void logEvent("form_start", {
       content_id: product?.contentId ?? null,
       content_name: product?.contentName ?? null,
@@ -209,8 +252,9 @@ export function useAnalytics() {
   }, []);
 
   // Funnel step 3: Purchase — order successfully sent (TikTok CompletePayment
-  // + Facebook Purchase). Async: hashes phone/email for TikTok Advanced
-  // Matching, then identifies + tracks. Caller does NOT need to await.
+  // + Facebook Purchase + GA4 purchase via GTM dataLayer). Async: hashes
+  // phone/email for TikTok Advanced Matching, then identifies + tracks.
+  // Caller does NOT need to await.
   const trackOrderSuccess = useCallback(
     async (productName: string, product?: ProductPixelData) => {
       fire("order_success", "product", productName);
@@ -223,17 +267,32 @@ export function useAnalytics() {
       tt("CompletePayment", ttPayload);
       // 3. Facebook Purchase — fires in parallel with same conversion data
       fb("Purchase", fbProductPayload(merged));
+      // 4. GA4 purchase via GTM dataLayer — same gating, same value/currency
+      gtmEcommerce("purchase", {
+        transaction_id: merged.orderId,
+        value: merged.value,
+        currency: CURRENCY,
+        items: [gtmItem(merged)],
+      });
     },
     [incrementStat]
   );
 
-  // Funnel step 1: ViewContent — when product is provided. Plain page_view otherwise.
+  // Funnel step 1: ViewContent / view_item — when product is provided. Plain page_view otherwise.
   const trackPageView = useCallback(
     (product?: ProductPixelData) => {
       fire("page_view");
       if (product?.contentId) {
         tt("ViewContent", pixelPayload(product));
         fb("ViewContent", fbProductPayload(product));
+        gtmEcommerce("view_item", {
+          currency: CURRENCY,
+          value: product.value,
+          items: [gtmItem(product)],
+        });
+      } else {
+        // Generic page_view (non-product pages) — keeps GA4 page tracking active
+        gtm({ event: "page_view", page_path: typeof window !== "undefined" ? window.location.pathname : "" });
       }
       void logEvent("page_view", {
         path: typeof window !== "undefined" ? window.location.pathname : null,
