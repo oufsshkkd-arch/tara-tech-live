@@ -170,9 +170,11 @@ function pixelPayload(p?: ProductPixelData) {
   };
 }
 
-// Async variant: same as pixelPayload + hashed phone_number/email for
-// TikTok Advanced Matching. Used by CompletePayment (purchase event).
-async function pixelPayloadWithIdentity(p: ProductPixelData): Promise<Record<string, unknown>> {
+// Same as pixelPayload + plain phone_number/email for TikTok Advanced
+// Matching. Used by CompletePayment (purchase event). TikTok hashes
+// these server-side; Pixel Helper detects them as Advanced Matching
+// fields when sent in plain form.
+function pixelPayloadWithIdentity(p: ProductPixelData): Record<string, unknown> {
   const base: Record<string, unknown> = {
     content_type: "product",
     content_id: p.contentId != null ? String(p.contentId) : undefined,
@@ -182,11 +184,11 @@ async function pixelPayloadWithIdentity(p: ProductPixelData): Promise<Record<str
   };
   if (p.phone) {
     const norm = normalizePhone(p.phone);
-    if (norm) base.phone_number = await sha256Hex(norm);
+    if (norm) base.phone_number = norm;
   }
   if (p.email) {
     const norm = normalizeEmail(p.email);
-    if (norm) base.email = await sha256Hex(norm);
+    if (norm) base.email = norm;
   }
   return base;
 }
@@ -260,10 +262,12 @@ export function useAnalytics() {
       fire("order_success", "product", productName);
       incrementStat("formSubmissions");
       const merged: ProductPixelData = { contentName: productName, ...product };
-      // 1. TikTok identify (advanced matching) BEFORE the event
+      // 1. TikTok identify (advanced matching) BEFORE the event — hashed
       await ttIdentify(merged.phone, merged.email);
-      // 2. TikTok CompletePayment with hashed identifiers in payload
-      const ttPayload = await pixelPayloadWithIdentity(merged);
+      // 2. TikTok CompletePayment with plain phone_number/email in payload
+      // (TikTok hashes server-side; Pixel Helper requires the plain form to
+      // detect Advanced Matching). content_id is the product slug from CMS.
+      const ttPayload = pixelPayloadWithIdentity(merged);
       tt("CompletePayment", ttPayload);
       // 3. Facebook Purchase — fires in parallel with same conversion data
       fb("Purchase", fbProductPayload(merged));

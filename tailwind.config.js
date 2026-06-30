@@ -4,13 +4,21 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: "#FAF8F5",
+        bg: "#F8F9FA",
         ink: "#111111",
         body: "#5F6368",
         line: "#EAEAEA",
         red: {
-          DEFAULT: "#B42318",
-          dark: "#8E1F1F",
+          DEFAULT: "#0369A1",
+          dark: "#0284C7",
+        },
+        brand: {
+          DEFAULT: "#0369A1",
+          dark: "#0284C7",
+        },
+        cta: {
+          DEFAULT: "#10B981",
+          dark: "#059669",
         },
       },
       fontFamily: {

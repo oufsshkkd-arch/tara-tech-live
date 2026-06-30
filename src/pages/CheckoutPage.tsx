@@ -53,6 +53,8 @@ export default function CheckoutPage() {
       date: now.toLocaleDateString("fr-MA"),
       time: now.toLocaleTimeString("fr-MA"),
       product_name: items.map(i => `${i.title} x${i.quantity}`).join(" | "),
+      product_slug: items.map(i => i.slug).join(" | "),
+      product_id:   items.map(i => i.id).join(" | "),
       price: String(total),
       quantity: String(count),
       full_name: form.full_name.trim(),

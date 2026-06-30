@@ -4,6 +4,11 @@
 
 :root {
   color-scheme: light;
+  --color-base: #F8F9FA;
+  --color-brand: #0369A1;
+  --color-brand-dark: #0284C7;
+  --color-cta: #10B981;
+  --color-cta-dark: #059669;
 }
 
 html,
@@ -13,7 +18,7 @@ body,
 }
 
 body {
-  background: #faf8f5;
+  background: var(--color-base);
   color: #111111;
   font-family: "Cairo", "Tajawal", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     Roboto, sans-serif;
@@ -29,7 +34,7 @@ body {
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-red px-6 py-3 text-sm font-medium tracking-wide text-white shadow-soft transition-all duration-200 hover:bg-red-dark hover:-translate-y-0.5 hover:shadow-lift active:translate-y-0;
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-cta px-6 py-3 text-sm font-medium tracking-wide text-white shadow-soft transition-all duration-200 hover:bg-cta-dark hover:-translate-y-0.5 hover:shadow-lift active:translate-y-0;
   }
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 rounded-full border border-line bg-white/60 backdrop-blur px-6 py-3 text-sm font-medium tracking-wide text-ink transition-all duration-200 hover:bg-white hover:border-ink/20;
@@ -67,11 +72,11 @@ body {
 
 /* Mesh gradient background — for hero */
 .mesh-bg {
-  background-color: #faf8f5;
+  background-color: var(--color-base);
   background-image:
-    radial-gradient(at 20% 20%, rgba(180, 35, 24, 0.18) 0px, transparent 50%),
+    radial-gradient(at 20% 20%, rgba(3, 105, 161, 0.18) 0px, transparent 50%),
     radial-gradient(at 80% 0%, rgba(17, 17, 17, 0.12) 0px, transparent 50%),
-    radial-gradient(at 0% 80%, rgba(180, 35, 24, 0.08) 0px, transparent 55%),
+    radial-gradient(at 0% 80%, rgba(3, 105, 161, 0.08) 0px, transparent 55%),
     radial-gradient(at 80% 90%, rgba(17, 17, 17, 0.10) 0px, transparent 50%);
   background-size: 200% 200%;
   animation: meshmove 18s ease-in-out infinite alternate;
@@ -142,12 +147,12 @@ body {
   inset: -50%;
   background: linear-gradient(
     120deg,
-    rgba(250,248,245,0.0) 0%,
-    rgba(180,35,24,0.04) 20%,
-    rgba(250,248,245,0.0) 40%,
+    rgba(248,249,250,0.0) 0%,
+    rgba(3,105,161,0.04) 20%,
+    rgba(248,249,250,0.0) 40%,
     rgba(17,17,17,0.03) 60%,
-    rgba(250,248,245,0.0) 80%,
-    rgba(180,35,24,0.03) 100%
+    rgba(248,249,250,0.0) 80%,
+    rgba(3,105,161,0.03) 100%
   );
   background-size: 300% 300%;
   animation: aurora 12s ease-in-out infinite alternate;
@@ -170,9 +175,9 @@ body {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 20% 80%, rgba(180,35,24,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 80%, rgba(3,105,161,0.06) 0%, transparent 60%),
     radial-gradient(ellipse at 80% 20%, rgba(17,17,17,0.05) 0%, transparent 60%),
-    radial-gradient(ellipse at 50% 50%, rgba(180,35,24,0.03) 0%, transparent 70%);
+    radial-gradient(ellipse at 50% 50%, rgba(3,105,161,0.03) 0%, transparent 70%);
   background-size: 200% 200%;
   animation: wave 16s ease-in-out infinite alternate;
   pointer-events: none;

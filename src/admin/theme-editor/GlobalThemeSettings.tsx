@@ -10,9 +10,9 @@ const presets: Record<
 > = {
   default: {
     colorPreset: "default",
-    primaryColor: "#111111",
-    secondaryColor: "#B42318",
-    backgroundColor: "#FAF8F5",
+    primaryColor: "#0369A1",
+    secondaryColor: "#10B981",
+    backgroundColor: "#F8F9FA",
     textColor: "#111111",
   },
   minimal: {
