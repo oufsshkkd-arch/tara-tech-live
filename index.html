@@ -9,56 +9,55 @@
       content="Tara Tech — تكنولوجيا مفيدة، مختارة بذوق. منتجات tech موثوقة، أنيقة ومفكر فيها باش تسهل عليك الحياة اليومية."
     />
     <title>Tara Tech — تكنولوجيا مفيدة، مختارة بذوق</title>
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-KV3FNM3N');</script>
-    <!-- End Google Tag Manager -->
-    <!-- Microsoft Clarity -->
-    <script type="text/javascript">
-      (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-      })(window, document, "clarity", "script", "wkekl1zk1c");
-    </script>
-    <!-- TikTok Pixel -->
+    <!-- Tracking Pixels: deferred to avoid blocking LCP -->
     <script>
-      !function (w, d, t) {
-        w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(
-        var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script")
-        ;n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
-        ttq.load('D81INH3C77U1Q23A93SG');
-        ttq.page();
-      }(window, document, 'ttq');
+      // Stub global queues synchronously so event calls before load are safe
+      window.dataLayer=window.dataLayer||[];
+      window.ttq=window.ttq||[];window.ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"];window.ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var _i=0;_i<window.ttq.methods.length;_i++)window.ttq.setAndDefer(window.ttq,window.ttq.methods[_i]);window.TiktokAnalyticsObject='ttq';
+      window.fbq=window.fbq||function(){(window.fbq.q=window.fbq.q||[]).push(arguments)};window._fbq=window.fbq;window.fbq.push=window.fbq;window.fbq.loaded=!0;window.fbq.version='2.0';window.fbq.queue=[];
     </script>
-    <!-- Facebook Pixel -->
     <script>
-      !function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s)}(window, document,'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', '4325181661059444');
-      fbq('track', 'PageView');
+      // Load all tracking after first paint to keep LCP clean
+      function _loadTracking(){
+        // GTM
+        (function(w,d,s,l,i){w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KV3FNM3N');
+        // Clarity
+        (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","wkekl1zk1c");
+        // TikTok
+        ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e};ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{};ttq._i[e]=[];ttq._i[e]._u=r;ttq._t=ttq._t||{};ttq._t[e]=+new Date;ttq._o=ttq._o||{};ttq._o[e]=n||{};n=document.createElement("script");n.type="text/javascript";n.async=!0;n.src=r+"?sdkid="+e+"&lib=ttq";e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
+        ttq.load('D81INH3C77U1Q23A93SG');ttq.page();
+        // Facebook
+        var t=document.createElement('script');t.async=!0;t.src='https://connect.facebook.net/en_US/fbevents.js';document.head.appendChild(t);
+        fbq('init','4325181661059444');fbq('track','PageView');
+      }
+      if('requestIdleCallback' in window){requestIdleCallback(_loadTracking,{timeout:2000})}else{setTimeout(_loadTracking,2000)}
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="dns-prefetch" href="https://supabase.co" />
+    <link rel="dns-prefetch" href="https://cxsrhqtwdlgrtgwdugcl.supabase.co" />
     <link rel="dns-prefetch" href="https://www.clarity.ms" />
     <link rel="dns-prefetch" href="https://analytics.tiktok.com" />
     <link rel="dns-prefetch" href="https://connect.facebook.net" />
     <link rel="dns-prefetch" href="https://www.facebook.com" />
     <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+    <!-- Google Fonts: non-render-blocking preload with swap fallback -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700;900&family=Inter:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&family=Tajawal:wght@300;400;500;700;800;900&display=swap"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700;900&family=Inter:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&family=Tajawal:wght@300;400;500;700;800;900&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700;900&family=Inter:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&family=Tajawal:wght@300;400;500;700;800;900&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
     <!-- Supabase init loader — removed by App.tsx once cms_state resolves -->
     <style>
       #init-loader {

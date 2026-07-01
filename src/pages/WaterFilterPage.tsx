@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -9,14 +9,30 @@ import {
 import OrderFormModal from "../components/OrderFormModal";
 import { useCart } from "../store/cart";
 
-// ─── Product images ───
-const IMG_HERO      = "/images/water-filter/hero.png";
-const IMG_SOLUTION  = "/images/water-filter/solution.png";
-const IMG_MECHANISM = "/images/water-filter/mechanism.png";
-const IMG_PACKAGE   = "/images/water-filter/package.png";
+// ─── Product images (WebP next-gen + PNG fallback) ───
+const IMG_HERO      = "/images/water-filter/hero.webp";
+const IMG_HERO_SM   = "/images/water-filter/hero-sm.webp";
+const IMG_HERO_PNG  = "/images/water-filter/hero.png";
 
-// Hero gallery
-const IMGS = [IMG_HERO, IMG_SOLUTION, IMG_MECHANISM, IMG_PACKAGE];
+const IMG_SOLUTION      = "/images/water-filter/solution.webp";
+const IMG_SOLUTION_SM   = "/images/water-filter/solution-sm.webp";
+const IMG_SOLUTION_PNG  = "/images/water-filter/solution.png";
+
+const IMG_MECHANISM     = "/images/water-filter/mechanism.webp";
+const IMG_MECHANISM_SM  = "/images/water-filter/mechanism-sm.webp";
+const IMG_MECHANISM_PNG = "/images/water-filter/mechanism.png";
+
+const IMG_PACKAGE       = "/images/water-filter/package.webp";
+const IMG_PACKAGE_SM    = "/images/water-filter/package-sm.webp";
+const IMG_PACKAGE_PNG   = "/images/water-filter/package.png";
+
+// Hero gallery — each entry: [webp, webp-small, png-fallback]
+const IMGS: [string, string, string][] = [
+  [IMG_HERO, IMG_HERO_SM, IMG_HERO_PNG],
+  [IMG_SOLUTION, IMG_SOLUTION_SM, IMG_SOLUTION_PNG],
+  [IMG_MECHANISM, IMG_MECHANISM_SM, IMG_MECHANISM_PNG],
+  [IMG_PACKAGE, IMG_PACKAGE_SM, IMG_PACKAGE_PNG],
+];
 
 const PROMO = [
   { text: "الدفع عند الاستلام", accent: false },
@@ -109,6 +125,18 @@ export default function WaterFilterPage() {
   const [selectedOffer, setSelectedOffer] = useState(OFFERS[1]);
   const { addItem, openCart } = useCart();
 
+  // Preload the LCP hero image as early as possible
+  useEffect(() => {
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "image";
+    link.type = "image/webp";
+    link.href = IMG_HERO;
+    link.setAttribute("fetchpriority", "high");
+    document.head.appendChild(link);
+    return () => { document.head.removeChild(link); };
+  }, []);
+
   function addToCartDirect(offer: typeof OFFERS[0]) {
     addItem({
       id: `p-wf1-${offer.id}`,
@@ -175,18 +203,30 @@ export default function WaterFilterPage() {
             >
               <div className="relative group">
                 <div className="aspect-square overflow-hidden rounded-3xl border border-line bg-white shadow-lift">
-                  <img
-                    src={IMGS[activeImg]}
-                    alt="فلتر ماء الصنبور الذكي"
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                  />
+                  <picture>
+                    <source
+                      type="image/webp"
+                      srcSet={`${IMGS[activeImg][1]} 400w, ${IMGS[activeImg][0]} 800w`}
+                      sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 550px"
+                    />
+                    <img
+                      src={IMGS[activeImg][2]}
+                      alt="فلتر ماء الصنبور الذكي"
+                      width={800}
+                      height={800}
+                      fetchPriority={activeImg === 0 ? "high" : "auto"}
+                      loading={activeImg === 0 ? "eager" : "lazy"}
+                      decoding={activeImg === 0 ? "sync" : "async"}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    />
+                  </picture>
                 </div>
                 <div className="absolute -right-3 -top-3 rounded-full bg-brand px-3 py-1.5 text-[11px] font-bold text-white shadow-lift">
                   Level 7 Purification
                 </div>
               </div>
               <div className="mt-3 grid grid-cols-4 gap-2">
-                {IMGS.map((img, i) => (
+                {IMGS.map((imgSet, i) => (
                   <button
                     key={i}
                     onClick={() => setActiveImg(i)}
@@ -194,7 +234,7 @@ export default function WaterFilterPage() {
                       activeImg === i ? "border-brand ring-2 ring-brand/10 shadow-sm" : "border-line hover:border-brand/30"
                     }`}
                   >
-                    <img src={img} alt="" className="h-full w-full object-cover" />
+                    <img src={imgSet[1]} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -345,11 +385,22 @@ export default function WaterFilterPage() {
               className="group relative"
             >
               <div className="aspect-square overflow-hidden rounded-3xl border border-line bg-white shadow-lift">
-                <img
-                  src={IMG_SOLUTION}
-                  alt="حل فلتر الماء الذكي"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                />
+                <picture>
+                  <source
+                    type="image/webp"
+                    srcSet={`${IMG_SOLUTION_SM} 400w, ${IMG_SOLUTION} 800w`}
+                    sizes="(max-width: 640px) 90vw, 550px"
+                  />
+                  <img
+                    src={IMG_SOLUTION_PNG}
+                    alt="حل فلتر الماء الذكي"
+                    width={800}
+                    height={800}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                  />
+                </picture>
               </div>
             </motion.div>
 
@@ -518,11 +569,22 @@ export default function WaterFilterPage() {
               className="order-1 lg:order-2"
             >
               <div className="aspect-square overflow-hidden rounded-3xl border border-line bg-white shadow-lift">
-                <img
-                  src={IMG_MECHANISM}
-                  alt="مراحل تصفية الفلتر من الداخل"
-                  className="h-full w-full object-cover"
-                />
+                <picture>
+                  <source
+                    type="image/webp"
+                    srcSet={`${IMG_MECHANISM_SM} 400w, ${IMG_MECHANISM} 800w`}
+                    sizes="(max-width: 640px) 90vw, 550px"
+                  />
+                  <img
+                    src={IMG_MECHANISM_PNG}
+                    alt="مراحل تصفية الفلتر من الداخل"
+                    width={800}
+                    height={800}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
+                </picture>
               </div>
             </motion.div>
           </div>
@@ -747,7 +809,22 @@ export default function WaterFilterPage() {
               className="group relative mx-auto max-w-sm lg:mx-0"
             >
               <div className="aspect-square overflow-hidden rounded-3xl border border-white/10 shadow-lift">
-                <img src={IMG_PACKAGE} alt="فلتر ماء الصنبور" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+                <picture>
+                  <source
+                    type="image/webp"
+                    srcSet={`${IMG_PACKAGE_SM} 400w, ${IMG_PACKAGE} 800w`}
+                    sizes="(max-width: 640px) 90vw, 350px"
+                  />
+                  <img
+                    src={IMG_PACKAGE_PNG}
+                    alt="فلتر ماء الصنبور"
+                    width={800}
+                    height={800}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                  />
+                </picture>
               </div>
               <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-2xl bg-brand px-6 py-3 text-lg font-bold text-white shadow-lift">
                 199 درهم فقط
@@ -797,8 +874,12 @@ export default function WaterFilterPage() {
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-line bg-white/95 backdrop-blur-md shadow-lift md:hidden">
         <div className="flex items-center gap-3 px-4 py-3" dir="rtl">
           <img
-            src={IMG_HERO}
+            src={IMG_HERO_SM}
             alt=""
+            width={44}
+            height={44}
+            loading="lazy"
+            decoding="async"
             className="h-11 w-11 shrink-0 rounded-xl border border-line object-cover"
           />
           <div className="min-w-0 flex-1">

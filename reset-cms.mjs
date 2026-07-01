@@ -2,7 +2,12 @@ import { createClient } from "@supabase/supabase-js";
 import { readFileSync } from "fs";
 
 // Read the .env file to get Supabase credentials
-const envContent = readFileSync(".env", "utf8");
+let envContent = "";
+try {
+  envContent = readFileSync(".env", "utf8");
+} catch {
+  envContent = readFileSync(".env.local", "utf8");
+}
 const env = Object.fromEntries(
   envContent.split("\n").filter(l => l.includes("=")).map(l => {
     const [k, ...v] = l.split("=");
@@ -11,7 +16,7 @@ const env = Object.fromEntries(
 );
 
 const url = env.VITE_SUPABASE_URL;
-const key = env.VITE_SUPABASE_ANON_KEY;
+const key = env.VITE_SUPABASE_ANON_KEY || env.VITE_SUPABASE_KEY;
 
 if (!url || !key) {
   console.error("Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY in .env");
