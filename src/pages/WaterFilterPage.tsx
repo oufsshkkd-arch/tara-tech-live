@@ -34,6 +34,10 @@ const IMGS: [string, string, string][] = [
   [IMG_PACKAGE, IMG_PACKAGE_SM, IMG_PACKAGE_PNG],
 ];
 
+// ─── WhatsApp for this product page only ───
+const WA_PHONE = "212617470221";
+const WA_LINK = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent("سلام، بغيت نستافسر على فلتر ماء الصنبور الذكي 💧")}`;
+
 const PROMO = [
   { text: "الدفع عند الاستلام", accent: false },
   { text: "توصيل سريع بالمجان", accent: false },
@@ -285,6 +289,15 @@ export default function WaterFilterPage() {
                     <ShoppingCart className="h-5 w-5 transition-transform group-hover:scale-110" />
                     اطلب الفلتر ديالك دابا
                   </button>
+                  <a
+                    href={WA_LINK}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift"
+                    aria-label="WhatsApp"
+                  >
+                    <MessageCircle className="h-6 w-6" fill="white" strokeWidth={0} />
+                  </a>
                 </div>
               </motion.div>
 
@@ -854,7 +867,7 @@ export default function WaterFilterPage() {
                 ))}
               </motion.ul>
 
-              <motion.div variants={fadeUp}>
+              <motion.div variants={fadeUp} className="flex items-center gap-3">
                 <button
                   onClick={() => handleOrderClick(OFFERS[1])}
                   className="btn-primary group inline-flex px-8 py-4 text-base"
@@ -862,6 +875,15 @@ export default function WaterFilterPage() {
                   <ShoppingCart className="h-5 w-5 transition-transform group-hover:scale-110" />
                   طلب الفلتر ديالك دابا قبل ما يسالي الستوك
                 </button>
+                <a
+                  href={WA_LINK}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift"
+                  aria-label="WhatsApp"
+                >
+                  <MessageCircle className="h-6 w-6" fill="white" strokeWidth={0} />
+                </a>
               </motion.div>
             </motion.div>
           </div>
@@ -886,6 +908,15 @@ export default function WaterFilterPage() {
             <div className="truncate text-xs text-body leading-none">فلتر ماء الصنبور</div>
             <div className="text-base font-bold text-ink leading-tight mt-0.5">{selectedOffer.price} درهم</div>
           </div>
+          <a
+            href={WA_LINK}
+            target="_blank"
+            rel="noreferrer"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white shadow-sm"
+            aria-label="WhatsApp"
+          >
+            <MessageCircle className="h-5 w-5" fill="white" strokeWidth={0} />
+          </a>
           <button onClick={() => setShowForm(true)} className="btn-primary px-5 py-2.5 text-sm">
             اطلب دابا
           </button>
