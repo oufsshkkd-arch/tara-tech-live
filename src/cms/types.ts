@@ -185,6 +185,8 @@ export type HeroThemeSettings = {
   badgeText: string;
   backgroundStyle: "light" | "dark" | "gradient" | "glass";
   textAlign: "left" | "center" | "right";
+  /** 0–1 darkness of the scrim over the hero media (default 0.55) */
+  overlayDarkness?: number;
   titleFontSize?: ResponsiveNumber;
   subtitleFontSize?: ResponsiveNumber;
   titleColor?: string;

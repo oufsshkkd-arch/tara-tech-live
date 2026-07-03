@@ -21,16 +21,21 @@ export default function Header({
   const { pathname } = useLocation();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80);
+    // The app scrolls inside #root (html/body are height:100%), not the window
+    const el = document.getElementById("root");
+    const target: HTMLElement | Window = el ?? window;
+    const onScroll = () =>
+      setScrolled((el ? el.scrollTop : window.scrollY) > 80);
     onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    target.addEventListener("scroll", onScroll, { passive: true });
+    return () => target.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => setOpen(false), [pathname]);
 
-  const onHero = pathname === "/";
-  const overPhoto = onHero && !scrolled;
+  // Always render the solid/blurred header — transparent-over-photo failed
+  // contrast on light hero images
+  const overPhoto = false;
 
   const links = [
     { to: "/", label: nav.labels.home, end: true },

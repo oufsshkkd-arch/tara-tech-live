@@ -10,15 +10,15 @@ import OrderFormModal from "../components/OrderFormModal";
 import { useCart } from "../store/cart";
 
 // ─── Product images ───
-const IMG_HERO        = "/images/organizer/hero.png";
-const IMG_PROBLEM     = "/images/organizer/problem.png";
-const IMG_SOLUTION    = "/images/organizer/solution.png";
-const IMG_MECHANISM   = "/images/organizer/mechanism.png";
-const IMG_NODRILL     = "/images/organizer/nodrill.png";
-const IMG_DETAILS     = "/images/organizer/details.png";
-const IMG_OFFER       = "/images/organizer/offer.png";
-const IMG_PACKAGE     = "/images/organizer/package.png";
-const IMG_CTA         = "/images/organizer/cta.png";
+const IMG_HERO        = "/images/organizer/hero.webp";
+const IMG_PROBLEM     = "/images/organizer/problem.webp";
+const IMG_SOLUTION    = "/images/organizer/solution.webp";
+const IMG_MECHANISM   = "/images/organizer/mechanism.webp";
+const IMG_NODRILL     = "/images/organizer/nodrill.webp";
+const IMG_DETAILS     = "/images/organizer/details.webp";
+const IMG_OFFER       = "/images/organizer/offer.webp";
+const IMG_PACKAGE     = "/images/organizer/package.webp";
+const IMG_CTA         = "/images/organizer/cta.webp";
 
 // Hero gallery
 const IMGS = [IMG_HERO, IMG_SOLUTION, IMG_DETAILS, IMG_OFFER];

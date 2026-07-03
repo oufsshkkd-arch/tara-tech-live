@@ -1,4 +1,4 @@
-import { ArrowLeft, Sparkles, Star } from "lucide-react";
+import { ArrowLeft, Sparkles, Star, Truck, ShieldCheck } from "lucide-react";
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -13,6 +13,22 @@ import type {
 } from "../cms/types";
 
 type Mode = "public" | "preview";
+
+// Inline-style scrims driven by the CMS overlayDarkness setting (0–1).
+// Inline styles instead of Tailwind gradient classes: dynamic opacities like
+// slate-950/92 aren't in Tailwind's opacity scale, which silently drops the
+// whole gradient (background-image: none) and leaves hero text unreadable.
+const SLATE_950 = "2,6,23";
+function scrimVertical(darkness: number) {
+  const bottom = Math.min(darkness + 0.35, 0.95);
+  const top = Math.max(darkness - 0.3, 0);
+  return `linear-gradient(to top, rgba(${SLATE_950},${bottom}) 0%, rgba(${SLATE_950},${darkness}) 45%, rgba(${SLATE_950},${top}) 100%)`;
+}
+function scrimHorizontal(darkness: number) {
+  // Left-heavy (RTL): text on the right stays readable, image visible on the left
+  const start = Math.min(darkness + 0.3, 0.95);
+  return `linear-gradient(to left, rgba(${SLATE_950},${start}) 0%, rgba(${SLATE_950},${darkness}) 50%, rgba(${SLATE_950},${darkness * 0.3}) 100%)`;
+}
 
 function HeroVideo({ src, poster }: { src: string; poster?: string }) {
   if (!src) return null;
@@ -288,6 +304,7 @@ function ScrollTransformHero({
     enableHeroProducts = false,
     stickyScrollLength = 2.2,
     starRatingText = "آلاف العملاء الراضين",
+    overlayDarkness = 0.55,
   } = settings;
 
   const resolvedImage =
@@ -343,7 +360,7 @@ function ScrollTransformHero({
 
   const Overlays = (
     <>
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/92 via-slate-950/40 to-slate-950/15" />
+      <div className="absolute inset-0" style={{ background: scrimVertical(overlayDarkness) }} />
       <div className="pointer-events-none absolute inset-0 opacity-20"
         style={{ background: "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(99,102,241,0.5), transparent)" }} />
     </>
@@ -429,6 +446,16 @@ function ScrollTransformHero({
               {primaryCtaText   && <CtaButton text={primaryCtaText}   href={primaryCtaLink}   variant="primary"   mode={mode} />}
               {secondaryCtaText && <CtaButton text={secondaryCtaText} href={secondaryCtaLink} variant="secondary" mode={mode} />}
             </motion.div>
+
+            {/* ── COD Trust Badges ── */}
+            <motion.div style={{ opacity: ctaOp }} className={`flex items-center gap-4 mt-1 border-t border-white/10 pt-3 ${ctaJustify}`}>
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-white/90">
+                <Truck className="h-3.5 w-3.5 text-emerald-500" /> توصيل مجاني
+              </div>
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-white/90">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" /> الدفع عند الاستلام
+              </div>
+            </motion.div>
             <div className={`flex items-center gap-2 ${ctaJustify}`}>
               <div className="flex">{[0,1,2,3,4].map(i => <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />)}</div>
               <span className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>{starRatingText}</span>
@@ -502,6 +529,7 @@ export default function HeroRevolut({
     enableVideo = false,
     enableHeroProducts = true,
     enableAnimation = true,
+    overlayDarkness = 0.55,
   } = settings;
 
   const resolvedImage =
@@ -580,6 +608,10 @@ export default function HeroRevolut({
           className="absolute inset-0 h-full w-full object-cover"
         />
       ) : null}
+      {/* ── Gradient Overlay for Text Legibility ── */}
+      {isBgLayout && hasMedia && (
+        <div className="absolute inset-0 z-0 pointer-events-none" style={{ background: scrimVertical(overlayDarkness) }} />
+      )}
     </motion.div>
   ) : null;
 
@@ -638,6 +670,16 @@ export default function HeroRevolut({
         )}
       </div>
 
+      {/* ── COD Trust Badges ── */}
+      <div className={`flex items-center gap-4 mt-2 pt-2 border-t ${isLight ? 'border-slate-200' : 'border-white/10'} ${ctaJustify}`}>
+        <div className={`flex items-center gap-1.5 text-xs font-semibold ${isLight ? 'text-slate-600' : 'text-white/90'}`}>
+          <Truck className="h-4 w-4 text-emerald-500" /> توصيل مجاني
+        </div>
+        <div className={`flex items-center gap-1.5 text-xs font-semibold ${isLight ? 'text-slate-600' : 'text-white/90'}`}>
+          <ShieldCheck className="h-4 w-4 text-emerald-500" /> الدفع عند الاستلام
+        </div>
+      </div>
+
       <div className={`flex items-center gap-2 ${ctaJustify}`}>
         <div className="flex">
           {[0, 1, 2, 3, 4].map((i) => (
@@ -686,8 +728,7 @@ export default function HeroRevolut({
             className="absolute inset-0 h-full w-full object-cover"
           />
         ) : null}
-        {/* Left-heavy gradient (RTL): text on right stays readable, image visible on left */}
-        <div className="absolute inset-0 bg-gradient-to-l from-slate-950/85 via-slate-950/55 to-slate-950/15" />
+        <div className="absolute inset-0" style={{ background: scrimHorizontal(overlayDarkness) }} />
         {/* Subtle purple glow */}
         <div
           className="pointer-events-none absolute inset-0 opacity-25"
@@ -751,13 +792,15 @@ export default function HeroRevolut({
     return (
       <section className={`w-full overflow-hidden ${bgClass}`} dir="rtl">
         {hasMedia && (
-          <div style={{ height: isMobile ? 220 : 340 }} className="relative w-full overflow-hidden">
+          <motion.div style={{ height: isMobile ? 220 : 340 }} className="relative w-full overflow-hidden">
             {enableVideo && resolvedVideo ? (
               <HeroVideo src={resolvedVideo} poster={resolvedPoster} />
-            ) : resolvedImage ? (
-              <img src={resolvedImage} alt="" loading="eager" className="h-full w-full object-cover" />
-            ) : null}
-          </div>
+            ) : (
+              <img src={resolvedImage} alt="" loading="eager" fetchPriority="high" className="h-full w-full object-cover" />
+            )}
+            {/* ── Gradient Overlay for Text Legibility ── */}
+            <div className="absolute inset-0 pointer-events-none" style={{ background: scrimVertical(overlayDarkness) }} />
+          </motion.div>
         )}
         <div className="px-6 py-10 sm:px-10">{textBlock}</div>
       </section>

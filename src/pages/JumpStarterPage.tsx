@@ -11,14 +11,14 @@ import { useCart } from "../store/cart";
 import { useCms } from "../cms/store";
 
 // ─── Product images ───
-const IMG_TRUNK        = "/images/jump-starter/trunk.jpg";
-const IMG_BATTERY      = "/images/jump-starter/battery-jump.jpg";
-const IMG_TIRE         = "/images/jump-starter/tire-dacia.jpg";
-const IMG_TIRE2        = "/images/jump-starter/tire-close.jpg";
-const IMG_BEFORE_AFTER = "/images/jump-starter/before-after.jpg";
-const IMG_FAMILY1      = "/images/jump-starter/family-mountains.jpg";
-const IMG_FAMILY2      = "/images/jump-starter/family-road.jpg";
-const IMG_PRODUCT      = "/images/jump-starter/product-hero.jpg";
+const IMG_TRUNK        = "/images/jump-starter/trunk.webp";
+const IMG_BATTERY      = "/images/jump-starter/battery-jump.webp";
+const IMG_TIRE         = "/images/jump-starter/tire-dacia.webp";
+const IMG_TIRE2        = "/images/jump-starter/tire-close.webp";
+const IMG_BEFORE_AFTER = "/images/jump-starter/before-after.webp";
+const IMG_FAMILY1      = "/images/jump-starter/family-mountains.webp";
+const IMG_FAMILY2      = "/images/jump-starter/family-road.webp";
+const IMG_PRODUCT      = "/images/jump-starter/product-hero.webp";
 
 // Hero gallery — product hero | trunk | battery jump | tire close-up
 const IMGS = [IMG_PRODUCT, IMG_TRUNK, IMG_BATTERY, IMG_TIRE2];
@@ -800,10 +800,11 @@ export default function JumpStarterPage() {
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={() => setShowForm(true)}
-              className="btn-ghost px-3 py-2.5 text-sm"
+              onClick={addToCart}
+              className="btn-ghost h-10 w-10 flex items-center justify-center rounded-full p-0 shrink-0"
+              aria-label="أضف للسلة"
             >
-              اطلب
+              <ShoppingCart className="h-5 w-5 text-ink" strokeWidth={2} />
             </button>
             <a
               href={`https://wa.me/${waPhone}`}
@@ -815,11 +816,10 @@ export default function JumpStarterPage() {
               <MessageCircle className="h-5 w-5" fill="white" strokeWidth={0} />
             </a>
             <button
-              onClick={addToCart}
-              className="btn-primary px-4 py-2.5 text-sm"
+              onClick={() => setShowForm(true)}
+              className="btn-primary flex-1 px-4 py-2.5 text-sm font-bold shadow-md shadow-brand/20"
             >
-              <ShoppingCart className="h-4 w-4" />
-              السلة
+              اطلب الآن
             </button>
           </div>
         </div>

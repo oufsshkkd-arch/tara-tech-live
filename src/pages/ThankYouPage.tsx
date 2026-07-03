@@ -66,11 +66,26 @@ export default function ThankYouPage() {
         const contentId = data.product_slug || data.product_id || data.product_name;
         const orderId   = Date.now().toString();
 
-        // ── Persist + fire conversion pixels ─────────────────────────────────
-        // Purchase events (TikTok CompletePayment + Facebook Purchase + GA4
-        // purchase via GTM dataLayer) only fire inside saveOrder().then() so
-        // a Supabase outage cannot inflate ad-platform conversions. The
-        // Google Sheet webhook above is the independent order-of-record.
+        // ── Fire conversion pixels independently ─────────────────────────────
+        trackOrderSuccess(data.product_name || "unknown", {
+          contentId,
+          contentName: data.product_name,
+          value: totalValue,
+          phone: data.phone,
+          email: data.email,
+          orderId,
+        }).catch((err) => console.error("[pixels] dispatch threw", err));
+        
+        console.info("[pixels] Purchase dispatched", {
+          transaction_id: orderId,
+          content_id: contentId,
+          value: totalValue,
+          currency: "MAD",
+          has_phone: !!data.phone,
+          has_email: !!data.email,
+        });
+
+        // ── Persist to Supabase independently ────────────────────────────────
         saveOrder({
           id: orderId,
           date: data.date || "",
@@ -85,28 +100,12 @@ export default function ThankYouPage() {
           source: data.source || "direct",
         })
           .then(() => {
-            trackOrderSuccess(data.product_name || "unknown", {
-              contentId,
-              contentName: data.product_name,
-              value: totalValue,
-              phone: data.phone,
-              email: data.email,
-              orderId,
-            }).catch((err) => console.error("[pixels] dispatch threw", err));
-            console.info("[pixels] Purchase dispatched after Supabase save", {
-              transaction_id: orderId,
-              content_id: contentId,
-              value: totalValue,
-              currency: "MAD",
-              has_phone: !!data.phone,
-              has_email: !!data.email,
-            });
+            console.info("[order] Supabase save successful");
           })
           .catch((err) => {
-            // Supabase write failed → intentionally NOT firing pixels (avoids
-            // inflated conversion counts). Order is still captured in the
-            // Google Sheet via the webhook above.
-            console.error("[order] Supabase save failed — pixels skipped", err);
+            // Supabase write failed, but order is captured in the Google Sheet 
+            // via the webhook above, and pixels were already fired.
+            console.error("[order] Supabase save failed", err);
           });
       }
     } catch { /* ignore */ }

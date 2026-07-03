@@ -633,13 +633,14 @@ export default function ProductPage() {
                 <div className="text-base font-bold text-ink leading-tight mt-0.5">{p.price} درهم</div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button onClick={() => setShowForm(true)} className="btn-ghost px-3 py-2.5 text-sm">اطلب</button>
+                <button onClick={addToCart} className="btn-ghost h-10 w-10 flex items-center justify-center rounded-full p-0 shrink-0" aria-label="أضف للسلة">
+                  <ShoppingCart className="h-5 w-5 text-ink" strokeWidth={2} />
+                </button>
                 <a href={waLink} target="_blank" rel="noreferrer" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white shadow-sm" aria-label="WhatsApp">
                   <MessageCircle className="h-5 w-5" fill="white" strokeWidth={0} />
                 </a>
-                <button onClick={addToCart} className="btn-primary px-4 py-2.5 text-sm">
-                  <ShoppingCart className="h-4 w-4" />
-                  السلة
+                <button onClick={() => setShowForm(true)} className="btn-primary flex-1 px-4 py-2.5 text-sm font-bold shadow-md shadow-brand/20">
+                  اطلب الآن
                 </button>
               </div>
             </div>

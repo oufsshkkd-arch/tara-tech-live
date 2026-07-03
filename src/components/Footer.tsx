@@ -27,7 +27,10 @@ export default function Footer({
             </span>
             <span className="display text-2xl text-ink">{brand.logoText}</span>
           </Link>
-          <p className="text-body max-w-md" dir="auto">
+          {/* dir="rtl" (not "auto"): the tagline starts with the Latin brand
+              name, which flips first-strong detection to LTR and breaks
+              Arabic punctuation order */}
+          <p className="text-body max-w-md" dir="rtl">
             {footer.tagline}
           </p>
           <div className="flex items-center gap-3 pt-2">

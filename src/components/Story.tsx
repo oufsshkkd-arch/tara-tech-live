@@ -86,7 +86,7 @@ export default function Story({ story: storyProp }: { story?: StoryContent } = {
           </h2>
           <p
             className="mt-6 text-base sm:text-lg text-body leading-relaxed max-w-xl"
-            dir="auto"
+            dir="rtl"
           >
             {story.body}
           </p>

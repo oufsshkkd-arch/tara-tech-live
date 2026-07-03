@@ -9,8 +9,8 @@ export default {
         body: "#5F6368",
         line: "#EAEAEA",
         red: {
-          DEFAULT: "#0369A1",
-          dark: "#0284C7",
+          DEFAULT: "#EF4444",
+          dark: "#DC2626",
         },
         brand: {
           DEFAULT: "#0369A1",

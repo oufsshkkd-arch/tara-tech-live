@@ -67,9 +67,9 @@ export const seed: CmsState = {
     primaryCta: "كتشف Tara Tech",
   },
   hero: {
-    headline: "منتجات ذكية ومختارة بعناية باش تسهّل عليك حياتك",
+    headline: "حلول ذكية كتوفر عليك الوقت والمجهود، اطلب اليوم وخلص حتى توصلك!",
     subheadline:
-      "فـ Tara Tech كنقدمو ليك منتجات عملية، موثوقة وراقية، كتعاونك فالحياة اليومية وكتخليك تختار براحة وثقة.",
+      "كنقدمو ليك منتجات عملية كتحل ليك مشاكل يومية حقيقية. اطلب دابا بكل ثقة، وخلص كاش حتى يوصلك المنتج لباب دارك.",
     primaryCta: "اكتشف المنتجات",
     primaryCtaLink: "/products",
     secondaryCta: "تواصل معنا",
@@ -80,7 +80,7 @@ export const seed: CmsState = {
     urgencyBadge: "تكنولوجيا عملية للحياة اليومية",
     backgroundStyle: "dark",
     textAlign: "right",
-    overlayDarkness: 0.15,
+    overlayDarkness: 0.55,
     showFloatingCard: true,
     floatingCardLines: [
       "جودة موثوقة",
@@ -186,7 +186,7 @@ export const seed: CmsState = {
       description:
         "حلول عملية للسيارة كتزيد الراحة، التنظيم، والاستعمال اليومي الذكي.",
       image:
-        "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1400&q=80",
+        "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1400&q=80",
       icon: "Car",
       hidden: false,
       order: 2,

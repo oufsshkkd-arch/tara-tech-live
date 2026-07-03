@@ -9,6 +9,26 @@
       content="Tara Tech — تكنولوجيا مفيدة، مختارة بذوق. منتجات tech موثوقة، أنيقة ومفكر فيها باش تسهل عليك الحياة اليومية."
     />
     <title>Tara Tech — تكنولوجيا مفيدة، مختارة بذوق</title>
+    <!-- Open Graph / WhatsApp / social sharing -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Tara Tech" />
+    <meta property="og:title" content="Tara Tech — تكنولوجيا مفيدة، مختارة بذوق" />
+    <meta
+      property="og:description"
+      content="منتجات tech موثوقة، أنيقة ومفكر فيها باش تسهل عليك الحياة اليومية. الدفع عند الاستلام."
+    />
+    <meta property="og:url" content="https://taratech.pro/" />
+    <meta property="og:image" content="https://taratech.pro/images/jump-starter/product-closeup.jpg" />
+    <meta property="og:image:width" content="2000" />
+    <meta property="og:image:height" content="2000" />
+    <meta property="og:locale" content="ar_MA" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Tara Tech — تكنولوجيا مفيدة، مختارة بذوق" />
+    <meta
+      name="twitter:description"
+      content="منتجات tech موثوقة، أنيقة ومفكر فيها باش تسهل عليك الحياة اليومية. الدفع عند الاستلام."
+    />
+    <meta name="twitter:image" content="https://taratech.pro/images/jump-starter/product-closeup.jpg" />
     <!-- Tracking Pixels: deferred to avoid blocking LCP -->
     <script>
       // Stub global queues synchronously so event calls before load are safe
@@ -17,7 +37,19 @@
       window.fbq=window.fbq||function(){(window.fbq.q=window.fbq.q||[]).push(arguments)};window._fbq=window.fbq;window.fbq.push=window.fbq;window.fbq.loaded=!0;window.fbq.version='2.0';window.fbq.queue=[];
     </script>
     <script>
-      // Load all tracking after first paint to keep LCP clean
+      // Load Facebook Pixel eagerly to ensure Purchase events aren't dropped on fast checkout
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '1594603931645528'); // using new pixel ID provided by user
+      fbq('track', 'PageView');
+
+      // Load all other tracking after first paint to keep LCP clean
       function _loadTracking(){
         // GTM
         (function(w,d,s,l,i){w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KV3FNM3N');
@@ -26,9 +58,6 @@
         // TikTok
         ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e};ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{};ttq._i[e]=[];ttq._i[e]._u=r;ttq._t=ttq._t||{};ttq._t[e]=+new Date;ttq._o=ttq._o||{};ttq._o[e]=n||{};n=document.createElement("script");n.type="text/javascript";n.async=!0;n.src=r+"?sdkid="+e+"&lib=ttq";e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
         ttq.load('D81INH3C77U1Q23A93SG');ttq.page();
-        // Facebook
-        var t=document.createElement('script');t.async=!0;t.src='https://connect.facebook.net/en_US/fbevents.js';document.head.appendChild(t);
-        fbq('init','4325181661059444');fbq('track','PageView');
       }
       if('requestIdleCallback' in window){requestIdleCallback(_loadTracking,{timeout:2000})}else{setTimeout(_loadTracking,2000)}
     </script>
@@ -44,17 +73,17 @@
     <link
       rel="preload"
       as="style"
-      href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700;900&family=Inter:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&family=Tajawal:wght@300;400;500;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700;900&family=Inter:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&family=Tajawal:wght@300;400;500;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
       media="print"
       onload="this.media='all'"
     />
     <noscript>
       <link
-        href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700;900&family=Inter:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&family=Tajawal:wght@300;400;500;700;800;900&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet"
       />
     </noscript>

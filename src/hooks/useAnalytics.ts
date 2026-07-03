@@ -15,6 +15,7 @@ declare global {
       action: "track" | "trackCustom" | "init" | "consent",
       event: string,
       params?: Record<string, unknown>,
+      options?: { eventID?: string },
     ) => void;
     dataLayer?: Record<string, unknown>[];
   }
@@ -99,7 +100,7 @@ function tt(event: string, params?: Record<string, unknown>) {
 // Facebook Pixel safe-fire (mirrors tt() — the fbevents.js IIFE also
 // installs fbq as a queue-stub immediately, so calls before SDK load
 // are enqueued and processed once it arrives).
-function fb(event: string, params?: Record<string, unknown>) {
+function fb(event: string, params?: Record<string, unknown>, eventId?: string) {
   try {
     if (typeof window === "undefined") return;
     if (typeof window.fbq === "function") {
@@ -107,8 +108,13 @@ function fb(event: string, params?: Record<string, unknown>) {
       const finalParams = FB_TEST_EVENT_CODE
         ? { ...(params ?? {}), test_event_code: FB_TEST_EVENT_CODE }
         : params;
-      window.fbq("track", event, finalParams);
-      try { console.debug(`[fbq] track ${event}`, finalParams); } catch { /* ignore */ }
+      const opts = eventId ? { eventID: eventId } : undefined;
+      if (opts) {
+        window.fbq("track", event, finalParams, opts);
+      } else {
+        window.fbq("track", event, finalParams);
+      }
+      try { console.debug(`[fbq] track ${event}`, finalParams, opts); } catch { /* ignore */ }
     } else {
       console.warn(`[fbq] not loaded — skipped ${event}`, params);
     }
@@ -116,7 +122,6 @@ function fb(event: string, params?: Record<string, unknown>) {
     console.error(`[fbq] threw on ${event}`, err);
   }
 }
-
 // Build the Facebook Pixel payload from our shared ProductPixelData shape.
 function fbProductPayload(p: ProductPixelData): Record<string, unknown> {
   return {
@@ -270,7 +275,7 @@ export function useAnalytics() {
       const ttPayload = pixelPayloadWithIdentity(merged);
       tt("CompletePayment", ttPayload);
       // 3. Facebook Purchase — fires in parallel with same conversion data
-      fb("Purchase", fbProductPayload(merged));
+      fb("Purchase", fbProductPayload(merged), merged.orderId);
       // 4. GA4 purchase via GTM dataLayer — same gating, same value/currency
       gtmEcommerce("purchase", {
         transaction_id: merged.orderId,

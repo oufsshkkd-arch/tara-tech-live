@@ -126,7 +126,7 @@ export default function WaterFilterPage() {
   const [activeImg, setActiveImg] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [selectedOffer, setSelectedOffer] = useState(OFFERS[1]);
+  const [selectedOffer, setSelectedOffer] = useState(OFFERS[0]);
   const { addItem, openCart } = useCart();
 
   // Preload the LCP hero image as early as possible
@@ -283,7 +283,7 @@ export default function WaterFilterPage() {
               <motion.div variants={fadeUp} className="mt-6 flex flex-col gap-2" dir="rtl">
                 <div className="flex gap-3">
                   <button
-                    onClick={() => handleOrderClick(OFFERS[1])}
+                    onClick={() => handleOrderClick(OFFERS[0])}
                     className="btn-primary group flex-1 justify-center py-4 text-base"
                   >
                     <ShoppingCart className="h-5 w-5 transition-transform group-hover:scale-110" />
